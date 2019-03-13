@@ -25,7 +25,7 @@ A timer that displays how long you have been streaming, self-explanatory. It'll 
 A PHP server application that uses MySQL to store a record of all the previously used titles/tags you've used while streaming. Please note the tool doesn't automatically pull such data, it just lets you record it. The "definitions.sql" file contains the MySQL database/table definition required to get it to work. Not 100% sure if it's valid sql, but if you use PHPMyAdmin or something, you could probably use the interface without any issues.
 
 ## streamers
-An HTML5 application that uses the Canvas API, to animate what is similiar to rain flowing upwards. Probably the most heavily documented of these tools.
+An HTML5 application that uses the Canvas API, to animate what is similiar to rain flowing upwards. Probably the most heavily documented of these tools. A live demo is located [here](https://emptysora.github.io/streamers/main.html)
 
 ## tts-bot
 An old C# based bot, that runs in a service container. it cooperates with the old-chatbot code to allow for low-ish latency text-to-speech. Unfortunately you can only choose the voice from the ones installed on your computer. [MS Documentation](https://docs.microsoft.com/en-us/previous-versions/office/developer/speech-technologies/dd167624(v%3Doffice.14))
