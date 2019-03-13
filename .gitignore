@@ -5,3 +5,27 @@ stream-timer/main.html~
 stream-timer/main.css~
 stream-timer/api.js
 *.js~
+old-chatbot/cheermotes/1.gif
+old-chatbot/cheermotes/100.gif
+old-chatbot/cheermotes/10000.gif
+old-chatbot/cheermotes/1000.gif
+old-chatbot/cheermotes/100000.gif
+old-chatbot/cheermotes/5000.gif
+*.lua~
+*.rb~
+old-chatbot/bot.log
+old-chatbot/config.ini
+old-chatbot/current_song.txt
+old-chatbot/Followers/[20170810] Followers.txt
+old-chatbot/Followers/[20170905] Followers.txt
+old-chatbot/Followers/[20170915] Followers.txt
+old-chatbot/Followers/[20170922] Followers.txt
+old-chatbot/Followers/[20171018] Followers.txt
+old-chatbot/Followers/[20171018] Followers.txt
+old-chatbot/moderators.txt
+old-chatbot/persistentStorage.dat
+old-chatbot/soraBot.php
+old-chatbot/web_interface_client_details.txt
+old-chatbot/web_interface_function_import_list.txt
+old-chatbot/Followers/[20171018] Followers.txt
+old-chatbot/Followers/[20170922] Followers.txt

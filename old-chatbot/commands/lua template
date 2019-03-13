@@ -1,0 +1,4 @@
+function Command(user, message, command, arguments, modded)
+	-- Lua Command Template
+end
+cooldown = --cooldown
