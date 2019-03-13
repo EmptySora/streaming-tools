@@ -1,0 +1,55 @@
+<html>
+	<head>
+		<!--to controll the stream compontents from my phone -->
+		<title>Stream Controller</title>
+		<script src="controller.js"></script>
+		<link rel="stylesheet" type="text/css" href="controller.css"/>
+	</head>
+	<body>
+		<div id="cover" style="display:none">
+			<div id="cover_text">
+				<p/><br/>
+				<p/><br/>
+				<p/><br/>
+				<center>Please Wait...</center>
+			</div>
+			<div id="cover_layer"></div>
+		</div>
+		
+		<table>
+			<thead>
+				<tr>
+					<th colspan="2" class="header">LiveSplit</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan="2">
+						<input type="button" value="START / SPLIT" onClick="ajax('split')"/>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input type="button" value="UNDO" onClick="ajax('undo')"/>
+					</td>
+					<td>
+						<input type="button" value="SKIP" onClick="ajax('skip')"/>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input type="button" value="PAUSE" onClick="ajax('pause')"/>
+					</td>
+					<td>
+						<input type="button" value="RESUME" onClick="ajax('resume')"/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<input type="button" value="RESET" onClick="ajax('reset')"/>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</body>
+</html>
