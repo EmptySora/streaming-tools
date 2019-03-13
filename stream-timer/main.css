@@ -1,0 +1,21 @@
+#clock.live {
+    /*font-family:monospace;*/
+    font-stretch:ultra-condensed;
+    letter-spacing: 0px;
+}
+
+#clock {
+    font-weight:bold;
+    font-size:18pt;
+    font-family:sans-serif;
+}
+
+#clock.offline {
+    font-stretch:ultra-condensed;
+    letter-spacing: -2px;
+    color:#800000;
+}
+
+#header {
+    font-size:8pt;
+}
