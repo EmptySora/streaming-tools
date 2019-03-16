@@ -1,13 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 1.0.0.0
+ * @version 1.2.0.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
+ const VERSION = "1.2.0.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -574,6 +575,7 @@ const RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
  * @default 180.0
  */
 var TRAIL_HSL_START = 180.0;
+const DEFAULT_TRAIL_HSL_START = TRAIL_HSL_START;
 
 /**
  * Represents the initial maximum hue of the dots that are created in degrees
@@ -588,6 +590,7 @@ var TRAIL_HSL_START = 180.0;
  * @default 180.0
  */
 var TRAIL_HSL_END = 240.0;
+const DEFAULT_TRAIL_HSL_END = TRAIL_HSL_END;
 
 
 
@@ -643,9 +646,92 @@ var dots = [];
  * @var {number}
  */
 var FRAME_COUNT = 0;
+var START_TIME;
 
 //Asin(B(x-C))+D
 //Amplitude, Frequency, H-Shift, V-Shift
+
+
+
+
+var STATUS_INFO_DISPLAYED = false;
+var VERBOSE_INFO_DISPLAYED = false;
+
+
+var keybinds = [
+//Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp, PageDown
+//Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause, AudioVolumeMute,
+//AudioVolumeDown, AudioVolumeUp, ContextMenu
+    {
+        "key":"e",
+        "conditions":[{"ctrl": false}],
+        "handler": function binding_refresh() {
+            window.location.reload();
+        }
+    },
+    {
+        "key":"s",
+        "conditions":[{"ctrl": false}],
+        "handler": function binding_status() {
+            STATUS_INFO_DISPLAYED = !STATUS_INFO_DISPLAYED;
+            if (STATUS_INFO_DISPLAYED) {
+                document.getElementById("status-info").style = "";
+                console.info("Turned on the status info overlay.");
+            } else {
+                document.getElementById("status-info").style.display = "none";
+                console.info("Turned off the status info overlay.");
+            }
+        }
+    },
+    {
+        "key":"v",
+        "conditions":[{"ctrl": false}],
+        "handler": function binding_verbose() {
+            VERBOSE_INFO_DISPLAYED = !VERBOSE_INFO_DISPLAYED;
+            console.info(`Now ${VERBOSE_INFO_DISPLAYED?"displaying":"hiding"} verbose information on the status info overlay.`);
+        }
+    },
+    {
+        "key":"d",
+        "conditions":[{"ctrl": false}],
+        "handler": function binding_count() {
+            console.info(`${dots.length} active dot(s).`);
+        }
+    },
+    {
+        "key":"r",
+        "conditions":[{"ctrl": false}],
+        "handler": function binding_reset() {
+            dots = [];
+            FRAME_COUNT = 0;
+            TRAIL_HSL_END = DEFAULT_TRAIL_HSL_END;
+            TRAIL_HSL_START = DEFAULT_TRAIL_HSL_START;
+            //Clear all prior paths.
+            context.beginPath();
+
+            //Set the fill and stroke styles to the background color at full opacity.
+            context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
+            context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
+
+            //Fill the entire canvas with the current fill style.
+            context.fillRect(0,0,Math.round(size.width),Math.round(size.height));
+            
+        }
+    },
+    {
+        "key":"h",
+        "conditions":[{"ctrl": false}],
+        "handler": function binding_help() {
+            console.clear();
+            console.info("KEYBINDINGS:");
+            console.info("r(e)fresh -- Refreshes the page.");
+            console.info("(h)elp    -- Displays this mesage.");
+            console.info("(s)tatus  -- Toggles the visibility of the status info overlay.");
+            console.info("(v)erbose -- Toggles the verbosity of the status info overlay.");
+            console.info("(r)eset   -- Resets the animation.");
+        }
+    }
+];
 
 
 /**
@@ -697,6 +783,9 @@ function sinusoidal(a,b,c,d) {
  * @function
  */
 function animation() {
+    if (!START_TIME) {
+        START_TIME = (new Date()).getTime();
+    }
     //Increment the frame counter.
     FRAME_COUNT += 1;
 
@@ -777,6 +866,8 @@ function start() {
 
     //hook into the resize event.
     window.addEventListener("resize",resizeHandler);
+
+    loadStatusInfo();
 }
 
 /**
@@ -988,6 +1079,545 @@ function newDot() {
     TRAIL_HSL_END %= 360;
     if(TRAIL_HSL_START > TRAIL_HSL_END) {
         TRAIL_HSL_START -= 360;
+    }
+}
+
+window.addEventListener("keyup",function (e) {
+    var i;
+    var j;
+    var k;
+    var cond;
+    var binding;
+    var cont;
+    var keys;
+    var modifiers = ["ctrl","alt","shift","meta"];
+    for (i = 0; i < keybinds.length; i += 1) {
+        cont = false;
+        binding = keybinds[i];
+        if (binding.key !== e.key) {
+            continue;
+        }
+        keys = Object.keys(binding);
+        if (keys.indexOf("conditions") !== -1) {
+            for (j = 0; j < binding.conditions.length; j += 1) {
+                cond = binding.conditions[j];
+                keys = Object.keys(cond);
+                if (!modifiers.some(function (mod) {
+                    if ((keys.indexOf(mod) !== -1) && (e[mod + "Key"] === cond[mod])) {
+                        return true;
+                    }
+                    return false;
+                })) {
+                    cont = true;
+                    break;
+                }
+                
+            }
+            if (cont) {
+                continue;
+            }
+        }
+
+        binding.handler(e);
+    }
+});
+
+var status_rows = [
+    {
+        "name": "General",
+        "type": "header"
+    },
+    {
+        "name": "Canvas Size",
+        "type": "range.number.integer",
+        "unit": ["","pixels"],
+        "sep": " x ",
+        "value": () => [
+            size.width,
+            size.height
+        ]
+    },
+    {
+        "name": "Version",
+        "type": "string",
+        "value": () => VERSION
+    },
+    {
+        "name": "Auto Resize",
+        "type": "flag",
+        "value": () => RESIZE_CANVAS_ON_WINDOW_RESIZE
+    },
+    {
+        "name": "Background",
+        "type": "color.rgb",
+        "value": () => BACKGROUND
+    },
+    {
+        "name": "Dot Color",
+        "type": "color.rgba",
+        "show": false,
+        "value": () => DOT_COLOR
+    },
+    {
+        "name": "Frame Statistics",
+        "type": "header"
+    },
+    {
+        "name": "Target FPS",
+        "type": "string",
+        "unit": "frames/second",
+        "value": () => FPS.toFixed(2)
+    },
+    {
+        "name": "Achieved FPS",
+        "type": "string",
+        "unit": "frames/second",
+        "value": () => (Math.round((FRAME_COUNT / (((new Date()).getTime() - START_TIME)/1000))*100) /100).toFixed(2)
+    },
+    {
+        "name": "Frame Count",
+        "type": "number.integer",
+        "unit": "frames",
+        "value": () => FRAME_COUNT
+    },
+    {
+        "name": "Dot Statistics",
+        "type": "header"
+    },
+    {
+        "name": "Speed",
+        "type": "range.number.decimal",
+        "unit": ["","pixels/second"],
+        "value": () => [
+            MIN_SPEED,
+            MAX_SPEED
+        ]
+    },
+    {
+        "name": "Acceleration",
+        "type": "range.number.decimal",
+        "unit": ["","pixels/second"],
+        "value": () => [
+            MIN_ACCEL,
+            MAX_ACCEL
+        ]
+    },
+    {
+        "name": "Active Dots",
+        "type": "range.number.integer",
+        "unit": ["","dots"],
+        "sep": " of ",
+        "value": () => [
+            dots.length,
+            MAX_DOTS
+        ]
+    },
+    {
+        "name": "Dot Rate",
+        "type": "number.integer",
+        "unit": "dots/frame",
+        "value": () => DOT_RATE
+    },
+    {
+        "name": "Trail Opacity",
+        "type": "color.alpha",
+        "value": () => TRAIL_OPACITY
+    },
+    {
+        "name": "Trail Color",
+        "type": "color.rgba",
+        "show": false,
+        "value": () => TRAIL_COLOR
+    },
+    {
+        "name": "Trail Saturation",
+        "type": "range.color.sat",
+        "value": () => [
+            TRAIL_SATURATION_MIN,
+            TRAIL_SATURATION_MAX
+        ]
+    },
+    {
+        "name": "Trail Luminosity",
+        "type": "range.color.luma",
+        "value": () => [
+            TRAIL_LUMINOSITY_MIN,
+            TRAIL_LUMINOSITY_MAX
+        ]
+    },
+    {
+        "name": "Fade Opacity",
+        "type": "number.percentage",
+        "value": () => FADE_OPACITY
+    },
+    {
+        "name": "Line Width",
+        "type": "range.number.decimal",
+        "unit": ["","pixels"],
+        "value": () => [
+            LINE_WIDTH_MIN,
+            LINE_WIDTH_MAX
+        ]
+    },
+    {
+        "name": "Trail Hue Range",
+        "type": "header"
+    },
+    {
+        "name": "Hue Drift",
+        "type": "number.decimal",
+        "unit": "degrees",
+        "value": () => HSL_DRIFT
+    },
+    {
+        "name": "Current",
+        "type": "range.color.hue",
+        "value": () => [
+            TRAIL_HSL_START,
+            TRAIL_HSL_END
+        ]
+    },
+    {
+        "name": "Default",
+        "type": "range.color.hue",
+        "value": () => [
+            DEFAULT_TRAIL_HSL_START,
+            DEFAULT_TRAIL_HSL_END
+        ]
+    },
+    {
+        "name": "Luma Oscillation",
+        "type": "header"
+    },
+    {
+        "name": "Period",
+        "type": "range.string",
+        "unit": ["","seconds"],
+        "format": (time) => {
+            
+        },
+        "value": () => [
+            LUMINOSITY_OSCILLATION_PERIOD_MIN.toFixed(2),
+            LUMINOSITY_OSCILLATION_PERIOD_MAX.toFixed(2)
+        ]
+    },
+    {
+        "name": "Amplitude",
+        "type": "range.color.luma",
+        "unit": ["","pixels"],
+        "value": () => [
+            LUMINOSITY_OSCILLATION_AMPLITUDE_MIN,
+            LUMINOSITY_OSCILLATION_PERIOD_MAX
+        ]
+    },
+    {
+        "name": "Phase Shift",
+        "type": "string",
+        "unit": "seconds",
+        "format": (time) => {
+            
+        },
+        "value": () => LUMINOSITY_OSCILLATION_PHASE_SHIFT.toFixed(2)
+    },
+    {
+        "name": "Line Width Oscillation",
+        "type": "header"
+    },
+    {
+        "name": "Period",
+        "type": "range.string",
+        "unit": ["","seconds"],
+        "format": (time) => {
+            
+        },
+        "value": () => [
+            LINE_WIDTH_OSCILLATION_PERIOD_MIN.toFixed(2),
+            LINE_WIDTH_OSCILLATION_PERIOD_MAX.toFixed(2)
+        ]
+    },
+    {
+        "name": "Amplitude",
+        "type": "range.number.decimal",
+        "unit": ["","pixels"],
+        "value": () => [
+            LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN,
+            LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX
+        ]
+    },
+    {
+        "name": "Phase Shift",
+        "type": "string",
+        "unit": "seconds",
+        "format": (time) => {
+            
+        },
+        "value": () => LINE_WIDTH_OSCILLATION_PHASE_SHIFT.toFixed(2)
+    }
+];
+
+function craftStatusElement(container,value,info,types,parameter) {
+    var main_type = types[0][0];
+    var sub_types = types.slice(1);
+    var sub_param = ((sub_types[0]||[])[parameter]||(sub_types[0]||[])[0]);
+    var widget = document.createElement("DIV");
+    widget.setAttribute("x-widget-parameter",parameter);
+    var units = (info.unit instanceof Array) ? info.unit[parameter] : info.unit;
+    var temp;
+    console.info("Loading status element: no. =",status_rows.indexOf(info),"name =",info.name,"; type =",main_type,"; subtypes =",sub_param,"; value =",value);
+    container.setAttribute("x-widget-number",status_rows.indexOf(info));
+    switch (main_type) {
+    case "color":
+        container.appendChild(widget);
+        widget.classList.add("status-widget");
+        widget.classList.add("color");
+        switch (sub_param) {
+        case "rgb":
+            widget.style.backgroundColor = `rgb(${value.join(",")})`;
+            widget.title = value.join(",");
+            break;
+        case "rgba":
+            widget.style.backgroundColor = `rgba(${value.join(",")})`;
+            widget.title = value.join(",");
+            break;
+        case "hsl":
+            widget.style.backgroundColor = `hsl(${value.join(",")})`;
+            widget.title = value.join(",");
+            break;
+        case "hsla":
+            widget.style.backgroundColor = `hsla(${value.join(",")})`;
+            widget.title = value.join(",");
+            break;
+        case "red":
+            widget.style.backgroundColor = `rgb(${value},0,0)`;
+            widget.title = value;
+            break;
+        case "blue":
+            widget.style.backgroundColor = `rgb(0,0,${value})`;
+            widget.title = value;
+            break;
+        case "green":
+            widget.style.backgroundColor = `rgb(0,${value},0)`;
+            widget.title = value;
+            break;
+        case "hue":
+            widget.style.backgroundColor = `hsl(${value},100%,50%)`;
+            widget.title = value;
+            break;
+        case "sat":
+            widget.style.backgroundColor = `hsl(0,${value}%,50%)`;
+            widget.title = value + "%";
+            break;
+        case "luma":
+            widget.style.backgroundColor = `hsl(0,100%,${value}%)`;
+            console.info(`hsl(0,0%,${value}%)`);
+            widget.title = value + "%";
+            break;
+        case "alpha":
+            widget.style.backgroundColor = `rgba(255,0,0,${value})`;
+            widget.title = value;
+            break;
+        }
+        break;
+    case "string":
+        widget = document.createElement("SPAN");
+        widget.setAttribute("x-widget-parameter",parameter);
+        widget.textContent = value;
+        container.appendChild(widget);
+        if (units) {
+            widget = document.createElement("DIV");
+            container.appendChild(widget);
+            widget.classList.add("status-widget");
+            widget.classList.add("units");
+            widget.innerHTML = "&nbsp;";
+            widget.textContent += units;
+        }
+        break;
+    case "number":
+        value = parseFloat(value);
+        widget = document.createElement("SPAN");
+        widget.setAttribute("x-widget-parameter",parameter);
+        switch (sub_param) {
+        case "integer":
+            widget.textContent = Math.round(value);
+            break;
+        case "decimal":
+            widget.textContent = value;
+            break;
+        case "percentage":
+            widget.textContent = `${(Math.round(value * 100 * 100) / 100)}%`;
+            break;
+        }
+        container.appendChild(widget);
+        if (units) {
+            widget = document.createElement("DIV");
+            container.appendChild(widget);
+            widget.classList.add("status-widget");
+            widget.classList.add("units");
+            widget.innerHTML = "&nbsp;";
+            widget.textContent += units;
+        }
+        break;
+    case "flag":
+        widget = document.createElement("SPAN");
+        widget.setAttribute("x-widget-parameter",parameter);
+        widget.textContent = value ? "YES" : "NO";
+        container.appendChild(widget);
+        break;
+    case "range":
+        craftStatusElement(container,value[0],info,sub_types,0);
+        temp = document.createElement("SPAN");
+        temp.classList.add("range-to");
+        temp.appendChild(document.createTextNode(info.sep||" to "));
+        container.appendChild(temp);
+        craftStatusElement(container,value[1],info,sub_types,1);
+        break;
+    case "custom":
+        widget.textContent = value;
+        container.appendChild(widget);
+        break;
+    case "header":break;
+    }
+}
+
+function updateStatusElement(widget,value,info,types,parameter) {
+    var main_type = types[0][0];
+    var sub_types = types.slice(1);
+    var sub_param = ((sub_types[0]||[])[parameter]||(sub_types[0]||[])[0]);
+    var temp;
+    //console.info("Updating status element: no. =",status_rows.indexOf(info),"name =",info.name,"; type =",main_type,"; subtypes =",sub_param,"; value =",value);
+    switch (main_type) {
+    case "color":
+        switch (sub_param) {
+        case "rgb":
+            widget.style.backgroundColor = `rgb(${value.join(",")})`;
+            widget.title = value.join(",");
+            break;
+        case "rgba":
+            widget.style.backgroundColor = `rgba(${value.join(",")})`;
+            widget.title = value.join(",");
+            break;
+        case "hsl":
+            widget.style.backgroundColor = `hsl(${value.join(",")})`;
+            widget.title = value.join(",");
+            break;
+        case "hsla":
+            widget.style.backgroundColor = `hsla(${value.join(",")})`;
+            widget.title = value.join(",");
+            break;
+        case "red":
+            widget.style.backgroundColor = `rgb(${value},0,0)`;
+            widget.title = value;
+            break;
+        case "blue":
+            widget.style.backgroundColor = `rgb(0,0,${value})`;
+            widget.title = value;
+            break;
+        case "green":
+            widget.style.backgroundColor = `rgb(0,${value},0)`;
+            widget.title = value;
+            break;
+        case "hue":
+            widget.style.backgroundColor = `hsl(${value},100%,50%)`;
+            widget.title = value;
+            break;
+        case "sat":
+            widget.style.backgroundColor = `hsl(0,${value}%,50%)`;
+            widget.title = value + "%";
+            break;
+        case "luma":
+            widget.style.backgroundColor = `hsl(0,100%,${value}%)`;
+            console.info(`hsl(0,0%,${value}%)`);
+            widget.title = value + "%";
+            break;
+        case "alpha":
+            widget.style.backgroundColor = `rgba(255,0,0,${value})`;
+            widget.title = value;
+            break;
+        }
+        break;
+    case "string":
+        widget.textContent = value;
+        break;
+    case "number":
+        value = parseFloat(value);
+        switch (sub_param) {
+        case "integer":
+            widget.textContent = Math.round(value);
+            break;
+        case "decimal":
+            widget.textContent = value;
+            break;
+        case "percentage":
+            widget.textContent = `${(Math.round(value * 100 * 100) / 100)}%`;
+            break;
+        }
+        break;
+    case "flag":
+        widget.textContent = value ? "YES" : "NO";
+        break;
+    case "custom":
+        widget.textContent = value;
+        break;
+    }
+}
+
+function loadStatusInfo() {
+    var tbody = document.getElementById("status-table-body");
+    var i;
+    var statrow;
+    var trow;
+    var c;
+    var type;
+    for (i = 0; i < status_rows.length; i += 1) {
+        statrow = status_rows[i];
+        if (statrow.show !== undefined && !statrow.show) {
+            continue;
+        }
+        trow = tbody.insertRow(-1);
+        trow.classList.add("status-info-row");
+        c = [trow.insertCell(-1)];
+        c[0].textContent = statrow.name;
+        type = statrow.type.split(/\./g).map(function (t) {
+            return t.split(/,/g);
+        });
+        if (statrow.type !== "header") {
+            c.push(trow.insertCell(-1));
+            craftStatusElement(c[1],statrow.value(),statrow,type,0);
+        } else {
+            trow.classList.add("header");
+            c[0].setAttribute("colspan","2");
+        }
+    }
+    window.setInterval(updateStatusInfo,10);
+}
+
+function updateStatusInfo() {
+    if (!STATUS_INFO_DISPLAYED) {
+        return; //don't update, save the frames
+    }
+    var tbody = document.getElementById("status-table-body");
+    var i;
+    var statrow;
+    var widget;
+    var c;
+    var type;
+    for (i = 0; i < status_rows.length; i += 1) {
+        statrow = status_rows[i];
+        if (statrow.show !== undefined && !statrow.show) {
+            continue;
+        }
+        widget = tbody.querySelector(`[x-widget-number="${i}"]`);
+        type = statrow.type.split(/\./g).map(function (t) {
+            return t.split(/,/g);
+        });
+        if (statrow.type !== "header") {
+            if (type[0][0] !== "range") {
+                updateStatusElement(widget.querySelector(`[x-widget-parameter="0"]`),statrow.value(),statrow,type,0);
+            } else {
+                updateStatusElement(widget.querySelector(`[x-widget-parameter="0"]`),statrow.value()[0],statrow,type.slice(1),0);
+                updateStatusElement(widget.querySelector(`[x-widget-parameter="1"]`),statrow.value()[1],statrow,type.slice(1),1);
+            }
+        }
     }
 }
 
