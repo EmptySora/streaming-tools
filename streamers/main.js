@@ -204,9 +204,54 @@
  * @see {@link newDot}
  */
 
+/**
+ * 
+ * @typedef {Object} KeyBindingInfo
+ * @property {Key} key - The name of the key being pressed, if this is a letter, or value that changes with the shift key, the actual value here depends on whether or not the shift key is pressed.
+ * @property {KeyBindingCondition[]} conditions - An Array of {@link KeyBindingCondition} objects that describe conditionals required to trigger the binding. Only one of the conditions needs to be met.
+ * @property {Function} handler - The event handler for the key binding.
+ */
 
+/**
+ * Conditions that must be met in order to run the key binding. All specified
+ * properties must have their respective keys set to the specified state.
+ * @typedef {Object} KeyBindingCondition
+ * @property {boolean} ctrl - Required state of the CTRL key.
+ * @property {boolean} alt - Required state of the ALT key.
+ * @property {boolean} meta - Required state of the META key.
+ * @property {boolean} shift - Required state of the SHIFT key.
+ */
 
+class Settings {
+    constructor(local_settings) {
+        this.__internal__settings = local_settings;
+    }
+    //getter
+    get area() {
+        //blah
+    }
 
+    //method
+    calcArea() {
+        //blah
+    }
+
+    //setter
+    set blah(value) {
+        //blah
+    }
+
+    //static
+    static method() {
+        //blah
+    }
+    //get/set work for static, use
+
+    static __constructor() {
+        
+    }
+}
+Settings.__constructor(); //basically emulating static constructors
 
 
 
@@ -218,7 +263,8 @@
  * @constant {ColorRGB}
  * @default [0,0,0]
  */
-const BACKGROUND = [0,0,0];
+var BACKGROUND = [0,0,0];
+const DEFAULT_BACKGROUND = [0,0,0];
 
 /**
  * The color of the leading trail all dots leave.
@@ -226,7 +272,8 @@ const BACKGROUND = [0,0,0];
  * @constant {ColorRGBA}
  * @default [255,255,255,1.0]
  */
-const DOT_COLOR = [255,255,255,1.0];
+var DOT_COLOR = [255,255,255,1.0];
+const DEFAULT_DOT_COLOR = [255,255,255,1.0];
 
 /**
  * A number ranging from 0.0 - 1.0 that represents the opacity of the trails
@@ -235,7 +282,8 @@ const DOT_COLOR = [255,255,255,1.0];
  * @constant {Opacity}
  * @default 1.0
  */
-const TRAIL_OPACITY = 1.0;
+var TRAIL_OPACITY = 1.0;
+const DEFAULT_TRAIL_OPACITY = 1.0;
 
 /**
  * The color of the secondary trail all dots leave.
@@ -243,7 +291,8 @@ const TRAIL_OPACITY = 1.0;
  * @constant {ColorRGBA}
  * @default [88,0,133,TRAIL_OPACITY]
  */
-const TRAIL_COLOR = [88, 0, 133,TRAIL_OPACITY];
+var TRAIL_COLOR = [88, 0, 133,TRAIL_OPACITY];
+const DEFAULT_TRAIL_COLOR = [88, 0, 133,DEFAULT_TRAIL_OPACITY];
 
 /**
  * The minimum saturation allowed for trail components.
@@ -252,7 +301,8 @@ const TRAIL_COLOR = [88, 0, 133,TRAIL_OPACITY];
  * @constant {Saturation}
  * @default 100.0
  */
-const TRAIL_SATURATION_MIN = 100.0;
+var TRAIL_SATURATION_MIN = 100.0;
+const DEFAULT_TRAIL_SATURATION_MIN = 100.0;
 
 /**
  * The maximum saturation allowed for trail components.
@@ -261,7 +311,8 @@ const TRAIL_SATURATION_MIN = 100.0;
  * @constant {Saturation}
  * @default 100.0
  */
-const TRAIL_SATURATION_MAX = 100.0;
+var TRAIL_SATURATION_MAX = 100.0;
+const DEFAULT_TRAIL_SATURATION_MAX = 100.0;
 
 /**
  * The minimum luminosity allowed for trail components.
@@ -270,7 +321,8 @@ const TRAIL_SATURATION_MAX = 100.0;
  * @constant {Luminosity}
  * @default 25.0
  */
-const TRAIL_LUMINOSITY_MIN = 25.0;
+var TRAIL_LUMINOSITY_MIN = 25.0;
+const DEFAULT_LUMINOSITY_MIN = 25.0;
 
 /**
  * The maximum luminosity allowed for trail components.
@@ -279,7 +331,8 @@ const TRAIL_LUMINOSITY_MIN = 25.0;
  * @constant {Luminosity}
  * @default 75.0
  */
-const TRAIL_LUMINOSITY_MAX = 75.0;
+var TRAIL_LUMINOSITY_MAX = 75.0;
+const DEFAULT_TRAIL_LUMINOSITY_MAX = 75.0;
 
 /**
  * The rate at which the average hue of the dots shifts around the color wheel.
@@ -291,7 +344,8 @@ const TRAIL_LUMINOSITY_MAX = 75.0;
  * @constant {number}
  * @default 0.1
  */
-const HSL_DRIFT = 0.1;
+var HSL_DRIFT = 0.1;
+const DEFAULT_HSL_DRIFT = 0.1;
 
 /**
  * The minimum speed in pixels per frame the dots move.
@@ -301,7 +355,8 @@ const HSL_DRIFT = 0.1;
  * @constant {number}
  * @default 0.1
  */
-const MIN_SPEED = 0.1;
+var MIN_SPEED = 0.1;
+const DEFAULT_MIN_SPEED = 0.1;
 
 /**
  * The maximum speed in pixels per frame the dots move.
@@ -311,7 +366,8 @@ const MIN_SPEED = 0.1;
  * @constant {number}
  * @default 2.0
  */
-const MAX_SPEED = 2.0;
+var MAX_SPEED = 2.0;
+const DEFAULT_MAX_SPEED = 2.0;
 
 /**
  * The minimum acceleration in pixels per frame the dots move.
@@ -321,7 +377,8 @@ const MAX_SPEED = 2.0;
  * @constant {number}
  * @default 0.01
  */
-const MIN_ACCEL = 0.01;
+var MIN_ACCEL = 0.01;
+const DEFAULT_MIN_ACCEL = 0.01;
 
 /**
  * The maximum acceleration in pixels per frame the dots move.
@@ -331,7 +388,8 @@ const MIN_ACCEL = 0.01;
  * @constant {number}
  * @default 0.50
  */
-const MAX_ACCEL = 0.50;
+var MAX_ACCEL = 0.50;
+const DEFAULT_MAX_ACCEL = 0.50;
 
 /**
  * The maximum number of dots that can concurrently be active at one time.
@@ -340,7 +398,8 @@ const MAX_ACCEL = 0.50;
  * @constant {number}
  * @default 250
  */
-const MAX_DOTS = 250;
+var MAX_DOTS = 250;
+const DEFAULT_MAX_DOTS = 250;
 
 /**
  * The rate at which new dots are added to the simulation/animation. They are
@@ -350,7 +409,8 @@ const MAX_DOTS = 250;
  * @constant {number}
  * @default 2
  */
-const DOT_RATE = 2;
+var DOT_RATE = 2;
+const DEFAULT_DOT_RATE = 2;
 
 /**
  * The opacity at which active trails are erased. A lower value here will make
@@ -365,7 +425,8 @@ const DOT_RATE = 2;
  * @constant {Opacity}
  * @default 2
  */
-const FADE_OPACITY = 0.2;
+var FADE_OPACITY = 0.2;
+const DEFAULT_FADE_OPACITY = 0.2;
 
 /**
  * The total number of frames to animate per second.
@@ -376,7 +437,8 @@ const FADE_OPACITY = 0.2;
  * @constant {number}
  * @default 20
  */
-const FPS = 20;
+var FPS = 30;
+const DEFAULT_FPS = 20;
 
 /**
  * DO NOT MODIFY THIS CONSTANT!!!
@@ -389,7 +451,9 @@ const FPS = 20;
  * @constant {number}
  * @default
  */
-const FRAME_INTERVAL = 1000 / FPS;
+var FRAME_INTERVAL = 1000 / FPS;
+var FRAME_INTERVAL_ = () => 1000 / FPS;
+const DEFAULT_FRAME_INTERVAL = 1000 / DEFAULT_FPS;
 
 
 /**
@@ -400,7 +464,8 @@ const FRAME_INTERVAL = 1000 / FPS;
  * @constant {number}
  * @default 0.5
  */
-const LINE_WIDTH_MIN = 0.5;
+var LINE_WIDTH_MIN = 0.5;
+const DEFAULT_LINE_WIDTH_MIN = 0.5;
 
 /**
  * The maximum width of the trails the dots produce. This value is effectively
@@ -410,7 +475,8 @@ const LINE_WIDTH_MIN = 0.5;
  * @constant {number}
  * @default 3.0
  */
-const LINE_WIDTH_MAX = 3.0;
+var LINE_WIDTH_MAX = 3.0;
+const DEFAULT_LINE_WIDTH_MAX = 3.0;
 
 
 /**
@@ -424,7 +490,9 @@ const LINE_WIDTH_MAX = 3.0;
  * @constant {number}
  * @default
  */
-const LUMINOSITY_OSCILLATION_PERIOD_MIN = FPS * 0.5;
+var LUMINOSITY_OSCILLATION_PERIOD_MIN = FPS * 0.5;
+var LUMINOSITY_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
+const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
 
 /**
  * The maximum amount of time before the luminosity of a dot, finishes an
@@ -437,7 +505,9 @@ const LUMINOSITY_OSCILLATION_PERIOD_MIN = FPS * 0.5;
  * @constant {number}
  * @default
  */
-const LUMINOSITY_OSCILLATION_PERIOD_MAX = FPS * 1;
+var LUMINOSITY_OSCILLATION_PERIOD_MAX = FPS * 1;
+var LUMINOSITY_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
+const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX = DEFAULT_FPS * 1;
 
 /**
  * The minimum variation in luminosity the dot should oscillate to/from.
@@ -448,7 +518,8 @@ const LUMINOSITY_OSCILLATION_PERIOD_MAX = FPS * 1;
  * @constant {number}
  * @default 0.1
  */
-const LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
+var LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
+const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
 
 /**
  * The maximum variation in luminosity the dot should oscillate to/from.
@@ -459,7 +530,8 @@ const LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
  * @constant {number}
  * @default 25
  */
-const LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
+var LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
+const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
 
 /**
  * The phase shift of the luminosity oscillation, relative to the start of the,
@@ -471,7 +543,8 @@ const LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
  * @constant {number}
  * @default 0
  */
-const LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
+var LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
+const DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
 
 
 /**
@@ -486,7 +559,9 @@ const LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
  * @constant {number}
  * @default
  */
-const LINE_WIDTH_OSCILLATION_PERIOD_MIN = FPS * 0.5;
+var LINE_WIDTH_OSCILLATION_PERIOD_MIN = FPS * 0.5;
+var LINE_WIDTH_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
 
 /**
  * The maximum amount of time before the line width of a dot, finishes an
@@ -500,7 +575,9 @@ const LINE_WIDTH_OSCILLATION_PERIOD_MIN = FPS * 0.5;
  * @constant {number}
  * @default
  */
-const LINE_WIDTH_OSCILLATION_PERIOD_MAX = FPS * 1;
+var LINE_WIDTH_OSCILLATION_PERIOD_MAX = FPS * 1;
+var LINE_WIDTH_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX = DEFAULT_FPS * 1;
 
 /**
  * The minimum variation in line width the dot should oscillate to/from.
@@ -512,7 +589,8 @@ const LINE_WIDTH_OSCILLATION_PERIOD_MAX = FPS * 1;
  * @constant {number}
  * @default 0.1
  */
-const LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
+var LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
+const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
 
 /**
  * The maximum variation in line width the dot should oscillate to/from.
@@ -524,7 +602,8 @@ const LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
  * @constant {number}
  * @default 2.0
  */
-const LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
+var LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
+const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
 
 /**
  * The phase shift of the line width oscillation, relative to the start of the,
@@ -537,7 +616,8 @@ const LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
  * @constant {number}
  * @default 0
  */
-const LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
+var LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
 
 /**
  * A flag that determines whether or not the canvas is resized whenever the
@@ -558,7 +638,8 @@ const LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
  *
  * @todo Implement this
  */
-const RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
+var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
+const DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
 //vertical shift (D) is the l parameter of the dot
 //2PI / LUM_OSC_PER = B
 
@@ -677,9 +758,14 @@ var keybinds = [
             if (STATUS_INFO_DISPLAYED) {
                 document.getElementById("status-info").style = "";
                 console.info("Turned on the status info overlay.");
+                window.statusInterval = window.setInterval(updateStatusInfo,10);
             } else {
                 document.getElementById("status-info").style.display = "none";
                 console.info("Turned off the status info overlay.");
+                if (window.statusInterval) {
+                    window.clearInterval(window.statusInterval,10);
+                    window.statusInterval = undefined;
+                }
             }
         }
     },
@@ -702,6 +788,7 @@ var keybinds = [
         "key":"r",
         "conditions":[{"ctrl": false}],
         "handler": function binding_reset() {
+            START_TIME = (new Date()).getTime();
             dots = [];
             FRAME_COUNT = 0;
             TRAIL_HSL_END = DEFAULT_TRAIL_HSL_END;
@@ -733,6 +820,16 @@ var keybinds = [
     }
 ];
 
+
+
+function updateFPS(_fps) {
+    FPS = _fps;
+    FRAME_INTERVAL = FRAME_INTERVAL_();
+    LUMINOSITY_OSCILLATION_PERIOD_MAX = LUMINOSITY_OSCILLATION_PERIOD_MAX_();
+    LUMINOSITY_OSCILLATION_PERIOD_MIN = LUMINOSITY_OSCILLATION_PERIOD_MIN_();
+    LINE_WIDTH_OSCILLATION_PERIOD_MAX = LINE_WIDTH_OSCILLATION_PERIOD_MAX_();
+    LINE_WIDTH_OSCILLATION_PERIOD_MIN = LINE_WIDTH_OSCILLATION_PERIOD_MIN_();
+}
 
 /**
  * Generates a random floating-point number between "min" and "max".
@@ -1409,7 +1506,6 @@ function craftStatusElement(container,value,info,types,parameter) {
             break;
         case "luma":
             widget.style.backgroundColor = `hsl(0,100%,${value}%)`;
-            console.info(`hsl(0,0%,${value}%)`);
             widget.title = value + "%";
             break;
         case "alpha":
@@ -1526,7 +1622,6 @@ function updateStatusElement(widget,value,info,types,parameter) {
             break;
         case "luma":
             widget.style.backgroundColor = `hsl(0,100%,${value}%)`;
-            console.info(`hsl(0,0%,${value}%)`);
             widget.title = value + "%";
             break;
         case "alpha":
@@ -1588,7 +1683,7 @@ function loadStatusInfo() {
             c[0].setAttribute("colspan","2");
         }
     }
-    window.setInterval(updateStatusInfo,10);
+
 }
 
 function updateStatusInfo() {
