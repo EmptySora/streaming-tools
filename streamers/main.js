@@ -933,6 +933,17 @@ function animation() {
  * @function
  */
 function start() {
+    document.body.addEventListener("mousemove",function() {
+        document.body.style.cursor = "default";
+        if (window.hideint !== undefined) {
+            window.clearInterval(window.hideint);
+            window.hideint = undefined;
+        }
+        window.hideint = window.setTimeout(function() {
+            window.hideint = undefined;
+            document.body.style.cursor = "none";
+        },1000);
+    });
     //Retrieve the CANVAS element
     canvas = document.querySelector("canvas");
 
