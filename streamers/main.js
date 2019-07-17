@@ -739,6 +739,20 @@ var STATUS_INFO_DISPLAYED = false;
 var VERBOSE_INFO_DISPLAYED = false;
 
 
+function upFPS() {
+    updateFPS(FPS + 5);
+    console.info(`Now targeting ${FPS} frames per second.`);
+}
+function downFPS() {
+    var old_fps = FPS;
+    updateFPS(Math.max(FPS - 5,5));
+    if (old_fps !== FPS) {
+        console.info(`Now targeting ${FPS} frames per second.`);
+    } else {
+        console.info(`Cannot reduce the framerate any lower than five frames per second.`);
+    }
+}
+
 var keybinds = [
 //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp, PageDown
 //Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause, AudioVolumeMute,
@@ -816,10 +830,31 @@ var keybinds = [
             console.info("(s)tatus  -- Toggles the visibility of the status info overlay.");
             console.info("(v)erbose -- Toggles the verbosity of the status info overlay.");
             console.info("(r)eset   -- Resets the animation.");
+            console.info("(+)       -- Increase the FPS by five frames per second.");
+            console.info("(-)       -- Decrease the FPS by five frames per second.");
         }
+    },
+    {
+        "key":"+",
+        "conditions":[{"ctrl": false}],
+        "handler": upFPS
+    },
+    {
+        "key":"-",
+        "conditions":[{"ctrl": false}],
+        "handler": downFPS
+    },
+    {
+        "key":"_",
+        "conditions":[{"ctrl": false, "shift": true}],
+        "handler": downFPS
+    },
+    {
+        "key":"=",
+        "conditions":[{"ctrl": false, "shift": false}],
+        "handler": upFPS
     }
 ];
-
 
 
 function updateFPS(_fps) {
