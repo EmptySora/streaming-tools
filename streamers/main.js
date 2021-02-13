@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 1.2.0.0
+ * @version 2.0.0.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
- const VERSION = "1.2.0.0";
+ const VERSION = "2.0.0.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -676,6 +676,110 @@ const DEFAULT_TRAIL_HSL_END = TRAIL_HSL_END;
 
 
 
+/**
+ * The port on the server running WinAudioLevels.exe that is listening
+ * for WebSocket Connections.
+ * @default 8069
+ * @constant {number}
+ */
+const PEAKS_APP_PORT = 8069;
+/**
+ * The domain of the server running WinAudioLevels.exe. If you are selfhosting,
+ * set this to one of: "127.0.0.1", "localhost", or "::1"
+ * @default "localhost"
+ * @constant {string}
+ */
+const PEAKS_APP_DOMAIN = "localhost";
+/**
+ * Whether or not the server running WinAudioLevels.exe only accepts secure connections.
+ * If you are selfhosting, most likely, this will be set to false. Otherwise, this must
+ * be set to true due to JS security restrictions.
+ * @default false
+ * @constant {boolean}
+ */
+const PEAKS_APP_SECURE = false;
+
+/**
+ * Whether or not to try connection to the audio peaks server at all. Set this to
+ * false if you are not running an audio peaks server.
+ * @default true
+ * @constant {boolean}
+ */
+const PEAKS_APP_ENABLED = true;
+
+/**
+ * How long to wait, in milliseconds, before attempting to reconnect to the
+ * audio peaks server after an error occurs.
+ * @default 30000
+ * @constant {number}
+ */
+const PEAKS_APP_ERROR_RECONNECT_WAIT = 30000;
+
+/**
+ * How long to wait, in milliseconds, before attempting to reconnect to the
+ * audio peaks server after a disconnection occurs.
+ * @default 5000
+ * @constant {number}
+ */
+const PEAKS_APP_RECONNECT_WAIT = 5000;
+
+/**
+ * The minimum multiplier the audio levels on the computer can affect the
+ * animation by. This should be between 0.0 and 1.0.
+ * A value of 0.0 would specify that dead silence would effectively halt
+ * the animation, while a value of 1.0 would indicate that the audio peaks
+ * would only be able to speed up the animation, if anything.
+ *
+ * The peak is converted to a percentage between 0% and 100%. Values less than
+ * 50% will slow down the animation, while values above that will speed up the
+ * animation. The actual calculation is as follows:
+ *     speed_up_range = MAX_VARIANCE - 1;
+ *     slow_down_range = 1 - MIN_VARIANCE;
+ *     if (peak === 50%) {
+ *         multiplier = 1;
+ *     } else if (peak < 50%) {
+ *         multiplier = 1 - (peak * 2 * slow_down_range);
+ *     } else { // > 50%
+ *         multiplier = 1 + ((peak - 50%) * 2 * speed_up_range);
+ *     }
+ * So, the range between MIN and MAX is not evenly spread out. MIN to 1, and 1
+ * to MAX are spread out evenly.
+ * @default 0.5
+ * @constant {number}
+ * @see {AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER}
+ */
+const AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.5;
+
+/**
+ * The maximum multiplier the audio levels on the computer can affect the
+ * animation by. This should be greater than or equal to 1.0.
+ * A value of 1.0 would indicate that the audio levels would only be able
+ * to slow down the animation, if anything, while a value of anything higher
+ * than that would indicate that the audio levels would speed things up.
+ * 
+ * The peak is converted to a percentage between 0% and 100%. Values less than
+ * 50% will slow down the animation, while values above that will speed up the
+ * animation. The actual calculation is as follows:
+ *     speed_up_range = MAX_VARIANCE - 1;
+ *     slow_down_range = 1 - MIN_VARIANCE;
+ *     if (peak === 50%) {
+ *         multiplier = 1;
+ *     } else if (peak < 50%) {
+ *         multiplier = 1 - (peak * 2 * slow_down_range);
+ *     } else { // > 50%
+ *         multiplier = 1 + ((peak - 50%) * 2 * speed_up_range);
+ *     }
+ * So, the range between MIN and MAX is not evenly spread out. MIN to 1, and 1
+ * to MAX are spread out evenly.
+ * @default 2.0
+ * @constant {number}
+ * @see {AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER}
+ */
+const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 2.0;
+
+
+
+
 /*********************************
  * END OF CONFIGURATION SETTINGS *
  *********************************/
@@ -728,6 +832,23 @@ var dots = [];
  */
 var FRAME_COUNT = 0;
 var START_TIME;
+
+
+/**
+ * A variable that stores the multiplier as determined by the last audio peak
+ * received by the audio peak server. This value is used to modify the
+ * frequency and occurrences of various pieces of the animation based on the
+ * audio level of the computer.
+ * @var {number}
+ */
+var AUDIO_PEAK_MULTIPLIER = 0.5;
+
+/**
+ * A variable that stores whether or not the application is connected to an
+ * audio peaks server.
+ * @var {boolean}
+ */
+var AUDIO_PEAKS_CONNECTED = false;
 
 //Asin(B(x-C))+D
 //Amplitude, Frequency, H-Shift, V-Shift
@@ -905,16 +1026,45 @@ function getB(period) {
  * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
  * where x is equal to the the current [frame count]{@link FRAME_COUNT}
  */
-function sinusoidal(a,b,c,d) {
+function sinusoidal(a, b, c, d) {
     return a * Math.sin(b * (FRAME_COUNT - c)) + d;
 }
+/**
+ * Calculates the value of a sinusoid equation given the four possible
+ * transformations that can be applied to it. (see {@link Sinusoid} for more
+ * details about each parameter.)
+ * The function uses the current [frame count]{@link FRAME_COUNT} as the value
+ * of the "x" parameter.
+ * @see {@link Sinusoid}
+ * @function
+ * @param {number} a - The amplitude of the function.
+ * @param {number} b - The frequency of the function.
+ * @param {number} c - The phase-shift of the function.
+ * @param {number} d - The vertical-shift of the function.
+ * @param {number} x - The x-value.
+ * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
+ * where x is equal to the the current [frame count]{@link FRAME_COUNT}
+ */
+function sinusoidal2(a, b, c, d, x) {
+    return a * Math.sin(b * (x - c)) + d;
+}
 
+function animation() {
+    try {
+        animationB();
+    } catch(e) {
+        console.error(e);
+    }
+    //set a timer to run this same function, when we need to animate the next
+    //frame.
+    window.setTimeout(animation,FRAME_INTERVAL);
+}
 /**
  * A function that represents the computation required to complete a single
  * frame in the animation.
  * @function
  */
-function animation() {
+function animationB() {
     if (!START_TIME) {
         START_TIME = (new Date()).getTime();
     }
@@ -942,7 +1092,7 @@ function animation() {
 
     //Add new dots to the animation, given we are able to.
     var i;
-    for (i = 0; i < DOT_RATE; i += 1) {
+    for (i = 0; i < DOT_RATE * AUDIO_PEAK_MULTIPLIER; i += 1) {
         if (dots.length >= MAX_DOTS) {
             //We currently have the maximum number of dots allowed,
             //don't add any more.
@@ -954,13 +1104,142 @@ function animation() {
 
     //Move all dots.
     moveDots();
-
-    //set a timer to run this same function, when we need to animate the next
-    //frame.
-    window.setTimeout(animation,FRAME_INTERVAL);
 }
 
 
+/**
+ * A function that loads the audio peaks subsystem to enable dynamic animations
+ * that respond to the audio levels on your computer.
+ * @function
+ */
+function loadPeaksApp() {
+    //peaks socket
+    var socket;
+    function connect() {
+        var reconnect = false;
+        AUDIO_PEAKS_CONNECTED = false;
+        socket = new WebSocket(`ws${PEAKS_APP_SECURE ? "s" : ""}://` +
+            `${PEAKS_APP_DOMAIN}:${PEAKS_APP_PORT}/AudioPeaks`);
+        socket.addEventListener("open", function () {
+            console.info("Connected to the Audio peaks sever successfully.");
+        });
+        socket.addEventListener("error", function (e) {
+            console.error("Failed to connect to the audio peaks server: ", e);
+            if (!reconnect) {
+                console.info(`Trying again in ${PEAKS_APP_ERROR_RECONNECT_WAIT / 1000} seconds.`);
+                window.setTimeout(connect, PEAKS_APP_ERROR_RECONNECT_WAIT);
+                reconnect = true;
+            }
+            AUDIO_PEAKS_CONNECTED = false;
+            AUDIO_PEAK_MULTIPLIER = 1;
+        });
+        socket.addEventListener("close", function () {
+            console.info("Lost the connection to the audio peaks server.");
+            if (!reconnect) {
+                console.info(`Trying again in ${PEAKS_APP_RECONNECT_WAIT / 1000} seconds.`);
+                window.setTimeout(connect, PEAKS_APP_RECONNECT_WAIT);
+                reconnect = true;
+            }
+            AUDIO_PEAKS_CONNECTED = false;
+            AUDIO_PEAK_MULTIPLIER = 1;
+        });
+        socket.addEventListener("message", function (e) {
+            var message = JSON.parse(e.data);
+            switch (message.status) {
+            case "Success":
+                AUDIO_PEAKS_CONNECTED = true;
+                var peak = message.data.max;
+                if (peak === 0.5) {
+                    AUDIO_PEAK_MULTIPLIER = 1;
+                } else if (peak < 0.5) {
+                    AUDIO_PEAK_MULTIPLIER = 1 - ((0.5 - peak) * 2 * (1 -
+                        AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER));
+                } else { // > 0.5
+                    AUDIO_PEAK_MULTIPLIER = 1 + ((peak - 0.5) * 2 * (
+                        AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER - 1));
+                }
+                break;
+            case "Error":
+                console.error("Audio peaks server encountered an error: ", message.data);
+                break;
+            }
+            /**
+             * The audio peaks message data structure. This is the format the
+             * audio peaks server sends data.
+             * @typedef {Object} AudioPeakMessage
+             * @property {string} status - 
+             *     Indicates the status of the message. See
+             *     {@link AudioPeakMessageStatus}, possible values of this
+             *     property.
+             * @property {AudioPeaks|Object} data -
+             *     The data of the message. This will either be a
+             *     {@link AudioPeaks} object if {@link AudioPeakMessage#status}
+             *     is "Success", or a C# Exception object if it is "Error".
+             */
+            /**
+             * The audio peaks message data structure. This is the format the
+             * audio peaks server sends data. There are three defined statuses:
+             *   Success - THe message contains "valid" audio data.
+             *   Info - Currently unused.
+             *   Error - The server encountered an error.
+             * @typedef {string} AudioPeakMessageStatus
+             */
+            /**
+             * The raw peak data from the WinAudioLevels.exe server.
+             * @typedef {Object} AudioPeaks
+             * @property {Number[]} peaks -
+             *     The collection of audio peaks detected. Each element is the
+             *     detected peak of a separate audio device.
+             * @property {Number} max - The largest audio peak detected.
+             * @property {Number} min - The smallest audio peak detected.
+             * @property {Number} avg -
+             *     The average of all the audio peaks detected.
+             */
+        });
+    }
+    //connect
+    connect();
+}
+
+/**
+ * Represents the components that make up the internal state of a dot.
+ * most of the property names are heavily abbreviated to make other pieces of
+ * code more readable, at the expense of understanding what each property means.
+ * Refer to the {@link newDot} function for information on the default values
+ * of the following properties.
+ * @typedef {Object} Dot
+ * @property {number} x - The current x coordinate of the dot.
+ * @property {number} y - The current y coordinate of the dot.
+ * @property {number} s - The speed of the dot, in pixels per frame.
+ * @property {number} a - The acceleration of the dot, in pixels per frame.
+ * @property {number} c - The average hue of the dot.
+ * @property {number} l - The average luminosity of the dot.
+ * @property {number} sa - The average saturation of the dot.
+ * @property {ColorRGB} c2 - The original RGB color of the dot, before the HSL
+ * change. This property is unused. It's included for compatibility.
+ * @property {number} f - The frame that the dot was created on, this is used
+ * to phase shift the sinusoid function so that the oscillation starts on the
+ * frame the dot was created, instead of where the oscillation would be at if
+ * the dot was created on the first frame
+ * @property {number} pa - The amplitude at which the luminosity of the dot
+ * fluctuates.
+ * @property {number} pb - The frequency at which the luminosity of the dot
+ * fluctuates.
+ * @property {number} pc - The phase-shift at which the luminosity of the dot
+ * fluctuates.
+ * @property {number} bpa - The amplitude at which the line width of the dot
+ * fluctuates.
+ * @property {number} bpb - The frequency at which the line width of the dot
+ * fluctuates.
+ * @property {number} bpc - The phase-shift at which the line width of the dot
+ * fluctuates.
+ * @property {number} w - The thickness of the trail left by the dot.
+ * @see {@link Hue}
+ * @see {@link Luminosity}
+ * @see {@link Saturation}
+ * @see {@link Sinusoid}
+ * @see {@link newDot}
+ */
 /**
  * A setup function, called when the page loads. It sets up the initial values
  * of the {@link canvas}, {@link context}, and {@link size} variables; sets up
@@ -979,6 +1258,14 @@ function start() {
             document.body.style.cursor = "none";
         },1000);
     });
+    //check if peaks app is enabled for more dynamic animations.
+    if (PEAKS_APP_ENABLED) {
+        try {
+            loadPeaksApp();
+        } catch (e) {
+            console.log("Failed to load peaks app: ", e);
+        }
+    }
     //Retrieve the CANVAS element
     canvas = document.querySelector("canvas");
 
@@ -1060,8 +1347,8 @@ function moveDots() {
     //collection cycles.
     var i;
     var d; 
-    var py;
-    var px;
+    var np;
+    var nbp;
     var l;
     var w;
 
@@ -1072,6 +1359,9 @@ function moveDots() {
         //meaning that even if we modify the "d" variable, it will still
         //affect "dots[i]", ie: d.y = 1 is the same as dots[i].y = 1.
         d = dots[i];
+        //sin x = 2pi    b/2pi=period
+        d.pfx = (d.pfx + 1) % d.pp;
+        d.bpfx = (d.bpfx + 1) % d.bpp;
 
         //Skip the first frame of the animation to retrieve the second of
         //three points necessary for the animation
@@ -1094,9 +1384,6 @@ function moveDots() {
         // 1 1 1 1 2 =>
         // 1 1 2 2 3 =>
         // 1 2 3 3 4
-        //store the old coordinates of the dot.
-        py = d.y;
-        px = d.x;
         
         //Determine the current effective luminosity of the dot based on the
         //current frame count
@@ -1144,7 +1431,117 @@ function moveDots() {
         //Move the dot upwards based on the dot's speed.
         d.y -= d.s;
         //Increase the dot's speed based on its acceleration.
-        d.s += d.a;
+        d.s += d.a * AUDIO_PEAK_MULTIPLIER;
+        //that's that...
+
+        /**
+         * A helper function used to get the new phase shift when changing the
+         * oscillation speed of the dots.
+         * See the comments below for more
+         * 
+         *
+         * To modify the trajectory of a sine wave, the following must occur:
+         *   - We must know the old period (eg: 1)
+         *   - We must know the new period (eg: 1.5)
+         *   - We must know the old phase shift (eg: 0)
+         *     - The phase shift is what will allow us to alter the frequency
+         *       of the sinusoid without altering the current position along
+         *       it. IE: it means that the last value was 1, it'll be 1--even
+         *       after the change in period.
+         *       This is necessary because what we are doing is effectively
+         *       shrinking the graph horizontally. Our position along the
+         *       X-axis isn't going to shrink with us, so, we shift the
+         *       graph to compensate for that.
+         *
+         * The calculation is:
+         *     new_phase_shift = ((old_period - new_period)
+         *         * (((frame - old_phase_shift) % old_period) / old_period)
+         *         + old_phase_shift) % new_period
+         * 2.5   2.5   5
+         * old_period = 15
+         * new_period = 20
+         * old_phase_shift = 2.5
+         * frame = 17.5
+         *
+         * Eg: if we have a sinusoid that repeats every 20 frames, that means
+         * that the period of that sinusoid is 20.
+         * Say we want to speed it up by 50%. How do we do that?
+         * Well, we know that to speed it up by 75% the new period has to be 15
+         * frames. If we assume that we weren't shifting the animation at all
+         * before this, that means the previous phase shift was 0 frames.
+         * So, if we are currently on frame 10, that means that the value of
+         * the sinusoid is 0, with the graph curving positive for 5 frames,
+         * then back to zero for another five frames before repeating from the
+         * start.
+         * IE:
+         *              _______
+         * |           /       \|
+         * |\---------/---------| (repeat) (dashed line is x-axis)
+         * | \_______/          |
+         *  ^ frame 0      ^ frame 15
+         *       ^ frame 5      ^ frame 20 (repeat)
+         *            ^ frame 10
+         * Without phase shifting, the new graph would look like this:
+         *           _____          _____
+         * |        /     \|       /     \|
+         * |\------/-------\------/-------| (repeat) (dashed line is x-axis)
+         * | \____/        |\____/        |
+         *  ^ frame 0      ^ frame 15
+         *       ^ frame 5      ^ frame 20 (repeat)
+         *            ^ frame 10
+         *
+         * Now, frame 0 suddenly goes from a value of 0 to nearing 1.
+         * If we don't rectify this, the animation will appear jittery as the
+         * change in function will cause drastic and frequent alterations.
+         * To fix this, we just need to shift the graph over until frame 10 has
+         * the right value and the right direction. IE:
+         *
+         *  __          _____          _____
+         * |  \|       /     \|       /     \|
+         * |---\------/-------\------/-------| (repeat) (dashed line is x-axis)
+         * |   |\____/        |\____/        |
+         *  ^ frame 0      ^ frame 15
+         *       ^ frame 5      ^ frame 20 (repeat)
+         *            ^ frame 10
+         * So: if the old period was 20, the new one is 15, and phase shift was 0
+         * shift it by "(20 - 15) + 0" = "5" (it's actually 2.5...?)
+         *
+         * so, from 20 ==> 15 (frame 10), it's 2.5 (frame 10 is 50% to looping
+         *    so 5 * 50% = 2.5)
+         * from 20 ==> 15 ==> 20 (frame 17.5), it's -2.5 (that's at 0% to looping, so)
+         *
+         *  +   2.5,   2.5  + -12.5, -12.5 (or -12.5) (because halfway) (frame 10 0.5) 20>15 = 5
+         *  + - 5.0, - 2.5  +  15.0,   2.5 (or +15) (frame 17.5 0.0/1.0) 15>20
+         *  +   7.5,   5.0  + - 7.5, - 5.0 (or -7.5) (frame 27.5 0.5) 20>15   17.5%15 =2.5
+         *  + -10.0, -10.0           (or +10) (frame 35 0.0/1.0) 15>20
+         *
+         *  12.5 17.5 25.0 35
+         *
+         *  if we mod by new period then subtract the phase shift
+         * @function
+         */
+        function getNewPhaseShift(oldPeriod, newPeriod, oldPhaseShift, x) {
+            return ((oldPeriod - newPeriod) * (
+                ((x - oldPhaseShift) % oldPeriod) / oldPeriod)
+                + oldPhaseShift) % newPeriod;
+            //fuck this calculation...
+        }
+        if (AUDIO_PEAK_MULTIPLIER !== d.oapm) {
+            np = (1 / AUDIO_PEAK_MULTIPLIER) * d.opp;
+            nbp = (1 / AUDIO_PEAK_MULTIPLIER) * d.obpp;
+            //pfx
+            d.pc = getNewPhaseShift(d.opp, np, d.pc, d.pfx);
+            d.pb = getB(np);
+            d.pp = np;
+            d.pc = getNewPhaseShift(d.obpp, nbp, d.bpc, d.bpfx);
+            d.pb = getB(np);
+            d.pp = np;
+        }
+        //we need to...
+        //keep the original period and the last period/phaseshift
+        //new period is the multiplier*original
+
+
 
         //Remove the current dot if it's off-screen
         if (d.ppy < 0) {
@@ -1166,6 +1563,8 @@ function moveDots() {
 function newDot() {
     //push the new dot to the end to the list of all active dots.
     //See the typedef of Dot for explanations of the following.
+    var vpb = rand(LUMINOSITY_OSCILLATION_PERIOD_MIN, LUMINOSITY_OSCILLATION_PERIOD_MAX);
+    var vbpb = rand(LINE_WIDTH_OSCILLATION_PERIOD_MIN, LINE_WIDTH_OSCILLATION_PERIOD_MAX);
     dots.push({
         //X-Coord: a random value between 0 and the size of the canvas.
         x: rand(0,size.width),
@@ -1189,19 +1588,33 @@ function newDot() {
         pa: rand(LUMINOSITY_OSCILLATION_AMPLITUDE_MIN,LUMINOSITY_OSCILLATION_AMPLITUDE_MAX),
         //Luminosity Oscillation Frequency: the frequency when the period is a
         //random value in between MIN/MAX.
-        pb: getB(rand(LUMINOSITY_OSCILLATION_PERIOD_MIN,LUMINOSITY_OSCILLATION_PERIOD_MAX)),
+        pb: getB(vpb),
+        //Luminosity Oscillation Period
+        pp: vpb,
+        //Luminosity Original Oscillation Period
+        opp: vpb,
         //Luminosity Oscillation Phase Shift: creation frame number + PHASE SHIFT
         pc: FRAME_COUNT + LUMINOSITY_OSCILLATION_PHASE_SHIFT,
         //Line Width Oscillation Amplitude: random value in between MIN/MAX.
         bpa: rand(LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN,LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX),
         //Line Width Oscillation Frequency: the frequency when the period is a
         //random value in between MIN/MAX.
-        bpb: getB(rand(LINE_WIDTH_OSCILLATION_PERIOD_MIN,LINE_WIDTH_OSCILLATION_PERIOD_MAX)),
+        bpb: getB(vbpb),
+        //Line Width Oscillation Period
+        bpp: vbpb,
+        //Line Width Original Oscillation Period
+        obpp: vbpb,
         //Line Width Oscillation Phase Shift: creation frame number + PHASE SHIFT
         bpc: FRAME_COUNT + LINE_WIDTH_OSCILLATION_PHASE_SHIFT,
         //Line Width: a random value between MIN/MAX.
-        w: rand(LINE_WIDTH_MIN,LINE_WIDTH_MAX)
+        w: rand(LINE_WIDTH_MIN, LINE_WIDTH_MAX),
+        //Sinusoidal frame helper values.
+        pfx: FRAME_COUNT,
+        bpfx: FRAME_COUNT,
+        //Old AUDIO_PEAK_MULTIPLIER.
+        oapm: 1
     });
+    //original period, last period, last phaseshift
 
     //Drift the Hue range, by HSL_DRIFT
     TRAIL_HSL_START += HSL_DRIFT;
