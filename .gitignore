@@ -13,3 +13,18 @@ old-chatbot/web_interface_client_details.txt
 old-chatbot/web_interface_function_import_list.txt
 tts-bot/.vs/TTSBot/v14/.suo
 streamers/I forget.js
+
+streamers/winaudiolevels/.vs/**
+streamers/winaudiolevels/comnatives/**
+streamers/winaudiolevels/debug/**
+streamers/winaudiolevels/nativehelp/**
+streamers/winaudiolevels/winaudiolevels/bin/**
+streamers/winaudiolevels/packages/**
+streamers/winaudiolevels/winaudiolevels/domain.*
+streamers/winaudiolevels/tools/**
+streamers/winaudiolevels/winaudiolevels/imports.txt
+streamers/winaudiolevels/winaudiolevels/obj/**
+streamers/winaudiolevels/winaudiolevels/properties/assemblyinfo1.cs
+streamers/winaudiolevels/winaudiolevels/*.csproj.user
+streamers/winaudiolevels/winaudiolevels/mediaexternals.cs
+streamers/winaudiolevels/winaudiolevels/app.config
