@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.0.0.0
+ * @version 2.1.0.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
- const VERSION = "2.0.0.0";
+const VERSION = "2.1.0.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -61,7 +61,7 @@
  * as a number ranging from 0 to 100.
  * @typedef {number} Saturation
  */
- 
+
 /**
  * Represents the luminosity of a color, or how much light the color gives off,
  * ranging from 0.0 to 100.0.
@@ -222,37 +222,45 @@
  * @property {boolean} shift - Required state of the SHIFT key.
  */
 
-class Settings {
-    constructor(local_settings) {
-        this.__internal__settings = local_settings;
-    }
-    //getter
-    get area() {
-        //blah
-    }
-
-    //method
-    calcArea() {
-        //blah
-    }
-
-    //setter
-    set blah(value) {
-        //blah
-    }
-
-    //static
-    static method() {
-        //blah
-    }
-    //get/set work for static, use
-
-    static __constructor() {
-        
-    }
-}
-Settings.__constructor(); //basically emulating static constructors
-
+/**
+ * Represents the components that make up the internal state of a dot.
+ * most of the property names are heavily abbreviated to make other pieces of
+ * code more readable, at the expense of understanding what each property means.
+ * Refer to the {@link newDot} function for information on the default values
+ * of the following properties.
+ * @typedef {Object} Dot
+ * @property {number} x - The current x coordinate of the dot.
+ * @property {number} y - The current y coordinate of the dot.
+ * @property {number} s - The speed of the dot, in pixels per frame.
+ * @property {number} a - The acceleration of the dot, in pixels per frame.
+ * @property {number} c - The average hue of the dot.
+ * @property {number} l - The average luminosity of the dot.
+ * @property {number} sa - The average saturation of the dot.
+ * @property {ColorRGB} c2 - The original RGB color of the dot, before the HSL
+ * change. This property is unused. It's included for compatibility.
+ * @property {number} f - The frame that the dot was created on, this is used
+ * to phase shift the sinusoid function so that the oscillation starts on the
+ * frame the dot was created, instead of where the oscillation would be at if
+ * the dot was created on the first frame
+ * @property {number} pa - The amplitude at which the luminosity of the dot
+ * fluctuates.
+ * @property {number} pb - The frequency at which the luminosity of the dot
+ * fluctuates.
+ * @property {number} pc - The phase-shift at which the luminosity of the dot
+ * fluctuates.
+ * @property {number} bpa - The amplitude at which the line width of the dot
+ * fluctuates.
+ * @property {number} bpb - The frequency at which the line width of the dot
+ * fluctuates.
+ * @property {number} bpc - The phase-shift at which the line width of the dot
+ * fluctuates.
+ * @property {number} w - The thickness of the trail left by the dot.
+ * @see {@link Hue}
+ * @see {@link Luminosity}
+ * @see {@link Saturation}
+ * @see {@link Sinusoid}
+ * @see {@link newDot}
+ */
 
 
 
@@ -263,8 +271,7 @@ Settings.__constructor(); //basically emulating static constructors
  * @constant {ColorRGB}
  * @default [0,0,0]
  */
-var BACKGROUND = [0,0,0];
-const DEFAULT_BACKGROUND = [0,0,0];
+const DEFAULT_BACKGROUND = [0, 0, 0];
 
 /**
  * The color of the leading trail all dots leave.
@@ -272,8 +279,7 @@ const DEFAULT_BACKGROUND = [0,0,0];
  * @constant {ColorRGBA}
  * @default [255,255,255,1.0]
  */
-var DOT_COLOR = [255,255,255,1.0];
-const DEFAULT_DOT_COLOR = [255,255,255,1.0];
+const DEFAULT_DOT_COLOR = [255, 255, 255, 1.0];
 
 /**
  * A number ranging from 0.0 - 1.0 that represents the opacity of the trails
@@ -282,7 +288,6 @@ const DEFAULT_DOT_COLOR = [255,255,255,1.0];
  * @constant {Opacity}
  * @default 1.0
  */
-var TRAIL_OPACITY = 1.0;
 const DEFAULT_TRAIL_OPACITY = 1.0;
 
 /**
@@ -291,8 +296,7 @@ const DEFAULT_TRAIL_OPACITY = 1.0;
  * @constant {ColorRGBA}
  * @default [88,0,133,TRAIL_OPACITY]
  */
-var TRAIL_COLOR = [88, 0, 133,TRAIL_OPACITY];
-const DEFAULT_TRAIL_COLOR = [88, 0, 133,DEFAULT_TRAIL_OPACITY];
+const DEFAULT_TRAIL_COLOR = [88, 0, 133, DEFAULT_TRAIL_OPACITY];
 
 /**
  * The minimum saturation allowed for trail components.
@@ -301,7 +305,6 @@ const DEFAULT_TRAIL_COLOR = [88, 0, 133,DEFAULT_TRAIL_OPACITY];
  * @constant {Saturation}
  * @default 100.0
  */
-var TRAIL_SATURATION_MIN = 100.0;
 const DEFAULT_TRAIL_SATURATION_MIN = 100.0;
 
 /**
@@ -311,7 +314,6 @@ const DEFAULT_TRAIL_SATURATION_MIN = 100.0;
  * @constant {Saturation}
  * @default 100.0
  */
-var TRAIL_SATURATION_MAX = 100.0;
 const DEFAULT_TRAIL_SATURATION_MAX = 100.0;
 
 /**
@@ -321,7 +323,6 @@ const DEFAULT_TRAIL_SATURATION_MAX = 100.0;
  * @constant {Luminosity}
  * @default 25.0
  */
-var TRAIL_LUMINOSITY_MIN = 25.0;
 const DEFAULT_LUMINOSITY_MIN = 25.0;
 
 /**
@@ -331,7 +332,6 @@ const DEFAULT_LUMINOSITY_MIN = 25.0;
  * @constant {Luminosity}
  * @default 75.0
  */
-var TRAIL_LUMINOSITY_MAX = 75.0;
 const DEFAULT_TRAIL_LUMINOSITY_MAX = 75.0;
 
 /**
@@ -344,7 +344,6 @@ const DEFAULT_TRAIL_LUMINOSITY_MAX = 75.0;
  * @constant {number}
  * @default 0.1
  */
-var HSL_DRIFT = 0.1;
 const DEFAULT_HSL_DRIFT = 0.1;
 
 /**
@@ -355,7 +354,6 @@ const DEFAULT_HSL_DRIFT = 0.1;
  * @constant {number}
  * @default 0.1
  */
-var MIN_SPEED = 0.1;
 const DEFAULT_MIN_SPEED = 0.1;
 
 /**
@@ -366,7 +364,6 @@ const DEFAULT_MIN_SPEED = 0.1;
  * @constant {number}
  * @default 2.0
  */
-var MAX_SPEED = 2.0;
 const DEFAULT_MAX_SPEED = 2.0;
 
 /**
@@ -377,7 +374,6 @@ const DEFAULT_MAX_SPEED = 2.0;
  * @constant {number}
  * @default 0.01
  */
-var MIN_ACCEL = 0.01;
 const DEFAULT_MIN_ACCEL = 0.01;
 
 /**
@@ -388,7 +384,6 @@ const DEFAULT_MIN_ACCEL = 0.01;
  * @constant {number}
  * @default 0.50
  */
-var MAX_ACCEL = 0.50;
 const DEFAULT_MAX_ACCEL = 0.50;
 
 /**
@@ -398,7 +393,6 @@ const DEFAULT_MAX_ACCEL = 0.50;
  * @constant {number}
  * @default 250
  */
-var MAX_DOTS = 250;
 const DEFAULT_MAX_DOTS = 250;
 
 /**
@@ -409,7 +403,6 @@ const DEFAULT_MAX_DOTS = 250;
  * @constant {number}
  * @default 2
  */
-var DOT_RATE = 2;
 const DEFAULT_DOT_RATE = 2;
 
 /**
@@ -425,7 +418,6 @@ const DEFAULT_DOT_RATE = 2;
  * @constant {Opacity}
  * @default 2
  */
-var FADE_OPACITY = 0.2;
 const DEFAULT_FADE_OPACITY = 0.2;
 
 /**
@@ -437,7 +429,6 @@ const DEFAULT_FADE_OPACITY = 0.2;
  * @constant {number}
  * @default 20
  */
-var FPS = 30;
 const DEFAULT_FPS = 20;
 
 /**
@@ -451,8 +442,6 @@ const DEFAULT_FPS = 20;
  * @constant {number}
  * @default
  */
-var FRAME_INTERVAL = 1000 / FPS;
-var FRAME_INTERVAL_ = () => 1000 / FPS;
 const DEFAULT_FRAME_INTERVAL = 1000 / DEFAULT_FPS;
 
 
@@ -464,7 +453,6 @@ const DEFAULT_FRAME_INTERVAL = 1000 / DEFAULT_FPS;
  * @constant {number}
  * @default 0.5
  */
-var LINE_WIDTH_MIN = 0.5;
 const DEFAULT_LINE_WIDTH_MIN = 0.5;
 
 /**
@@ -475,7 +463,6 @@ const DEFAULT_LINE_WIDTH_MIN = 0.5;
  * @constant {number}
  * @default 3.0
  */
-var LINE_WIDTH_MAX = 3.0;
 const DEFAULT_LINE_WIDTH_MAX = 3.0;
 
 
@@ -490,8 +477,6 @@ const DEFAULT_LINE_WIDTH_MAX = 3.0;
  * @constant {number}
  * @default
  */
-var LUMINOSITY_OSCILLATION_PERIOD_MIN = FPS * 0.5;
-var LUMINOSITY_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
 const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
 
 /**
@@ -505,8 +490,6 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
  * @constant {number}
  * @default
  */
-var LUMINOSITY_OSCILLATION_PERIOD_MAX = FPS * 1;
-var LUMINOSITY_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
 const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX = DEFAULT_FPS * 1;
 
 /**
@@ -518,7 +501,6 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX = DEFAULT_FPS * 1;
  * @constant {number}
  * @default 0.1
  */
-var LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
 const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
 
 /**
@@ -530,7 +512,6 @@ const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
  * @constant {number}
  * @default 25
  */
-var LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
 const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
 
 /**
@@ -543,7 +524,6 @@ const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
  * @constant {number}
  * @default 0
  */
-var LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
 const DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
 
 
@@ -559,8 +539,6 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
  * @constant {number}
  * @default
  */
-var LINE_WIDTH_OSCILLATION_PERIOD_MIN = FPS * 0.5;
-var LINE_WIDTH_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
 const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
 
 /**
@@ -575,8 +553,6 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
  * @constant {number}
  * @default
  */
-var LINE_WIDTH_OSCILLATION_PERIOD_MAX = FPS * 1;
-var LINE_WIDTH_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
 const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX = DEFAULT_FPS * 1;
 
 /**
@@ -589,7 +565,6 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX = DEFAULT_FPS * 1;
  * @constant {number}
  * @default 0.1
  */
-var LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
 const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
 
 /**
@@ -602,7 +577,6 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
  * @constant {number}
  * @default 2.0
  */
-var LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
 const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
 
 /**
@@ -616,7 +590,6 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
  * @constant {number}
  * @default 0
  */
-var LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
 const DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
 
 /**
@@ -638,7 +611,6 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
  *
  * @todo Implement this
  */
-var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
 const DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
 //vertical shift (D) is the l parameter of the dot
 //2PI / LUM_OSC_PER = B
@@ -655,7 +627,6 @@ const DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
  * @var {number}
  * @default 180.0
  */
-var TRAIL_HSL_START = 180.0;
 const DEFAULT_TRAIL_HSL_START = TRAIL_HSL_START;
 
 /**
@@ -670,7 +641,6 @@ const DEFAULT_TRAIL_HSL_START = TRAIL_HSL_START;
  * @var {number}
  * @default 180.0
  */
-var TRAIL_HSL_END = 240.0;
 const DEFAULT_TRAIL_HSL_END = TRAIL_HSL_END;
 
 
@@ -748,7 +718,7 @@ const PEAKS_APP_RECONNECT_WAIT = 5000;
  * @constant {number}
  * @see {AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER}
  */
-const AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.5;
+const AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
 
 /**
  * The maximum multiplier the audio levels on the computer can affect the
@@ -775,1412 +745,1233 @@ const AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.5;
  * @constant {number}
  * @see {AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER}
  */
-const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 2.0;
+const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
 
+/*****************************************************************************
+ *********************** END OF CONFIGURATION SETTINGS ***********************
+ *****************************************************************************/
 
+var BACKGROUND = [0, 0, 0];
+var DOT_COLOR = [255, 255, 255, 1.0];
+var TRAIL_OPACITY = 1.0;
+var TRAIL_COLOR = [88, 0, 133, TRAIL_OPACITY];
+var TRAIL_SATURATION_MIN = 100.0;
+var TRAIL_SATURATION_MAX = 100.0;
+var TRAIL_LUMINOSITY_MIN = 25.0;
+var TRAIL_LUMINOSITY_MAX = 75.0;
+var HSL_DRIFT = 0.1;
+var MIN_SPEED = 0.1;
+var MAX_SPEED = 2.0;
+var MIN_ACCEL = 0.01;
+var MAX_ACCEL = 0.50;
+var MAX_DOTS = 250;
+var DOT_RATE = 2;
+var FADE_OPACITY = 0.2;
+var FPS = 30;
+var FRAME_INTERVAL = 1000 / FPS;
+var FRAME_INTERVAL_ = () => 1000 / FPS;
+var LINE_WIDTH_MIN = 0.5;
+var LINE_WIDTH_MAX = 3.0;
+var LUMINOSITY_OSCILLATION_PERIOD_MIN = FPS * 0.5;
+var LUMINOSITY_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
+var LUMINOSITY_OSCILLATION_PERIOD_MAX = FPS * 1;
+var LUMINOSITY_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
+var LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
+var LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
+var LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
+var LINE_WIDTH_OSCILLATION_PERIOD_MIN = FPS * 0.5;
+var LINE_WIDTH_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
+var LINE_WIDTH_OSCILLATION_PERIOD_MAX = FPS * 1;
+var LINE_WIDTH_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
+var LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
+var LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
+var LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
+var TRAIL_HSL_START = 180.0;
+var TRAIL_HSL_END = 240.0;
+var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
+var ani;
 
-
-/*********************************
- * END OF CONFIGURATION SETTINGS *
- *********************************/
-
-
-
-
-/**
- * A variable that holds a reference to the HTML canvas element
- * (selector: "#canvas").
- * This value is filled in when the page finishes loading.
- * @var {HTMLCanvasElement}
- * @readonly
- */
-var canvas;
-
-/**
- * A variable that holds a reference to the 2D Rendering context of the
- * {@link canvas} element. This context provides methods and properties that
- * are used to draw to the {@link canvas}.
- * This value is filled in when the page finishes loading.
- * @var {CanvasRenderingContext2D}
- * @readonly
- */
-var context;
-
-/**
- * A variable that holds the last known
- * (or initial if {@link RESIZE_CANVAS_ON_WINDOW_RESIZE} is false)
- * size of the viewport window. The size of the {@link canvas} is set to the
- * [width]{@link DOMRect.width} and [height]{@link DOMRect.height} properties of
- * this variable.
- * @var {DOMRect}
- */
-var size;
-
-/**
- * A variable that contains a list of all the currently active dots being
- * animated. The maximum number of elements in this array is {@link MAX_DOTS}.
- * @see {@link Dot)
- * @var {Dot[]}
- */
-var dots = [];
-
-/**
- * A variable that stores the total number of frames that have been rendered
- * already. This value is used when computing the value of the sinusoidal
- * functions
- * @var {number}
- */
-var FRAME_COUNT = 0;
-var START_TIME;
-
-
-/**
- * A variable that stores the multiplier as determined by the last audio peak
- * received by the audio peak server. This value is used to modify the
- * frequency and occurrences of various pieces of the animation based on the
- * audio level of the computer.
- * @var {number}
- */
-var AUDIO_PEAK_MULTIPLIER = 0.5;
-
-/**
- * A variable that stores whether or not the application is connected to an
- * audio peaks server.
- * @var {boolean}
- */
-var AUDIO_PEAKS_CONNECTED = false;
-
-//Asin(B(x-C))+D
-//Amplitude, Frequency, H-Shift, V-Shift
-
-
-
-
-var STATUS_INFO_DISPLAYED = false;
-var VERBOSE_INFO_DISPLAYED = false;
-
-
-function upFPS() {
-    updateFPS(FPS + 5);
-    console.info(`Now targeting ${FPS} frames per second.`);
-}
-function downFPS() {
-    var old_fps = FPS;
-    updateFPS(Math.max(FPS - 5,5));
-    if (old_fps !== FPS) {
-        console.info(`Now targeting ${FPS} frames per second.`);
-    } else {
-        console.info(`Cannot reduce the framerate any lower than five frames per second.`);
-    }
-}
-
-var keybinds = [
-//Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp, PageDown
-//Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause, AudioVolumeMute,
-//AudioVolumeDown, AudioVolumeUp, ContextMenu
-    {
-        "key":"e",
-        "conditions":[{"ctrl": false}],
-        "handler": function binding_refresh() {
-            window.location.reload();
+class StatusElement {
+    constructor(tbody, statrow) {
+        this.__original = statrow;
+        if (statrow.show !== undefined && !statrow.show) {
+            return;
         }
-    },
-    {
-        "key":"s",
-        "conditions":[{"ctrl": false}],
-        "handler": function binding_status() {
-            STATUS_INFO_DISPLAYED = !STATUS_INFO_DISPLAYED;
-            if (STATUS_INFO_DISPLAYED) {
-                document.getElementById("status-info").style = "";
-                console.info("Turned on the status info overlay.");
-                window.statusInterval = window.setInterval(updateStatusInfo,10);
+        var trow = tbody.insertRow(-1);
+        trow.classList.add("status-info-row");
+        var c = trow.insertCell(-1);
+        c.textContent = statrow.name;
+        var type = statrow.type.split(/\./g).map((t) => {
+            return t.split(/,/g);
+        });
+        this.pType = type;
+        if (statrow.type !== "header") {
+            c = trow.insertCell(-1);
+            this.widget = c;
+            this.owner = c;
+            if (type[0][0] === "range") {
+                this.craftStatusElement(type.slice(1)[0][0], 0);
+                c = document.createElement("SPAN");
+                c.classList.add("range-to");
+                c.appendChild(document.createTextNode(this.sep));
+                this.owner.appendChild(c);
+                this.craftStatusElement(type.slice(1)[0][0], 1);
             } else {
-                document.getElementById("status-info").style.display = "none";
-                console.info("Turned off the status info overlay.");
-                if (window.statusInterval) {
-                    window.clearInterval(window.statusInterval,10);
-                    window.statusInterval = undefined;
-                }
+                this.craftStatusElement(type[0][0], 0);
             }
+        } else {
+            trow.classList.add("header");
+            c.setAttribute("colspan", "2");
         }
-    },
-    {
-        "key":"v",
-        "conditions":[{"ctrl": false}],
-        "handler": function binding_verbose() {
-            VERBOSE_INFO_DISPLAYED = !VERBOSE_INFO_DISPLAYED;
-            console.info(`Now ${VERBOSE_INFO_DISPLAYED?"displaying":"hiding"} verbose information on the status info overlay.`);
-        }
-    },
-    {
-        "key":"d",
-        "conditions":[{"ctrl": false}],
-        "handler": function binding_count() {
-            console.info(`${dots.length} active dot(s).`);
-        }
-    },
-    {
-        "key":"r",
-        "conditions":[{"ctrl": false}],
-        "handler": function binding_reset() {
-            START_TIME = (new Date()).getTime();
-            dots = [];
-            FRAME_COUNT = 0;
-            TRAIL_HSL_END = DEFAULT_TRAIL_HSL_END;
-            TRAIL_HSL_START = DEFAULT_TRAIL_HSL_START;
-            //Clear all prior paths.
-            context.beginPath();
-
-            //Set the fill and stroke styles to the background color at full opacity.
-            context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
-            context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
-
-            //Fill the entire canvas with the current fill style.
-            context.fillRect(0,0,Math.round(size.width),Math.round(size.height));
-            
-        }
-    },
-    {
-        "key":"h",
-        "conditions":[{"ctrl": false}],
-        "handler": function binding_help() {
-            console.clear();
-            console.info("KEYBINDINGS:");
-            console.info("r(e)fresh -- Refreshes the page.");
-            console.info("(h)elp    -- Displays this mesage.");
-            console.info("(s)tatus  -- Toggles the visibility of the status info overlay.");
-            console.info("(v)erbose -- Toggles the verbosity of the status info overlay.");
-            console.info("(r)eset   -- Resets the animation.");
-            console.info("(+)       -- Increase the FPS by five frames per second.");
-            console.info("(-)       -- Decrease the FPS by five frames per second.");
-        }
-    },
-    {
-        "key":"+",
-        "conditions":[{"ctrl": false}],
-        "handler": upFPS
-    },
-    {
-        "key":"-",
-        "conditions":[{"ctrl": false}],
-        "handler": downFPS
-    },
-    {
-        "key":"_",
-        "conditions":[{"ctrl": false, "shift": true}],
-        "handler": downFPS
-    },
-    {
-        "key":"=",
-        "conditions":[{"ctrl": false, "shift": false}],
-        "handler": upFPS
     }
-];
-
-
-function updateFPS(_fps) {
-    FPS = _fps;
-    FRAME_INTERVAL = FRAME_INTERVAL_();
-    LUMINOSITY_OSCILLATION_PERIOD_MAX = LUMINOSITY_OSCILLATION_PERIOD_MAX_();
-    LUMINOSITY_OSCILLATION_PERIOD_MIN = LUMINOSITY_OSCILLATION_PERIOD_MIN_();
-    LINE_WIDTH_OSCILLATION_PERIOD_MAX = LINE_WIDTH_OSCILLATION_PERIOD_MAX_();
-    LINE_WIDTH_OSCILLATION_PERIOD_MIN = LINE_WIDTH_OSCILLATION_PERIOD_MIN_();
-}
-
-/**
- * Generates a random floating-point number between "min" and "max".
- * If you need an integer instead, call {@link Math.floor} on the result of this
- * function.
- * @function
- * @param {number} min - The inclusive lower bound of the random number.
- * @param {number} max - The exclusive upper bound of the random number.
- * @returns {number} The pseudorandom number that was generated.
- */
-function rand(min, max) {
-    return (Math.random() * (max - min)) + min;
-}
-
-/**
- * Determines the frequency of a sinusoidal equation based on a given period.
- * @see {@link Sinusoid}
- * @function
- * @param {number} period - The period of the sinusoidal function.
- * @returns {number} The frequency of the sinusoidal function.
- */
-function getB(period) {
-    return (2 * Math.PI) / period;
-}
-
-/**
- * Calculates the value of a sinusoid equation given the four possible
- * transformations that can be applied to it. (see {@link Sinusoid} for more
- * details about each parameter.)
- * The function uses the current [frame count]{@link FRAME_COUNT} as the value
- * of the "x" parameter.
- * @see {@link Sinusoid}
- * @function
- * @param {number} a - The amplitude of the function.
- * @param {number} b - The frequency of the function.
- * @param {number} c - The phase-shift of the function.
- * @param {number} d - The vertical-shift of the function.
- * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
- * where x is equal to the the current [frame count]{@link FRAME_COUNT}
- */
-function sinusoidal(a, b, c, d) {
-    return a * Math.sin(b * (FRAME_COUNT - c)) + d;
-}
-/**
- * Calculates the value of a sinusoid equation given the four possible
- * transformations that can be applied to it. (see {@link Sinusoid} for more
- * details about each parameter.)
- * The function uses the current [frame count]{@link FRAME_COUNT} as the value
- * of the "x" parameter.
- * @see {@link Sinusoid}
- * @function
- * @param {number} a - The amplitude of the function.
- * @param {number} b - The frequency of the function.
- * @param {number} c - The phase-shift of the function.
- * @param {number} d - The vertical-shift of the function.
- * @param {number} x - The x-value.
- * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
- * where x is equal to the the current [frame count]{@link FRAME_COUNT}
- */
-function sinusoidal2(a, b, c, d, x) {
-    return a * Math.sin(b * (x - c)) + d;
-}
-
-function animation() {
-    try {
-        animationB();
-    } catch(e) {
-        console.error(e);
+    get name() {
+        return this.__original.name;
     }
-    //set a timer to run this same function, when we need to animate the next
-    //frame.
-    window.setTimeout(animation,FRAME_INTERVAL);
-}
-/**
- * A function that represents the computation required to complete a single
- * frame in the animation.
- * @function
- */
-function animationB() {
-    if (!START_TIME) {
-        START_TIME = (new Date()).getTime();
+    get type() {
+        return this.__original.type;
     }
-    //Increment the frame counter.
-    FRAME_COUNT += 1;
-
-    //Erase all previously recorded paths.
-    context.beginPath();
-
-    //Set the fill style and stroke style to the background color, at the
-    //fade opacity
-    context.fillStyle = `rgba(${BACKGROUND.join(",")},${FADE_OPACITY})`;
-    context.strokeStyle = `rgba(${BACKGROUND.join(",")},${FADE_OPACITY})`;
-
-    //Move the path to the origin of the canvas, (0,0), or the upper left corner
-    //of the canvas.
-    context.moveTo(0,0);
-
-    //Create a rectangle, offset by (0,0), the size of the entire canvas.
-    context.rect(0,0,Math.round(size.width),Math.round(size.height));
-
-    //Fill the current path.
-    context.fill();
-
-
-    //Add new dots to the animation, given we are able to.
-    var i;
-    for (i = 0; i < DOT_RATE * AUDIO_PEAK_MULTIPLIER; i += 1) {
-        if (dots.length >= MAX_DOTS) {
-            //We currently have the maximum number of dots allowed,
-            //don't add any more.
+    get unit() {
+        return this.__original.unit;
+    }
+    get value() {
+        var fn = this.__original.value;
+        if (fn instanceof Function) {
+            return (this.pType[0][0] !== "range")
+                ? [fn()]
+                : fn();
+        }
+        return undefined;
+    }
+    get format() {
+        var fn = this.__original.format;
+        if (fn instanceof Function) {
+            return fn();
+        }
+        return undefined;
+    }
+    get sep() {
+        return this.__original.sep || " to ";
+    }
+    get visible() {
+        return this.__original.show === undefined || this.__original.show;
+    }
+    __updateInternal(types, parameter) {
+        var value = this.value[parameter];
+        var widget = this[`param${parameter}`];
+        var main_type = types[0][0];
+        var sub_types = types.slice(1);
+        var sub_param = ((sub_types[0] || [])[parameter] || (sub_types[0] || [])[0]);
+        switch (main_type) {
+        case "color":
+            switch (sub_param) {
+            case "rgb":
+                widget.style.backgroundColor = `rgb(${value.join(",")})`;
+                widget.title = value.join(",");
+                break;
+            case "rgba":
+                widget.style.backgroundColor = `rgba(${value.join(",")})`;
+                widget.title = value.join(",");
+                break;
+            case "hsl":
+                widget.style.backgroundColor = `hsl(${value.join(",")})`;
+                widget.title = value.join(",");
+                break;
+            case "hsla":
+                widget.style.backgroundColor = `hsla(${value.join(",")})`;
+                widget.title = value.join(",");
+                break;
+            case "red":
+                widget.style.backgroundColor = `rgb(${value},0,0)`;
+                widget.title = value;
+                break;
+            case "blue":
+                widget.style.backgroundColor = `rgb(0,0,${value})`;
+                widget.title = value;
+                break;
+            case "green":
+                widget.style.backgroundColor = `rgb(0,${value},0)`;
+                widget.title = value;
+                break;
+            case "hue":
+                widget.style.backgroundColor = `hsl(${value},100%,50%)`;
+                widget.title = value;
+                break;
+            case "sat":
+                widget.style.backgroundColor = `hsl(0,${value}%,50%)`;
+                widget.title = value + "%";
+                break;
+            case "luma":
+                widget.style.backgroundColor = `hsl(0,100%,${value}%)`;
+                widget.title = value + "%";
+                break;
+            case "alpha":
+                widget.style.backgroundColor = `rgba(255,0,0,${value})`;
+                widget.title = value;
+                break;
+            }
+            break;
+        case "string":
+            widget.textContent = value;
+            break;
+        case "number":
+            value = parseFloat(value);
+            switch (sub_param) {
+            case "integer":
+                widget.textContent = Math.round(value);
+                break;
+            case "decimal":
+                widget.textContent = value;
+                break;
+            case "percentage":
+                widget.textContent = `${(Math.round(value * 100 * 100) / 100)}%`;
+                break;
+            }
+            break;
+        case "flag":
+            widget.textContent = value ? "YES" : "NO";
+            break;
+        case "custom":
+            widget.textContent = value;
             break;
         }
-        //Add another dot.
-        newDot();
     }
-
-    //Move all dots.
-    moveDots();
-}
-
-
-/**
- * A function that loads the audio peaks subsystem to enable dynamic animations
- * that respond to the audio levels on your computer.
- * @function
- */
-function loadPeaksApp() {
-    //peaks socket
-    var socket;
-    function connect() {
-        var reconnect = false;
-        AUDIO_PEAKS_CONNECTED = false;
-        socket = new WebSocket(`ws${PEAKS_APP_SECURE ? "s" : ""}://` +
-            `${PEAKS_APP_DOMAIN}:${PEAKS_APP_PORT}/AudioPeaks`);
-        socket.addEventListener("open", function () {
-            console.info("Connected to the Audio peaks sever successfully.");
-        });
-        socket.addEventListener("error", function (e) {
-            console.error("Failed to connect to the audio peaks server: ", e);
-            if (!reconnect) {
-                console.info(`Trying again in ${PEAKS_APP_ERROR_RECONNECT_WAIT / 1000} seconds.`);
-                window.setTimeout(connect, PEAKS_APP_ERROR_RECONNECT_WAIT);
-                reconnect = true;
-            }
-            AUDIO_PEAKS_CONNECTED = false;
-            AUDIO_PEAK_MULTIPLIER = 1;
-        });
-        socket.addEventListener("close", function () {
-            console.info("Lost the connection to the audio peaks server.");
-            if (!reconnect) {
-                console.info(`Trying again in ${PEAKS_APP_RECONNECT_WAIT / 1000} seconds.`);
-                window.setTimeout(connect, PEAKS_APP_RECONNECT_WAIT);
-                reconnect = true;
-            }
-            AUDIO_PEAKS_CONNECTED = false;
-            AUDIO_PEAK_MULTIPLIER = 1;
-        });
-        socket.addEventListener("message", function (e) {
-            var message = JSON.parse(e.data);
-            switch (message.status) {
-            case "Success":
-                AUDIO_PEAKS_CONNECTED = true;
-                var peak = message.data.max;
-                if (peak === 0.5) {
-                    AUDIO_PEAK_MULTIPLIER = 1;
-                } else if (peak < 0.5) {
-                    AUDIO_PEAK_MULTIPLIER = 1 - ((0.5 - peak) * 2 * (1 -
-                        AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER));
-                } else { // > 0.5
-                    AUDIO_PEAK_MULTIPLIER = 1 + ((peak - 0.5) * 2 * (
-                        AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER - 1));
-                }
-                break;
-            case "Error":
-                console.error("Audio peaks server encountered an error: ", message.data);
-                break;
-            }
-            /**
-             * The audio peaks message data structure. This is the format the
-             * audio peaks server sends data.
-             * @typedef {Object} AudioPeakMessage
-             * @property {string} status - 
-             *     Indicates the status of the message. See
-             *     {@link AudioPeakMessageStatus}, possible values of this
-             *     property.
-             * @property {AudioPeaks|Object} data -
-             *     The data of the message. This will either be a
-             *     {@link AudioPeaks} object if {@link AudioPeakMessage#status}
-             *     is "Success", or a C# Exception object if it is "Error".
-             */
-            /**
-             * The audio peaks message data structure. This is the format the
-             * audio peaks server sends data. There are three defined statuses:
-             *   Success - THe message contains "valid" audio data.
-             *   Info - Currently unused.
-             *   Error - The server encountered an error.
-             * @typedef {string} AudioPeakMessageStatus
-             */
-            /**
-             * The raw peak data from the WinAudioLevels.exe server.
-             * @typedef {Object} AudioPeaks
-             * @property {Number[]} peaks -
-             *     The collection of audio peaks detected. Each element is the
-             *     detected peak of a separate audio device.
-             * @property {Number} max - The largest audio peak detected.
-             * @property {Number} min - The smallest audio peak detected.
-             * @property {Number} avg -
-             *     The average of all the audio peaks detected.
-             */
-        });
-    }
-    //connect
-    connect();
-}
-
-/**
- * Represents the components that make up the internal state of a dot.
- * most of the property names are heavily abbreviated to make other pieces of
- * code more readable, at the expense of understanding what each property means.
- * Refer to the {@link newDot} function for information on the default values
- * of the following properties.
- * @typedef {Object} Dot
- * @property {number} x - The current x coordinate of the dot.
- * @property {number} y - The current y coordinate of the dot.
- * @property {number} s - The speed of the dot, in pixels per frame.
- * @property {number} a - The acceleration of the dot, in pixels per frame.
- * @property {number} c - The average hue of the dot.
- * @property {number} l - The average luminosity of the dot.
- * @property {number} sa - The average saturation of the dot.
- * @property {ColorRGB} c2 - The original RGB color of the dot, before the HSL
- * change. This property is unused. It's included for compatibility.
- * @property {number} f - The frame that the dot was created on, this is used
- * to phase shift the sinusoid function so that the oscillation starts on the
- * frame the dot was created, instead of where the oscillation would be at if
- * the dot was created on the first frame
- * @property {number} pa - The amplitude at which the luminosity of the dot
- * fluctuates.
- * @property {number} pb - The frequency at which the luminosity of the dot
- * fluctuates.
- * @property {number} pc - The phase-shift at which the luminosity of the dot
- * fluctuates.
- * @property {number} bpa - The amplitude at which the line width of the dot
- * fluctuates.
- * @property {number} bpb - The frequency at which the line width of the dot
- * fluctuates.
- * @property {number} bpc - The phase-shift at which the line width of the dot
- * fluctuates.
- * @property {number} w - The thickness of the trail left by the dot.
- * @see {@link Hue}
- * @see {@link Luminosity}
- * @see {@link Saturation}
- * @see {@link Sinusoid}
- * @see {@link newDot}
- */
-/**
- * A setup function, called when the page loads. It sets up the initial values
- * of the {@link canvas}, {@link context}, and {@link size} variables; sets up
- * the canvas, and begins the animation.
- * @function
- */
-function start() {
-    document.body.addEventListener("mousemove",function() {
-        document.body.style.cursor = "default";
-        if (window.hideint !== undefined) {
-            window.clearInterval(window.hideint);
-            window.hideint = undefined;
+    craftStatusElement(type, parameter) {
+        var widget = document.createElement("DIV");
+        switch (type) {
+        case "color":
+            widget.classList.add("status-widget");
+            widget.classList.add("color");
+            break;
+        case "string":
+        case "number":
+        case "flag":
+            widget = document.createElement("SPAN");
+            break;
         }
-        window.hideint = window.setTimeout(function() {
-            window.hideint = undefined;
-            document.body.style.cursor = "none";
-        },1000);
-    });
-    //check if peaks app is enabled for more dynamic animations.
-    if (PEAKS_APP_ENABLED) {
-        try {
-            loadPeaksApp();
-        } catch (e) {
-            console.log("Failed to load peaks app: ", e);
+        this.owner.appendChild(widget);
+        this[`param${parameter}`] = widget;
+        var units = (this.__original.unit instanceof Array)
+            ? this.__original.unit[parameter]
+            : this.__original.unit;
+        if (units) {
+            widget = document.createElement("DIV");
+            this.owner.appendChild(widget);
+            widget.classList.add("status-widget");
+            widget.classList.add("units");
+            widget.innerHTML = "&nbsp;";
+            widget.textContent += units;
         }
+        return;
     }
-    //Retrieve the CANVAS element
-    canvas = document.querySelector("canvas");
 
-    //Get a 2D drawing context for the canvas
-    context = canvas.getContext("2d");
-
-    //Get the size of the canvas, which should be stretched to the full size of
-    //the window.
-    size = canvas.getBoundingClientRect();
-
-    //Set the width and height of the canvas internally, so that the canvas has
-    //a 1 to 1 ratio between itself and the screen.
-    canvas.setAttribute("width",Math.round(size.width));
-    canvas.setAttribute("height",Math.round(size.height));
-
-    //Clear all prior paths.
-    context.beginPath();
-
-    //Set the fill and stroke styles to the background color at full opacity.
-    context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
-    context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
-
-    //Fill the entire canvas with the current fill style.
-    context.fillRect(0,0,Math.round(size.width),Math.round(size.height));
-
-    //Create a timer to start the animation.
-    window.setTimeout(animation,FRAME_INTERVAL);
-
-    //hook into the resize event.
-    window.addEventListener("resize",resizeHandler);
-
-    loadStatusInfo();
-}
-
-/**
- * An event handler used to handle the {@link Window.onresize} event.
- * @function
- * @listens event:resize
- */
-function resizeHandler() {
-    //Initialize variables.
-    var i;
-    var osize = size;
-
-    //verify that resize is actually enabled
-    if (RESIZE_CANVAS_ON_WINDOW_RESIZE) {
-        //Get the size of the canvas, which should be stretched to the full size
-        //of the window.
-        size = canvas.getBoundingClientRect();
-
-        //Set the width and height of the canvas internally, so that the canvas
-        //has a 1 to 1 ratio between itself and the screen.
-        canvas.setAttribute("width",Math.round(size.width));
-        canvas.setAttribute("height",Math.round(size.height));
-
-        //check to see if the canvas was made smaller, if not, don't check.
-        if(osize.width > size.width) {
-            //check all dots to see if they're still in bounds.
-            for (i = 0; i < dots.length; i += 1) {
-                if (dots[i].x > size.width) {
-                    //dot is out of bounds, remove it.
-                    dots.splice(i,1);
-                    i -= 1;
-                }
+    update() {
+        if (!this.visible) {
+            return;
+        }
+        if (this.type !== "header") {
+            if (this.pType[0][0] !== "range") {
+                this.__updateInternal(this.pType, 0);
+            } else {
+                this.__updateInternal(this.pType.slice(1), 0);
+                this.__updateInternal(this.pType.slice(1), 1);
             }
         }
     }
 }
 
-/**
- * A helper function used to move all the dots.
- * @function
- */
-function moveDots() {
-    //Initialize all variables used in the for loop below to undefined.
-    //Initializing them outside of the loop is beneficial as it prevents
-    //the javascript engine from reallocating each variable every iteration
-    //of the for loop. This reduces the amount of data needed in garbage
-    //collection cycles.
-    var i;
-    var d; 
-    var np;
-    var nbp;
-    var l;
-    var w;
-
-    //Iterate over every dot.
-    for (i = 0; i < dots.length; i += 1) {
-        //get the current dot.
-        //JavaScript objects are always passed **by value**
-        //meaning that even if we modify the "d" variable, it will still
-        //affect "dots[i]", ie: d.y = 1 is the same as dots[i].y = 1.
-        d = dots[i];
-        //sin x = 2pi    b/2pi=period
-        d.pfx = (d.pfx + 1) % d.pp;
-        d.bpfx = (d.bpfx + 1) % d.bpp;
-
-        //Skip the first frame of the animation to retrieve the second of
-        //three points necessary for the animation
-        if (d.py === undefined) {
-            d.px = d.x;
-            d.py = d.y;
-            continue;
+class StatusElementCollection {
+    constructor(output, rows) {
+        console.info("creating rows!");
+        var nrows = [];
+        rows.forEach((row) => {
+            nrows.push(new StatusElement(output, row));
+        });
+        this.rows = nrows;
+    }
+    update() {
+        if (!ani.statusEnabled) {
+            return; //don't update, save the frames; kill the animals.
         }
+        this.rows.forEach((row) => {
+            row.update();
+        });
+    }
+}
 
-        //Skip the second frame of the animation to retrieve the third of
-        //three points necessary for the animation
-        if (d.ppy === undefined) {
-            d.ppx = d.px;
-            d.ppy = d.py;
-            d.px = d.x;
-            d.py = d.y
-            continue;
+class Dot {
+    constructor(ani) {
+        var vpb = Dot.rand(LUMINOSITY_OSCILLATION_PERIOD_MIN, LUMINOSITY_OSCILLATION_PERIOD_MAX);
+        var vbpb = Dot.rand(LINE_WIDTH_OSCILLATION_PERIOD_MIN, LINE_WIDTH_OSCILLATION_PERIOD_MAX);
+        //See the typedef of Dot for explanations of the following.
+
+        //X-Coord: a random value between 0 and the size of the canvas.
+        //Y-Coord: the very bottom of the canvas.
+        //Speed: A random value between MIN/MAX SPEED.
+        //Acceleration: A random value between MIN/MAX ACCELERATION.
+        //Hue: A random value between TRAIL HSL START/END.
+        //Luminosity: A random value between TRAIL LUMINOSITY START/END.
+        //Saturation: A random value between TRAIL SATURATION START/END.
+        //Legacy RGB color, deprecated in favor of HSL's greater control of color.
+        //Creation Frame: current frame count.
+        //Luminosity Oscillation Amplitude: random value in between MIN/MAX.
+        //Luminosity Oscillation Frequency: the frequency when the period is a random value in between MIN/MAX.
+        //Luminosity Oscillation Period
+        //Luminosity Original Oscillation Period
+        //Luminosity Oscillation Phase Shift: creation frame number + PHASE SHIFT
+        //Line Width Oscillation Amplitude: random value in between MIN/MAX.
+        //Line Width Oscillation Frequency: the frequency when the period is a random value in between MIN/MAX.
+        //Line Width Oscillation Period
+        //Line Width Original Oscillation Period
+        //Line Width Oscillation Phase Shift: creation frame number + PHASE SHIFT
+        //Line Width: a random value between MIN/MAX.
+        //Sinusoidal frame helper value.
+        //Sinusoidal frame helper value.
+        //Old AUDIO_PEAK_MULTIPLIER.
+        this.x = Dot.rand(0, ani.size.width);
+        this.y = ani.size.height;
+        this.s = Dot.rand(MIN_SPEED, MAX_SPEED);
+        this.a = Dot.rand(MIN_ACCEL, MAX_ACCEL);
+        this.c = Dot.rand(TRAIL_HSL_START, TRAIL_HSL_END);
+        this.l = Dot.rand(TRAIL_LUMINOSITY_MIN, TRAIL_LUMINOSITY_MAX);
+        this.sa = Dot.rand(TRAIL_SATURATION_MIN, TRAIL_SATURATION_MAX);
+        this.c2 = [Dot.randInt(0, 255), Dot.randInt(0, 255), Dot.randInt(0, 255)];
+        this.f = ani.frameCount;
+        this.pa = Dot.rand(LUMINOSITY_OSCILLATION_AMPLITUDE_MIN, LUMINOSITY_OSCILLATION_AMPLITUDE_MAX);
+        this.pb = Dot.getB(vpb);
+        this.pp = vpb;
+        this.opp = vpb;
+        this.pc = ani.frameCount + LUMINOSITY_OSCILLATION_PHASE_SHIFT;
+        this.bpa = Dot.rand(LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN, LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX);
+        this.bpb = Dot.getB(vbpb);
+        this.bpp = vbpb;
+        this.obpp = vbpb;
+        this.bpc = ani.frameCount + LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
+        this.w = Dot.rand(LINE_WIDTH_MIN, LINE_WIDTH_MAX);
+        this.pfx = ani.frameCount;
+        this.bpfx = ani.frameCount;
+        this.oapm = 1;
+        this.py = null;
+        this.ppy = null;
+        this.px = null;
+        this.ppx = null;
+        Dot.UpdateTrailDrift();
+    }
+    //getter
+    get blah() {
+        return "blah";
+    }
+
+    shiftRefPoints() {
+        if (this.py === null) {
+            this.px = this.x;
+            this.py = this.y;
+            return;
         }
-        // 3 2 p 1 n
-        // 1 1 1 1 2 =>
-        // 1 1 2 2 3 =>
-        // 1 2 3 3 4
-        
-        //Determine the current effective luminosity of the dot based on the
-        //current frame count
-        l = sinusoidal(d.pa,d.pb,d.pc,d.l);
-        //Determine the current effective line width of the dot based on the
-        //current frame count
-        w = sinusoidal(d.bpa,d.bpb,d.bpc,d.w);
-
-        //Set the line width
-        context.lineWidth = w;
-
-        //Clear all preivous paths
-        context.beginPath();
-
-        //Set the stroke and fill styles to the hue, saturation, luminosity,
-        //and opacity of the current dot.
-        context.strokeStyle = `hsla(${d.c},${d.sa}%,${l}%,${TRAIL_OPACITY})`;
-        context.fillStyle = `hsla(${d.c},${d.sa}%,${l}%,${TRAIL_OPACITY})`;
-
-        //Move to the oldest of the three reference points of the dot.
-        context.moveTo(Math.round(d.ppx),Math.round(d.ppy));
-        //Make a line to the second oldest of the three reference points of the
-        //dot.
-        context.lineTo(Math.round(d.px),Math.round(d.py));
-        //Draw the line.
-        context.stroke();
-
-        //sets the stroke and fill styles to the lead color of the dot.
-        //context.strokeStyle = `rgba(${DOT_COLOR.join(",")})`;
-        //context.fillStyle = `rgba(${DOT_COLOR.join(",")})`;
-
-        //Make a line to the first (newest) of the three reference points of the
-        //dot
-        context.lineTo(Math.round(d.x),Math.round(d.y));
-        //Draw the line.
-        context.stroke();
-
-        //Shift the second reference point into the third slot.
-        d.ppx = d.px;
-        d.ppy = d.py;
-        //Shift the first reference point into the second slot.
-        d.px = d.x;
-        d.py = d.y;
-        
-        //Move the dot upwards based on the dot's speed.
-        d.y -= d.s;
-        //Increase the dot's speed based on its acceleration.
-        d.s += d.a * AUDIO_PEAK_MULTIPLIER;
-        //that's that...
-
-        /**
-         * A helper function used to get the new phase shift when changing the
-         * oscillation speed of the dots.
-         * See the comments below for more
-         * 
-         *
-         * To modify the trajectory of a sine wave, the following must occur:
-         *   - We must know the old period (eg: 1)
-         *   - We must know the new period (eg: 1.5)
-         *   - We must know the old phase shift (eg: 0)
-         *     - The phase shift is what will allow us to alter the frequency
-         *       of the sinusoid without altering the current position along
-         *       it. IE: it means that the last value was 1, it'll be 1--even
-         *       after the change in period.
-         *       This is necessary because what we are doing is effectively
-         *       shrinking the graph horizontally. Our position along the
-         *       X-axis isn't going to shrink with us, so, we shift the
-         *       graph to compensate for that.
-         *
-         * The calculation is:
-         *     new_phase_shift = ((old_period - new_period)
-         *         * (((frame - old_phase_shift) % old_period) / old_period)
-         *         + old_phase_shift) % new_period
-         * 2.5   2.5   5
-         * old_period = 15
-         * new_period = 20
-         * old_phase_shift = 2.5
-         * frame = 17.5
-         *
-         * Eg: if we have a sinusoid that repeats every 20 frames, that means
-         * that the period of that sinusoid is 20.
-         * Say we want to speed it up by 50%. How do we do that?
-         * Well, we know that to speed it up by 75% the new period has to be 15
-         * frames. If we assume that we weren't shifting the animation at all
-         * before this, that means the previous phase shift was 0 frames.
-         * So, if we are currently on frame 10, that means that the value of
-         * the sinusoid is 0, with the graph curving positive for 5 frames,
-         * then back to zero for another five frames before repeating from the
-         * start.
-         * IE:
-         *              _______
-         * |           /       \|
-         * |\---------/---------| (repeat) (dashed line is x-axis)
-         * | \_______/          |
-         *  ^ frame 0      ^ frame 15
-         *       ^ frame 5      ^ frame 20 (repeat)
-         *            ^ frame 10
-         * Without phase shifting, the new graph would look like this:
-         *           _____          _____
-         * |        /     \|       /     \|
-         * |\------/-------\------/-------| (repeat) (dashed line is x-axis)
-         * | \____/        |\____/        |
-         *  ^ frame 0      ^ frame 15
-         *       ^ frame 5      ^ frame 20 (repeat)
-         *            ^ frame 10
-         *
-         * Now, frame 0 suddenly goes from a value of 0 to nearing 1.
-         * If we don't rectify this, the animation will appear jittery as the
-         * change in function will cause drastic and frequent alterations.
-         * To fix this, we just need to shift the graph over until frame 10 has
-         * the right value and the right direction. IE:
-         *
-         *  __          _____          _____
-         * |  \|       /     \|       /     \|
-         * |---\------/-------\------/-------| (repeat) (dashed line is x-axis)
-         * |   |\____/        |\____/        |
-         *  ^ frame 0      ^ frame 15
-         *       ^ frame 5      ^ frame 20 (repeat)
-         *            ^ frame 10
-         * So: if the old period was 20, the new one is 15, and phase shift was 0
-         * shift it by "(20 - 15) + 0" = "5" (it's actually 2.5...?)
-         *
-         * so, from 20 ==> 15 (frame 10), it's 2.5 (frame 10 is 50% to looping
-         *    so 5 * 50% = 2.5)
-         * from 20 ==> 15 ==> 20 (frame 17.5), it's -2.5 (that's at 0% to looping, so)
-         *
-         *  +   2.5,   2.5  + -12.5, -12.5 (or -12.5) (because halfway) (frame 10 0.5) 20>15 = 5
-         *  + - 5.0, - 2.5  +  15.0,   2.5 (or +15) (frame 17.5 0.0/1.0) 15>20
-         *  +   7.5,   5.0  + - 7.5, - 5.0 (or -7.5) (frame 27.5 0.5) 20>15   17.5%15 =2.5
-         *  + -10.0, -10.0           (or +10) (frame 35 0.0/1.0) 15>20
-         *
-         *  12.5 17.5 25.0 35
-         *
-         *  if we mod by new period then subtract the phase shift
-         * @function
-         */
-        function getNewPhaseShift(oldPeriod, newPeriod, oldPhaseShift, x) {
-            return ((oldPeriod - newPeriod) * (
-                ((x - oldPhaseShift) % oldPeriod) / oldPeriod)
-                + oldPhaseShift) % newPeriod;
-            //fuck this calculation...
-        }
-        if (AUDIO_PEAK_MULTIPLIER !== d.oapm) {
-            np = (1 / AUDIO_PEAK_MULTIPLIER) * d.opp;
-            nbp = (1 / AUDIO_PEAK_MULTIPLIER) * d.obpp;
-            //pfx
-            d.pc = getNewPhaseShift(d.opp, np, d.pc, d.pfx);
-            d.pb = getB(np);
-            d.pp = np;
-            d.pc = getNewPhaseShift(d.obpp, nbp, d.bpc, d.bpfx);
-            d.pb = getB(np);
-            d.pp = np;
+        this.ppx = this.px;
+        this.ppy = this.py;
+        this.px = this.x;
+        this.py = this.y;
+    }
+    updatePhaseShifts() {
+        if (ani.audioPeakMultiplier !== this.oapm) {
+            var np = (1 / ani.audioPeakMultiplier) * this.opp;
+            var nbp = (1 / ani.audioPeakMultiplier) * this.obpp;
+            this.pc = Dot.getNewPhaseShift(this.opp, np, this.pc, this.pfx);
+            this.pb = Dot.getB(np);
+            this.pp = np;
+            this.bpc = Dot.getNewPhaseShift(this.obpp, nbp, this.bpc, this.bpfx);
+            this.bpb = Dot.getB(nbp);
+            this.bpp = nbp;
         }
         //we need to...
         //keep the original period and the last period/phaseshift
         //new period is the multiplier*original
-
-
-
-        //Remove the current dot if it's off-screen
-        if (d.ppy < 0) {
-            dots.splice(i,1);
-            i -= 1;
+    }
+    updateSpeedAndPosition() {
+        //Move the dot upwards based on the dot's speed.
+        this.y -= this.s * ani.audioPeakMultiplier;
+        //Increase the dot's speed based on its acceleration.
+        this.s += this.a;// * AUDIO_PEAK_MULTIPLIER;
+    }
+    draw() {
+        //Skip the first and second frames of the animation to retrieve the
+        //second and third of the three points necessary for the animation
+        if (this.mustShift) {
+            this.shiftRefPoints();
+            return;
         }
-        
+
+        //sin x = 2pi    b/2pi=period
+        this.pfx = (this.pfx + 1) % this.pp;
+        this.bpfx = (this.bpfx + 1) % this.bpp;
+
+        //Set the line width
+        ani.context.lineWidth = this.currentLineWidth;
+
+        //Clear all preivous paths
+        ani.context.beginPath();
+
+        //Set the stroke and fill styles to the color of the current dot.
+        ani.context.strokeStyle =
+            ani.context.fillStyle = this.colorHSL;
+
+        //Move to the oldest of the three reference points of the dot.
+        ani.context.moveTo(this.rppx, this.rppy);
+        //Make a line to the second oldest of the three reference points of the dot.
+        ani.context.lineTo(this.rpx, this.rpy);
+        //Draw the line.
+        ani.context.stroke();
+
+        //Make a line to the first (newest) of the three reference points of the dot
+        ani.context.lineTo(this.rx, this.ry);
+        //Draw the line.
+        ani.context.stroke();
+
+        //Shift the reference points and update the speed, position, and phase shifts.
+        this.shiftRefPoints();
+        this.updateSpeedAndPosition();
+        //this.updatePhaseShifts(); //BUGGED
+
         //Reset the line width
-        context.lineWidth = 1;
+        ani.context.lineWidth = 1;
     }
-}
-
-/**
- * A helper function used to generate a single new dot.
- * See {@link Dot} for more info about the structure of the dot.
- * @see {@link Dot}
- * @function
- */
-function newDot() {
-    //push the new dot to the end to the list of all active dots.
-    //See the typedef of Dot for explanations of the following.
-    var vpb = rand(LUMINOSITY_OSCILLATION_PERIOD_MIN, LUMINOSITY_OSCILLATION_PERIOD_MAX);
-    var vbpb = rand(LINE_WIDTH_OSCILLATION_PERIOD_MIN, LINE_WIDTH_OSCILLATION_PERIOD_MAX);
-    dots.push({
-        //X-Coord: a random value between 0 and the size of the canvas.
-        x: rand(0,size.width),
-        //Y-Coord: the very bottom of the canvas.
-        y: size.height,
-        //Speed: A random value between MIN/MAX SPEED.
-        s: rand(MIN_SPEED,MAX_SPEED),
-        //Acceleration: A random value between MIN/MAX ACCELERATION.
-        a: rand(MIN_ACCEL,MAX_ACCEL),
-        //Hue: A random value between TRAIL HSL START/END.
-        c: rand(TRAIL_HSL_START,TRAIL_HSL_END),
-        //Luminosity: A random value between TRAIL LUMINOSITY START/END.
-        l: rand(TRAIL_LUMINOSITY_MIN,TRAIL_LUMINOSITY_MAX),
-        //Saturation: A random value between TRAIL SATURATION START/END.
-        sa: rand(TRAIL_SATURATION_MIN,TRAIL_SATURATION_MAX),
-        //Legacy RGB color, deprecated in favor of HSL's greater control of color.
-        c2: [Math.floor(rand(0,255)),Math.floor(rand(0,255)),Math.floor(rand(0,255))],
-        //Creation Frame: current frame count.
-        f: FRAME_COUNT,
-        //Luminosity Oscillation Amplitude: random value in between MIN/MAX.
-        pa: rand(LUMINOSITY_OSCILLATION_AMPLITUDE_MIN,LUMINOSITY_OSCILLATION_AMPLITUDE_MAX),
-        //Luminosity Oscillation Frequency: the frequency when the period is a
-        //random value in between MIN/MAX.
-        pb: getB(vpb),
-        //Luminosity Oscillation Period
-        pp: vpb,
-        //Luminosity Original Oscillation Period
-        opp: vpb,
-        //Luminosity Oscillation Phase Shift: creation frame number + PHASE SHIFT
-        pc: FRAME_COUNT + LUMINOSITY_OSCILLATION_PHASE_SHIFT,
-        //Line Width Oscillation Amplitude: random value in between MIN/MAX.
-        bpa: rand(LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN,LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX),
-        //Line Width Oscillation Frequency: the frequency when the period is a
-        //random value in between MIN/MAX.
-        bpb: getB(vbpb),
-        //Line Width Oscillation Period
-        bpp: vbpb,
-        //Line Width Original Oscillation Period
-        obpp: vbpb,
-        //Line Width Oscillation Phase Shift: creation frame number + PHASE SHIFT
-        bpc: FRAME_COUNT + LINE_WIDTH_OSCILLATION_PHASE_SHIFT,
-        //Line Width: a random value between MIN/MAX.
-        w: rand(LINE_WIDTH_MIN, LINE_WIDTH_MAX),
-        //Sinusoidal frame helper values.
-        pfx: FRAME_COUNT,
-        bpfx: FRAME_COUNT,
-        //Old AUDIO_PEAK_MULTIPLIER.
-        oapm: 1
-    });
-    //original period, last period, last phaseshift
-
-    //Drift the Hue range, by HSL_DRIFT
-    TRAIL_HSL_START += HSL_DRIFT;
-    TRAIL_HSL_END += HSL_DRIFT;
-
-    //Bounds checking, make sure HSL_START/END are between 0 and 360.
-    //doing this prevents the application from randomly failing when either
-    //gets too large or too small.
-    //The application should only break when the precision of FRAME_COUNT becomes
-    //too small to keep track of each new frame, or when we overflow FRAME_COUNT into NaN
-    if(TRAIL_HSL_START < 0) {
-        TRAIL_HSL_START += 360;
+    get mustShift() {
+        return (this.py === null) || (this.ppy === null);
     }
-    if(TRAIL_HSL_END < 0) {
-        TRAIL_HSL_END += 360;
+    get currentLuminosity() {
+        //Determine the current effective luminosity of the dot based on the
+        //current frame count
+        return Dot.sinusoidal(this.pa, this.pb, this.pc, this.l);
     }
-    TRAIL_HSL_START %= 360;
-    TRAIL_HSL_END %= 360;
-    if(TRAIL_HSL_START > TRAIL_HSL_END) {
-        TRAIL_HSL_START -= 360;
+    get currentLineWidth() {
+        //Determine the current effective line width of the dot based on the
+        //current frame count
+        return Dot.sinusoidal(this.bpa, this.bpb, this.bpc, this.w);
     }
-}
+    get colorHSL() {
+        return `hsla(${this.c},${this.sa}%,${this.currentLuminosity}%,${TRAIL_OPACITY})`;
+    }
+    get offScreen() {
+        return this.ppy < 0;
+    }
+    get rpx() {
+        return Math.round(this.px);
+    }
+    get rppx() {
+        return Math.round(this.ppx);
+    }
+    get rpy() {
+        return Math.round(this.py);
+    }
+    get rppy() {
+        return Math.round(this.ppy);
+    }
+    get rx() {
+        return Math.round(this.x);
+    }
+    get ry() {
+        return Math.round(this.y);
+    }
 
-window.addEventListener("keyup",function (e) {
-    var i;
-    var j;
-    var k;
-    var cond;
-    var binding;
-    var cont;
-    var keys;
-    var modifiers = ["ctrl","alt","shift","meta"];
-    for (i = 0; i < keybinds.length; i += 1) {
-        cont = false;
-        binding = keybinds[i];
-        if (binding.key !== e.key) {
-            continue;
+    static UpdateTrailDrift() {
+        //Drift the Hue range, by HSL_DRIFT
+        TRAIL_HSL_START += HSL_DRIFT;
+        TRAIL_HSL_END += HSL_DRIFT;
+
+        //Bounds checking, make sure HSL_START/END are between 0 and 360.
+        //doing this prevents the application from randomly failing when either
+        //gets too large or too small.
+        //The application should only break when the precision of FRAME_COUNT becomes
+        //too small to keep track of each new frame, or when we overflow FRAME_COUNT into NaN
+        if (TRAIL_HSL_START < 0) {
+            TRAIL_HSL_START += 360;
         }
-        keys = Object.keys(binding);
-        if (keys.indexOf("conditions") !== -1) {
-            for (j = 0; j < binding.conditions.length; j += 1) {
-                cond = binding.conditions[j];
-                keys = Object.keys(cond);
-                if (!modifiers.some(function (mod) {
-                    if ((keys.indexOf(mod) !== -1) && (e[mod + "Key"] === cond[mod])) {
-                        return true;
+        if (TRAIL_HSL_END < 0) {
+            TRAIL_HSL_END += 360;
+        }
+        TRAIL_HSL_START %= 360;
+        TRAIL_HSL_END %= 360;
+        if (TRAIL_HSL_START > TRAIL_HSL_END) {
+            TRAIL_HSL_START -= 360;
+        }
+    }
+
+    /**
+        * A helper function used to get the new phase shift when changing the
+        * oscillation speed of the dots.
+        * See the comments below for more
+        * 
+        *
+        * To modify the trajectory of a sine wave, the following must occur:
+        *   - We must know the old period (eg: 1)
+        *   - We must know the new period (eg: 1.5)
+        *   - We must know the old phase shift (eg: 0)
+        *     - The phase shift is what will allow us to alter the frequency
+        *       of the sinusoid without altering the current position along
+        *       it. IE: it means that the last value was 1, it'll be 1--even
+        *       after the change in period.
+        *       This is necessary because what we are doing is effectively
+        *       shrinking the graph horizontally. Our position along the
+        *       X-axis isn't going to shrink with us, so, we shift the
+        *       graph to compensate for that.
+        *
+        * The calculation is:
+        *     new_phase_shift = ((old_period - new_period)
+        *         * (((frame - old_phase_shift) % old_period) / old_period)
+        *         + old_phase_shift) % new_period
+        * 2.5   2.5   5
+        * old_period = 15
+        * new_period = 20
+        * old_phase_shift = 2.5
+        * frame = 17.5
+        *
+        * Eg: if we have a sinusoid that repeats every 20 frames, that means
+        * that the period of that sinusoid is 20.
+        * Say we want to speed it up by 50%. How do we do that?
+        * Well, we know that to speed it up by 75% the new period has to be 15
+        * frames. If we assume that we weren't shifting the animation at all
+        * before this, that means the previous phase shift was 0 frames.
+        * So, if we are currently on frame 10, that means that the value of
+        * the sinusoid is 0, with the graph curving positive for 5 frames,
+        * then back to zero for another five frames before repeating from the
+        * start.
+        * IE:
+        *              _______
+        * |           /       \|
+        * |\---------/---------| (repeat) (dashed line is x-axis)
+        * | \_______/          |
+        *  ^ frame 0      ^ frame 15
+        *       ^ frame 5      ^ frame 20 (repeat)
+        *            ^ frame 10
+        * Without phase shifting, the new graph would look like this:
+        *           _____          _____
+        * |        /     \|       /     \|
+        * |\------/-------\------/-------| (repeat) (dashed line is x-axis)
+        * | \____/        |\____/        |
+        *  ^ frame 0      ^ frame 15
+        *       ^ frame 5      ^ frame 20 (repeat)
+        *            ^ frame 10
+        *
+        * Now, frame 0 suddenly goes from a value of 0 to nearing 1.
+        * If we don't rectify this, the animation will appear jittery as the
+        * change in function will cause drastic and frequent alterations.
+        * To fix this, we just need to shift the graph over until frame 10 has
+        * the right value and the right direction. IE:
+        *
+        *  __          _____          _____
+        * |  \|       /     \|       /     \|
+        * |---\------/-------\------/-------| (repeat) (dashed line is x-axis)
+        * |   |\____/        |\____/        |
+        *  ^ frame 0      ^ frame 15
+        *       ^ frame 5      ^ frame 20 (repeat)
+        *            ^ frame 10
+        * So: if the old period was 20, the new one is 15, and phase shift was 0
+        * shift it by "(20 - 15) + 0" = "5" (it's actually 2.5...?)
+        *
+        * so, from 20 ==> 15 (frame 10), it's 2.5 (frame 10 is 50% to looping
+        *    so 5 * 50% = 2.5)
+        * from 20 ==> 15 ==> 20 (frame 17.5), it's -2.5 (that's at 0% to looping, so)
+        *
+        *  +   2.5,   2.5  + -12.5, -12.5 (or -12.5) (because halfway) (frame 10 0.5) 20>15 = 5
+        *  + - 5.0, - 2.5  +  15.0,   2.5 (or +15) (frame 17.5 0.0/1.0) 15>20
+        *  +   7.5,   5.0  + - 7.5, - 5.0 (or -7.5) (frame 27.5 0.5) 20>15   17.5%15 =2.5
+        *  + -10.0, -10.0           (or +10) (frame 35 0.0/1.0) 15>20
+        *
+        *  12.5 17.5 25.0 35
+        *
+        *  if we mod by new period then subtract the phase shift
+        * @function
+        */
+    static getNewPhaseShift(oldPeriod, newPeriod, oldPhaseShift, x) {
+        return ((oldPeriod - newPeriod) * (
+            ((x - oldPhaseShift) % oldPeriod) / oldPeriod)
+            + oldPhaseShift) % newPeriod;
+        //fuck this calculation...
+    }
+
+
+    /**
+     * Calculates the value of a sinusoid equation given the four possible
+     * transformations that can be applied to it. (see {@link Sinusoid} for more
+     * details about each parameter.)
+     * The function uses the current [frame count]{@link FRAME_COUNT} as the value
+     * of the "x" parameter.
+     * @see {@link Sinusoid}
+     * @function
+     * @param {number} a - The amplitude of the function.
+     * @param {number} b - The frequency of the function.
+     * @param {number} c - The phase-shift of the function.
+     * @param {number} d - The vertical-shift of the function.
+     * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
+     * where x is equal to the the current [frame count]{@link FRAME_COUNT}
+     */
+    static sinusoidal(a, b, c, d) {
+        return Dot.sinusoidal2(a, b, c, d, ani.frameCount);
+    }
+    /**
+     * Calculates the value of a sinusoid equation given the four possible
+     * transformations that can be applied to it. (see {@link Sinusoid} for more
+     * details about each parameter.)
+     * The function uses the current [frame count]{@link FRAME_COUNT} as the value
+     * of the "x" parameter.
+     * @see {@link Sinusoid}
+     * @function
+     * @param {number} a - The amplitude of the function.
+     * @param {number} b - The frequency of the function.
+     * @param {number} c - The phase-shift of the function.
+     * @param {number} d - The vertical-shift of the function.
+     * @param {number} x - The x-value.
+     * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
+     * where x is equal to the the current [frame count]{@link FRAME_COUNT}
+     */
+    static sinusoidal2(a, b, c, d, x) {
+        return a * Math.sin(b * (x - c)) + d;
+    }
+
+
+    /**
+     * Generates a random floating-point number between "min" and "max".
+     * If you need an integer instead, call the {@link randInt} function.
+     * @function
+     * @param {number} min - The inclusive lower bound of the random number.
+     * @param {number} max - The exclusive upper bound of the random number.
+     * @returns {number} The pseudorandom number that was generated.
+     */
+    static rand(min, max) {
+        return (Math.random() * (max - min)) + min;
+    }
+
+    /**
+     * Generates a random integer number between "min" and "max".
+     * @function
+     * @param {number} min - The inclusive lower bound of the random number.
+     * @param {number} max - The exclusive upper bound of the random number.
+     * @returns {number} The pseudorandom number that was generated.
+     */
+    static randInt(min, max) {
+        return Math.floor((Math.random() * (max - min)) + min);
+    }
+
+    /**
+     * Determines the frequency of a sinusoidal equation based on a given period.
+     * @see {@link Sinusoid}
+     * @function
+     * @param {number} period - The period of the sinusoidal function.
+     * @returns {number} The frequency of the sinusoidal function.
+     */
+    static getB(period) {
+        return (2 * Math.PI) / period;
+    }
+}
+
+class Animation {
+    constructor() {
+        var status_rows = [
+            {
+                "name": "General",
+                "type": "header"
+            }, {
+                "name": "Canvas Size",
+                "type": "range.number.integer",
+                "unit": ["", "pixels"],
+                "sep": " x ",
+                "value": () => [ani.size.width, ani.size.height]
+            }, {
+                "name": "Version",
+                "type": "string",
+                "value": () => VERSION
+            }, {
+                "name": "Auto Resize",
+                "type": "flag",
+                "value": () => RESIZE_CANVAS_ON_WINDOW_RESIZE
+            }, {
+                "name": "Background",
+                "type": "color.rgb",
+                "value": () => BACKGROUND
+            }, {
+                "name": "Dot Color",
+                "type": "color.rgba",
+                "show": false,
+                "value": () => DOT_COLOR
+            }, {
+                "name": "Frame Statistics",
+                "type": "header"
+            }, {
+                "name": "Target FPS",
+                "type": "string",
+                "unit": "frames/second",
+                "value": () => FPS.toFixed(2)
+            }, {
+                "name": "Achieved FPS",
+                "type": "string",
+                "unit": "frames/second",
+                "value": () => (Math.round((ani.frameCount / (((new Date()).getTime() - ani.startTime) / 1000)) * 100) / 100).toFixed(2)
+            }, {
+                "name": "Frame Count",
+                "type": "number.integer",
+                "unit": "frames",
+                "value": () => ani.frameCount
+            }, {
+                "name": "Dot Statistics",
+                "type": "header"
+            }, {
+                "name": "Speed",
+                "type": "range.number.decimal",
+                "unit": ["", "pixels/second"],
+                "value": () => [MIN_SPEED, MAX_SPEED]
+            }, {
+                "name": "Acceleration",
+                "type": "range.number.decimal",
+                "unit": ["", "pixels/second"],
+                "value": () => [MIN_ACCEL, MAX_ACCEL]
+            }, {
+                "name": "Active Dots",
+                "type": "range.number.integer",
+                "unit": ["", "dots"],
+                "sep": " of ",
+                "value": () => [ani.dots.length, MAX_DOTS]
+            }, {
+                "name": "Dot Rate",
+                "type": "number.integer",
+                "unit": "dots/frame",
+                "value": () => DOT_RATE
+            }, {
+                "name": "Trail Opacity",
+                "type": "color.alpha",
+                "value": () => TRAIL_OPACITY
+            }, {
+                "name": "Trail Color",
+                "type": "color.rgba",
+                "show": false,
+                "value": () => TRAIL_COLOR
+            }, {
+                "name": "Trail Saturation",
+                "type": "range.color.sat",
+                "value": () => [TRAIL_SATURATION_MIN, TRAIL_SATURATION_MAX]
+            }, {
+                "name": "Trail Luminosity",
+                "type": "range.color.luma",
+                "value": () => [TRAIL_LUMINOSITY_MIN, TRAIL_LUMINOSITY_MAX]
+            }, {
+                "name": "Fade Opacity",
+                "type": "number.percentage",
+                "value": () => FADE_OPACITY
+            }, {
+                "name": "Line Width",
+                "type": "range.number.decimal",
+                "unit": ["", "pixels"],
+                "value": () => [LINE_WIDTH_MIN, LINE_WIDTH_MAX]
+            }, {
+                "name": "Trail Hue Range",
+                "type": "header"
+            }, {
+                "name": "Hue Drift",
+                "type": "number.decimal",
+                "unit": "degrees",
+                "value": () => HSL_DRIFT
+            }, {
+                "name": "Current",
+                "type": "range.color.hue",
+                "value": () => [TRAIL_HSL_START, TRAIL_HSL_END]
+            }, {
+                "name": "Default",
+                "type": "range.color.hue",
+                "value": () => [DEFAULT_TRAIL_HSL_START, DEFAULT_TRAIL_HSL_END]
+            }, {
+                "name": "Luma Oscillation",
+                "type": "header"
+            }, {
+                "name": "Period",
+                "type": "range.string",
+                "unit": ["", "seconds"],
+                "format": (time) => { },
+                "value": () => [
+                    LUMINOSITY_OSCILLATION_PERIOD_MIN.toFixed(2),
+                    LUMINOSITY_OSCILLATION_PERIOD_MAX.toFixed(2)
+                ]
+            }, {
+                "name": "Amplitude",
+                "type": "range.color.luma",
+                "value": () => [
+                    LUMINOSITY_OSCILLATION_AMPLITUDE_MIN,
+                    LUMINOSITY_OSCILLATION_PERIOD_MAX
+                ]
+            }, {
+                "name": "Phase Shift",
+                "type": "string",
+                "unit": "seconds",
+                "format": (time) => { },
+                "value": () => LUMINOSITY_OSCILLATION_PHASE_SHIFT.toFixed(2)
+            }, {
+                "name": "Line Width Oscillation",
+                "type": "header"
+            }, {
+                "name": "Period",
+                "type": "range.string",
+                "unit": ["", "seconds"],
+                "format": (time) => { },
+                "value": () => [
+                    LINE_WIDTH_OSCILLATION_PERIOD_MIN.toFixed(2),
+                    LINE_WIDTH_OSCILLATION_PERIOD_MAX.toFixed(2)
+                ]
+            }, {
+                "name": "Amplitude",
+                "type": "range.number.decimal",
+                "unit": ["", "pixels"],
+                "value": () => [
+                    LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN,
+                    LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX
+                ]
+            }, {
+                "name": "Phase Shift",
+                "type": "string",
+                "unit": "seconds",
+                "format": (time) => { },
+                "value": () => LINE_WIDTH_OSCILLATION_PHASE_SHIFT.toFixed(2)
+            }
+        ];
+        this.dots = [];
+        this.audioPeakMultiplier = 1;
+
+        this.status = new StatusElementCollection(
+            document.getElementById("status-table-body"),
+            status_rows);
+        this.statusEnabled = false;
+    }
+    start() {
+        //Retrieve the CANVAS element
+        this.canvas = document.querySelector("canvas");
+
+        //Get a 2D drawing context for the canvas
+        this.context = this.canvas.getContext("2d");
+
+        //Get the size of the canvas, which should be stretched to the full size of
+        //the window.
+        this.size = this.canvas.getBoundingClientRect();
+
+        //Set the width and height of the canvas internally, so that the canvas has
+        //a 1 to 1 ratio between itself and the screen.
+        this.canvas.setAttribute("width", this.width);
+        this.canvas.setAttribute("height", this.height);
+
+        //Clear all prior paths.
+        this.context.beginPath();
+
+        //Set the fill and stroke styles to the background color at full opacity.
+        this.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        this.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
+
+        //Fill the entire canvas with the current fill style.
+        this.context.fillRect(0, 0, this.width, this.height);
+
+        //Create a timer to start the animation.
+        window.setTimeout(Animation.animate, FRAME_INTERVAL);
+        this.status.update();
+    }
+    get width() {
+        return Math.round(this.size.width);
+    }
+    get height() {
+        return Math.round(this.size.height);
+    }
+    animate() {
+        try {
+            this.__animateInternal();
+        } catch (e) {
+            console.error(e);
+        }
+        //set a timer to run this same function, when we need to animate the next
+        //frame.
+        window.setTimeout(Animation.animate, FRAME_INTERVAL);
+    }
+    updateSize() {
+        //Initialize variables.
+        var i;
+        var osize = this.size;
+
+        //verify that resize is actually enabled
+        if (RESIZE_CANVAS_ON_WINDOW_RESIZE) {
+            //Get the size of the canvas, which should be stretched to the full size
+            //of the window.
+            this.size = this.canvas.getBoundingClientRect();
+
+            //Set the width and height of the canvas internally, so that the canvas
+            //has a 1 to 1 ratio between itself and the screen.
+            this.canvas.setAttribute("width", this.width);
+            this.canvas.setAttribute("height", this.height);
+
+            //check to see if the canvas was made smaller, if not, don't check.
+            if (osize.width > this.size.width) {
+                //check all dots to see if they're still in bounds.
+                for (i = 0; i < this.dots.length; i += 1) {
+                    if (this.dots[i].x > this.size.width) {
+                        //dot is out of bounds, remove it.
+                        this.dots.splice(i--, 1);
                     }
-                    return false;
-                })) {
-                    cont = true;
-                    break;
                 }
-                
-            }
-            if (cont) {
-                continue;
             }
         }
-
-        binding.handler(e);
     }
-});
 
-var status_rows = [
-    {
-        "name": "General",
-        "type": "header"
-    },
-    {
-        "name": "Canvas Size",
-        "type": "range.number.integer",
-        "unit": ["","pixels"],
-        "sep": " x ",
-        "value": () => [
-            size.width,
-            size.height
-        ]
-    },
-    {
-        "name": "Version",
-        "type": "string",
-        "value": () => VERSION
-    },
-    {
-        "name": "Auto Resize",
-        "type": "flag",
-        "value": () => RESIZE_CANVAS_ON_WINDOW_RESIZE
-    },
-    {
-        "name": "Background",
-        "type": "color.rgb",
-        "value": () => BACKGROUND
-    },
-    {
-        "name": "Dot Color",
-        "type": "color.rgba",
-        "show": false,
-        "value": () => DOT_COLOR
-    },
-    {
-        "name": "Frame Statistics",
-        "type": "header"
-    },
-    {
-        "name": "Target FPS",
-        "type": "string",
-        "unit": "frames/second",
-        "value": () => FPS.toFixed(2)
-    },
-    {
-        "name": "Achieved FPS",
-        "type": "string",
-        "unit": "frames/second",
-        "value": () => (Math.round((FRAME_COUNT / (((new Date()).getTime() - START_TIME)/1000))*100) /100).toFixed(2)
-    },
-    {
-        "name": "Frame Count",
-        "type": "number.integer",
-        "unit": "frames",
-        "value": () => FRAME_COUNT
-    },
-    {
-        "name": "Dot Statistics",
-        "type": "header"
-    },
-    {
-        "name": "Speed",
-        "type": "range.number.decimal",
-        "unit": ["","pixels/second"],
-        "value": () => [
-            MIN_SPEED,
-            MAX_SPEED
-        ]
-    },
-    {
-        "name": "Acceleration",
-        "type": "range.number.decimal",
-        "unit": ["","pixels/second"],
-        "value": () => [
-            MIN_ACCEL,
-            MAX_ACCEL
-        ]
-    },
-    {
-        "name": "Active Dots",
-        "type": "range.number.integer",
-        "unit": ["","dots"],
-        "sep": " of ",
-        "value": () => [
-            dots.length,
-            MAX_DOTS
-        ]
-    },
-    {
-        "name": "Dot Rate",
-        "type": "number.integer",
-        "unit": "dots/frame",
-        "value": () => DOT_RATE
-    },
-    {
-        "name": "Trail Opacity",
-        "type": "color.alpha",
-        "value": () => TRAIL_OPACITY
-    },
-    {
-        "name": "Trail Color",
-        "type": "color.rgba",
-        "show": false,
-        "value": () => TRAIL_COLOR
-    },
-    {
-        "name": "Trail Saturation",
-        "type": "range.color.sat",
-        "value": () => [
-            TRAIL_SATURATION_MIN,
-            TRAIL_SATURATION_MAX
-        ]
-    },
-    {
-        "name": "Trail Luminosity",
-        "type": "range.color.luma",
-        "value": () => [
-            TRAIL_LUMINOSITY_MIN,
-            TRAIL_LUMINOSITY_MAX
-        ]
-    },
-    {
-        "name": "Fade Opacity",
-        "type": "number.percentage",
-        "value": () => FADE_OPACITY
-    },
-    {
-        "name": "Line Width",
-        "type": "range.number.decimal",
-        "unit": ["","pixels"],
-        "value": () => [
-            LINE_WIDTH_MIN,
-            LINE_WIDTH_MAX
-        ]
-    },
-    {
-        "name": "Trail Hue Range",
-        "type": "header"
-    },
-    {
-        "name": "Hue Drift",
-        "type": "number.decimal",
-        "unit": "degrees",
-        "value": () => HSL_DRIFT
-    },
-    {
-        "name": "Current",
-        "type": "range.color.hue",
-        "value": () => [
-            TRAIL_HSL_START,
-            TRAIL_HSL_END
-        ]
-    },
-    {
-        "name": "Default",
-        "type": "range.color.hue",
-        "value": () => [
-            DEFAULT_TRAIL_HSL_START,
-            DEFAULT_TRAIL_HSL_END
-        ]
-    },
-    {
-        "name": "Luma Oscillation",
-        "type": "header"
-    },
-    {
-        "name": "Period",
-        "type": "range.string",
-        "unit": ["","seconds"],
-        "format": (time) => {
-            
-        },
-        "value": () => [
-            LUMINOSITY_OSCILLATION_PERIOD_MIN.toFixed(2),
-            LUMINOSITY_OSCILLATION_PERIOD_MAX.toFixed(2)
-        ]
-    },
-    {
-        "name": "Amplitude",
-        "type": "range.color.luma",
-        "unit": ["","pixels"],
-        "value": () => [
-            LUMINOSITY_OSCILLATION_AMPLITUDE_MIN,
-            LUMINOSITY_OSCILLATION_PERIOD_MAX
-        ]
-    },
-    {
-        "name": "Phase Shift",
-        "type": "string",
-        "unit": "seconds",
-        "format": (time) => {
-            
-        },
-        "value": () => LUMINOSITY_OSCILLATION_PHASE_SHIFT.toFixed(2)
-    },
-    {
-        "name": "Line Width Oscillation",
-        "type": "header"
-    },
-    {
-        "name": "Period",
-        "type": "range.string",
-        "unit": ["","seconds"],
-        "format": (time) => {
-            
-        },
-        "value": () => [
-            LINE_WIDTH_OSCILLATION_PERIOD_MIN.toFixed(2),
-            LINE_WIDTH_OSCILLATION_PERIOD_MAX.toFixed(2)
-        ]
-    },
-    {
-        "name": "Amplitude",
-        "type": "range.number.decimal",
-        "unit": ["","pixels"],
-        "value": () => [
-            LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN,
-            LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX
-        ]
-    },
-    {
-        "name": "Phase Shift",
-        "type": "string",
-        "unit": "seconds",
-        "format": (time) => {
-            
-        },
-        "value": () => LINE_WIDTH_OSCILLATION_PHASE_SHIFT.toFixed(2)
+    /**
+     * A function that represents the computation required to complete a single
+     * frame in the animation.
+     * @function
+     */
+    __animateInternal() {
+        this.frameCount = 0;
+        if (!this.startTime) {
+            this.startTime = (new Date()).getTime();
+        }
+        //Increment the frame counter.
+        this.frameCount += 1;
+
+        //Erase all previously recorded paths.
+        this.context.beginPath();
+
+        //Set the fill style and stroke style to the background color, at the
+        //fade opacity
+        this.context.fillStyle = `rgba(${BACKGROUND.join(",")},${FADE_OPACITY})`;
+        this.context.strokeStyle = `rgba(${BACKGROUND.join(",")},${FADE_OPACITY})`;
+
+        //Move the path to the origin of the canvas, (0,0), or the upper left corner
+        //of the canvas.
+        this.context.moveTo(0, 0);
+
+        //Create a rectangle, offset by (0,0), the size of the entire canvas.
+        this.context.rect(0, 0, this.width, this.height);
+
+        //Fill the current path.
+        this.context.fill();
+
+        //Add new dots and then move all dots.
+        this.addNewDots();
+        this.moveAllDots();
     }
-];
 
-function craftStatusElement(container,value,info,types,parameter) {
-    var main_type = types[0][0];
-    var sub_types = types.slice(1);
-    var sub_param = ((sub_types[0]||[])[parameter]||(sub_types[0]||[])[0]);
-    var widget = document.createElement("DIV");
-    widget.setAttribute("x-widget-parameter",parameter);
-    var units = (info.unit instanceof Array) ? info.unit[parameter] : info.unit;
-    var temp;
-    console.info("Loading status element: no. =",status_rows.indexOf(info),"name =",info.name,"; type =",main_type,"; subtypes =",sub_param,"; value =",value);
-    container.setAttribute("x-widget-number",status_rows.indexOf(info));
-    switch (main_type) {
-    case "color":
-        container.appendChild(widget);
-        widget.classList.add("status-widget");
-        widget.classList.add("color");
-        switch (sub_param) {
-        case "rgb":
-            widget.style.backgroundColor = `rgb(${value.join(",")})`;
-            widget.title = value.join(",");
-            break;
-        case "rgba":
-            widget.style.backgroundColor = `rgba(${value.join(",")})`;
-            widget.title = value.join(",");
-            break;
-        case "hsl":
-            widget.style.backgroundColor = `hsl(${value.join(",")})`;
-            widget.title = value.join(",");
-            break;
-        case "hsla":
-            widget.style.backgroundColor = `hsla(${value.join(",")})`;
-            widget.title = value.join(",");
-            break;
-        case "red":
-            widget.style.backgroundColor = `rgb(${value},0,0)`;
-            widget.title = value;
-            break;
-        case "blue":
-            widget.style.backgroundColor = `rgb(0,0,${value})`;
-            widget.title = value;
-            break;
-        case "green":
-            widget.style.backgroundColor = `rgb(0,${value},0)`;
-            widget.title = value;
-            break;
-        case "hue":
-            widget.style.backgroundColor = `hsl(${value},100%,50%)`;
-            widget.title = value;
-            break;
-        case "sat":
-            widget.style.backgroundColor = `hsl(0,${value}%,50%)`;
-            widget.title = value + "%";
-            break;
-        case "luma":
-            widget.style.backgroundColor = `hsl(0,100%,${value}%)`;
-            widget.title = value + "%";
-            break;
-        case "alpha":
-            widget.style.backgroundColor = `rgba(255,0,0,${value})`;
-            widget.title = value;
-            break;
-        }
-        break;
-    case "string":
-        widget = document.createElement("SPAN");
-        widget.setAttribute("x-widget-parameter",parameter);
-        widget.textContent = value;
-        container.appendChild(widget);
-        if (units) {
-            widget = document.createElement("DIV");
-            container.appendChild(widget);
-            widget.classList.add("status-widget");
-            widget.classList.add("units");
-            widget.innerHTML = "&nbsp;";
-            widget.textContent += units;
-        }
-        break;
-    case "number":
-        value = parseFloat(value);
-        widget = document.createElement("SPAN");
-        widget.setAttribute("x-widget-parameter",parameter);
-        switch (sub_param) {
-        case "integer":
-            widget.textContent = Math.round(value);
-            break;
-        case "decimal":
-            widget.textContent = value;
-            break;
-        case "percentage":
-            widget.textContent = `${(Math.round(value * 100 * 100) / 100)}%`;
-            break;
-        }
-        container.appendChild(widget);
-        if (units) {
-            widget = document.createElement("DIV");
-            container.appendChild(widget);
-            widget.classList.add("status-widget");
-            widget.classList.add("units");
-            widget.innerHTML = "&nbsp;";
-            widget.textContent += units;
-        }
-        break;
-    case "flag":
-        widget = document.createElement("SPAN");
-        widget.setAttribute("x-widget-parameter",parameter);
-        widget.textContent = value ? "YES" : "NO";
-        container.appendChild(widget);
-        break;
-    case "range":
-        craftStatusElement(container,value[0],info,sub_types,0);
-        temp = document.createElement("SPAN");
-        temp.classList.add("range-to");
-        temp.appendChild(document.createTextNode(info.sep||" to "));
-        container.appendChild(temp);
-        craftStatusElement(container,value[1],info,sub_types,1);
-        break;
-    case "custom":
-        widget.textContent = value;
-        container.appendChild(widget);
-        break;
-    case "header":break;
-    }
-}
+    /**
+     * A helper function used to move all the dots.
+     * @function
+     */
+    moveAllDots() {
+        var i;
 
-function updateStatusElement(widget,value,info,types,parameter) {
-    var main_type = types[0][0];
-    var sub_types = types.slice(1);
-    var sub_param = ((sub_types[0]||[])[parameter]||(sub_types[0]||[])[0]);
-    var temp;
-    //console.info("Updating status element: no. =",status_rows.indexOf(info),"name =",info.name,"; type =",main_type,"; subtypes =",sub_param,"; value =",value);
-    switch (main_type) {
-    case "color":
-        switch (sub_param) {
-        case "rgb":
-            widget.style.backgroundColor = `rgb(${value.join(",")})`;
-            widget.title = value.join(",");
-            break;
-        case "rgba":
-            widget.style.backgroundColor = `rgba(${value.join(",")})`;
-            widget.title = value.join(",");
-            break;
-        case "hsl":
-            widget.style.backgroundColor = `hsl(${value.join(",")})`;
-            widget.title = value.join(",");
-            break;
-        case "hsla":
-            widget.style.backgroundColor = `hsla(${value.join(",")})`;
-            widget.title = value.join(",");
-            break;
-        case "red":
-            widget.style.backgroundColor = `rgb(${value},0,0)`;
-            widget.title = value;
-            break;
-        case "blue":
-            widget.style.backgroundColor = `rgb(0,0,${value})`;
-            widget.title = value;
-            break;
-        case "green":
-            widget.style.backgroundColor = `rgb(0,${value},0)`;
-            widget.title = value;
-            break;
-        case "hue":
-            widget.style.backgroundColor = `hsl(${value},100%,50%)`;
-            widget.title = value;
-            break;
-        case "sat":
-            widget.style.backgroundColor = `hsl(0,${value}%,50%)`;
-            widget.title = value + "%";
-            break;
-        case "luma":
-            widget.style.backgroundColor = `hsl(0,100%,${value}%)`;
-            widget.title = value + "%";
-            break;
-        case "alpha":
-            widget.style.backgroundColor = `rgba(255,0,0,${value})`;
-            widget.title = value;
-            break;
-        }
-        break;
-    case "string":
-        widget.textContent = value;
-        break;
-    case "number":
-        value = parseFloat(value);
-        switch (sub_param) {
-        case "integer":
-            widget.textContent = Math.round(value);
-            break;
-        case "decimal":
-            widget.textContent = value;
-            break;
-        case "percentage":
-            widget.textContent = `${(Math.round(value * 100 * 100) / 100)}%`;
-            break;
-        }
-        break;
-    case "flag":
-        widget.textContent = value ? "YES" : "NO";
-        break;
-    case "custom":
-        widget.textContent = value;
-        break;
-    }
-}
-
-function loadStatusInfo() {
-    var tbody = document.getElementById("status-table-body");
-    var i;
-    var statrow;
-    var trow;
-    var c;
-    var type;
-    for (i = 0; i < status_rows.length; i += 1) {
-        statrow = status_rows[i];
-        if (statrow.show !== undefined && !statrow.show) {
-            continue;
-        }
-        trow = tbody.insertRow(-1);
-        trow.classList.add("status-info-row");
-        c = [trow.insertCell(-1)];
-        c[0].textContent = statrow.name;
-        type = statrow.type.split(/\./g).map(function (t) {
-            return t.split(/,/g);
+        //Iterate over every dot.
+        this.dots.forEach((d) => {
+            d.draw();
         });
-        if (statrow.type !== "header") {
-            c.push(trow.insertCell(-1));
-            craftStatusElement(c[1],statrow.value(),statrow,type,0);
+        for (i = 0; i < this.dots.length; i += 1) {
+            //Remove the current dot if it's off-screen
+            if (this.dots[i].offScreen) {
+                this.dots.splice(i--, 1);
+            }
+        }
+    }
+
+    addNewDots() {
+        var i;
+        for (i = 0; i < DOT_RATE * this.audioPeakMultiplier; i += 1) {
+            if (this.dots.length >= MAX_DOTS) {
+                //Can't add more dots.
+                break;
+            }
+            //Add another dot and add it to the list.
+            this.dots.push(new Dot(this));
+        }
+    }
+
+    static animate() {
+        ani.animate();
+    }
+
+    /**
+     * A setup function, called when the page loads. It sets up the initial values
+     * of the {@link canvas}, {@link context}, and {@link size} variables; sets up
+     * the canvas, and begins the animation.
+     * @function
+     */
+    static start() {
+
+        //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp, PageDown
+        //Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause, AudioVolumeMute,
+        //AudioVolumeDown, AudioVolumeUp, ContextMenu
+        var keybinds = [
+            {
+                "key": "e",
+                "conditions": [{ "ctrl": false }],
+                "handler": () => window.location.reload()
+            }, {
+                "key": "s",
+                "conditions": [{ "ctrl": false }],
+                "handler": () => ani.toggleStatus()
+            }, {
+                "key": "v",
+                "conditions": [{ "ctrl": false }],
+                "handler": () => ani.toggleVerboseStatus()
+            }, {
+                "key": "d",
+                "conditions": [{ "ctrl": false }],
+                "handler": () => console.info(`${ani.dots.length} active dot(s).`)
+            }, {
+                "key": "r",
+                "conditions": [{ "ctrl": false }],
+                "handler": () => ani.reset()
+            }, {
+                "key": "h",
+                "conditions": [{ "ctrl": false }],
+                "handler": () => ani.help()
+            }, {
+                "key": "+",
+                "conditions": [{ "ctrl": false }],
+                "handler": Animation.upFPS
+            }, {
+                "key": "-",
+                "conditions": [{ "ctrl": false }],
+                "handler": Animation.downFPS
+            }, {
+                "key": "_",
+                "conditions": [{ "ctrl": false, "shift": true }],
+                "handler": Animation.downFPS
+            }, {
+                "key": "=",
+                "conditions": [{ "ctrl": false, "shift": false }],
+                "handler": Animation.upFPS
+            }
+        ];
+
+        var timeout = null;
+        ani = new Animation();
+        document.body.addEventListener("mousemove", () => {
+            document.body.style.cursor = "default";
+            if (timeout !== null) {
+                window.clearTimeout(timeout);
+            }
+            timeout = window.setTimeout(() => {
+                timeout = null;
+                document.body.style.cursor = "none";
+            }, 1000);
+        });
+        window.addEventListener("keyup", (e) => {
+            var modifiers = ["ctrl", "alt", "shift", "meta"];
+            keybinds.forEach((binding) => {
+                if (binding.key !== e.key) {
+                    return;
+                }
+                var keys = Object.keys(binding);
+                if (keys.indexOf("conditions") !== -1) {
+                    if (binding.conditions.some((cond) => {
+                        keys = Object.keys(cond);
+                        return !modifiers.some((mod) => {
+                            return (keys.indexOf(mod) !== -1) && (e[mod + "Key"] === cond[mod]);
+                        });
+                    })) {
+                        return;
+                    }
+                }
+
+                binding.handler(e);
+            });
+        });
+        window.addEventListener("resize", () => {
+            ani.updateSize();
+        });
+        //check if peaks app is enabled for more dynamic animations.
+        if (PEAKS_APP_ENABLED) {
+            try {
+                ani.loadPeaksApp();
+            } catch (e) {
+                console.log("Failed to load peaks app: ", e);
+            }
+        }
+        ani.start();
+    }
+
+    /**
+     * A function that loads the audio peaks subsystem to enable dynamic animations
+     * that respond to the audio levels on your computer.
+     * @function
+     */
+    loadPeaksApp() {
+        //peaks socket
+        var socket;
+        function connect() {
+            var reconnect = false;
+            socket = new WebSocket(`ws${PEAKS_APP_SECURE ? "s" : ""}://` +
+                `${PEAKS_APP_DOMAIN}:${PEAKS_APP_PORT}/AudioPeaks`);
+            socket.addEventListener("open", function () {
+                console.info("Connected to the Audio peaks sever successfully.");
+            });
+            socket.addEventListener("error", function (e) {
+                console.error("Failed to connect to the audio peaks server: ", e);
+                if (!reconnect) {
+                    console.info(`Trying again in ${PEAKS_APP_ERROR_RECONNECT_WAIT / 1000} seconds.`);
+                    window.setTimeout(connect, PEAKS_APP_ERROR_RECONNECT_WAIT);
+                    reconnect = true;
+                }
+                ani.audioPeakMultiplier = 1;
+            });
+            socket.addEventListener("close", function () {
+                console.info("Lost the connection to the audio peaks server.");
+                if (!reconnect) {
+                    console.info(`Trying again in ${PEAKS_APP_RECONNECT_WAIT / 1000} seconds.`);
+                    window.setTimeout(connect, PEAKS_APP_RECONNECT_WAIT);
+                    reconnect = true;
+                }
+                ani.audioPeakMultiplier = 1;
+            });
+            socket.addEventListener("message", function (e) {
+                var message = JSON.parse(e.data);
+                switch (message.status) {
+                    case "Success":
+                        var peak = message.data.max;
+                        if (peak === 0.5) {
+                            ani.audioPeakMultiplier = 1;
+                        } else if (peak < 0.5) {
+                            ani.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 -
+                                AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER));
+                        } else { // > 0.5
+                            ani.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (
+                                AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER - 1));
+                        }
+                        break;
+                    case "Error":
+                        console.error("Audio peaks server encountered an error: ", message.data);
+                        break;
+                }
+                /**
+                 * The audio peaks message data structure. This is the format the
+                 * audio peaks server sends data.
+                 * @typedef {Object} AudioPeakMessage
+                 * @property {string} status - 
+                 *     Indicates the status of the message. See
+                 *     {@link AudioPeakMessageStatus}, possible values of this
+                 *     property.
+                 * @property {AudioPeaks|Object} data -
+                 *     The data of the message. This will either be a
+                 *     {@link AudioPeaks} object if {@link AudioPeakMessage#status}
+                 *     is "Success", or a C# Exception object if it is "Error".
+                 */
+                /**
+                 * The audio peaks message data structure. This is the format the
+                 * audio peaks server sends data. There are three defined statuses:
+                 *   Success - THe message contains "valid" audio data.
+                 *   Info - Currently unused.
+                 *   Error - The server encountered an error.
+                 * @typedef {string} AudioPeakMessageStatus
+                 */
+                /**
+                 * The raw peak data from the WinAudioLevels.exe server.
+                 * @typedef {Object} AudioPeaks
+                 * @property {Number[]} peaks -
+                 *     The collection of audio peaks detected. Each element is the
+                 *     detected peak of a separate audio device.
+                 * @property {Number} max - The largest audio peak detected.
+                 * @property {Number} min - The smallest audio peak detected.
+                 * @property {Number} avg -
+                 *     The average of all the audio peaks detected.
+                 */
+            });
+        }
+        //connect
+        connect();
+    }
+
+    static updateFPS(_fps) {
+        FPS = _fps;
+        FRAME_INTERVAL = FRAME_INTERVAL_();
+        LUMINOSITY_OSCILLATION_PERIOD_MAX = LUMINOSITY_OSCILLATION_PERIOD_MAX_();
+        LUMINOSITY_OSCILLATION_PERIOD_MIN = LUMINOSITY_OSCILLATION_PERIOD_MIN_();
+        LINE_WIDTH_OSCILLATION_PERIOD_MAX = LINE_WIDTH_OSCILLATION_PERIOD_MAX_();
+        LINE_WIDTH_OSCILLATION_PERIOD_MIN = LINE_WIDTH_OSCILLATION_PERIOD_MIN_();
+    }
+    static upFPS() {
+        Animation.updateFPS(FPS + 5);
+        console.info(`Now targeting ${FPS} frames per second.`);
+    }
+    static downFPS() {
+        var old_fps = FPS;
+        Animation.updateFPS(Math.max(FPS - 5, 5));
+        if (old_fps !== FPS) {
+            console.info(`Now targeting ${FPS} frames per second.`);
         } else {
-            trow.classList.add("header");
-            c[0].setAttribute("colspan","2");
+            console.info(`Cannot reduce the framerate any lower than five frames per second.`);
         }
     }
 
-}
+    reset() {
+        this.startTime = (new Date()).getTime();
+        this.dots = [];
+        this.frameCount = 0;
+        TRAIL_HSL_END = DEFAULT_TRAIL_HSL_END;
+        TRAIL_HSL_START = DEFAULT_TRAIL_HSL_START;
+        //Clear all prior paths.
+        this.context.beginPath();
 
-function updateStatusInfo() {
-    if (!STATUS_INFO_DISPLAYED) {
-        return; //don't update, save the frames
+        //Set the fill and stroke styles to the background color at full opacity.
+        this.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        this.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
+
+        //Fill the entire canvas with the current fill style.
+        this.context.fillRect(0, 0, this.width, this.height);
     }
-    var tbody = document.getElementById("status-table-body");
-    var i;
-    var statrow;
-    var widget;
-    var c;
-    var type;
-    for (i = 0; i < status_rows.length; i += 1) {
-        statrow = status_rows[i];
-        if (statrow.show !== undefined && !statrow.show) {
-            continue;
-        }
-        widget = tbody.querySelector(`[x-widget-number="${i}"]`);
-        type = statrow.type.split(/\./g).map(function (t) {
-            return t.split(/,/g);
-        });
-        if (statrow.type !== "header") {
-            if (type[0][0] !== "range") {
-                updateStatusElement(widget.querySelector(`[x-widget-parameter="0"]`),statrow.value(),statrow,type,0);
-            } else {
-                updateStatusElement(widget.querySelector(`[x-widget-parameter="0"]`),statrow.value()[0],statrow,type.slice(1),0);
-                updateStatusElement(widget.querySelector(`[x-widget-parameter="1"]`),statrow.value()[1],statrow,type.slice(1),1);
+    toggleStatus() {
+        this.statusEnabled = !this.statusEnabled;
+        if (this.statusEnabled) {
+            document.getElementById("status-info").style = "";
+            console.info("Turned on the status info overlay.");
+            this.statusInterval = window.setInterval(() => {
+                this.status.update();
+            }, 10);
+        } else {
+            document.getElementById("status-info").style.display = "none";
+            console.info("Turned off the status info overlay.");
+            if (this.statusInterval) {
+                window.clearInterval(this.statusInterval, 10);
+                window.statusInterval = undefined;
             }
         }
     }
-}
+    toggleVerboseStatus() {
+        this.verbose = !this.verbose;
+        console.info(`Now ${this.verbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
 
+    }
+    help() {
+        console.clear();
+        console.info("KEYBINDINGS:");
+        console.info("r(e)fresh -- Refreshes the page.");
+        console.info("(h)elp    -- Displays this mesage.");
+        console.info("(s)tatus  -- Toggles the visibility of the status info overlay.");
+        console.info("(v)erbose -- Toggles the verbosity of the status info overlay.");
+        console.info("(r)eset   -- Resets the animation.");
+        console.info("(+)       -- Increase the FPS by five frames per second.");
+        console.info("(-)       -- Decrease the FPS by five frames per second.");
+    }
+}
 
 if (document.readyState !== "complete") {
-    //If the page isn't done loading, wait for it to finish loading, then run
-    //start.
-    window.addEventListener("load",start);
+    window.addEventListener("load", Animation.start);
 } else {
-    //The page has already finished loading, run start now.
-    start();
+    Animation.start();
 }
+
+/*
+class Settings {
+    constructor(local_settings) {
+        this.__internal__settings = local_settings;
+    }
+    get area() { }
+    calcArea() { }
+    set blah(value) { }
+    static method() { }
+    static __constructor() { }
+}
+Settings.__constructor(); //basically emulating static constructors
+*/
+
+/**
+ * @todo Add settings rows for the audio peaks settings
+ * @todo Add in keybinds to enable/disable audio peaks
+ * @todo Store settings in localStorage or IDB to use later on (see commented out code at top)
+ * @todo Complete documentation.
+ */
