@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.0.0
+ * @version 2.1.1.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.0.0";
+const VERSION = "2.1.1.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -165,103 +165,99 @@ const VERSION = "2.1.0.0";
  */
 
 /**
- * Represents the components that make up the internal state of a dot.
- * most of the property names are heavily abbreviated to make other pieces of
- * code more readable, at the expense of understanding what each property means.
- * Refer to the {@link newDot} function for information on the default values
- * of the following properties.
- * @typedef {Object} Dot
- * @property {number} x - The current x coordinate of the dot.
- * @property {number} y - The current y coordinate of the dot.
- * @property {number} s - The speed of the dot, in pixels per frame.
- * @property {number} a - The acceleration of the dot, in pixels per frame.
- * @property {number} c - The average hue of the dot.
- * @property {number} l - The average luminosity of the dot.
- * @property {number} sa - The average saturation of the dot.
- * @property {ColorRGB} c2 - The original RGB color of the dot, before the HSL
- * change. This property is unused. It's included for compatibility.
- * @property {number} f - The frame that the dot was created on, this is used
- * to phase shift the sinusoid function so that the oscillation starts on the
- * frame the dot was created, instead of where the oscillation would be at if
- * the dot was created on the first frame
- * @property {number} pa - The amplitude at which the luminosity of the dot
- * fluctuates.
- * @property {number} pb - The frequency at which the luminosity of the dot
- * fluctuates.
- * @property {number} pc - The phase-shift at which the luminosity of the dot
- * fluctuates.
- * @property {number} bpa - The amplitude at which the line width of the dot
- * fluctuates.
- * @property {number} bpb - The frequency at which the line width of the dot
- * fluctuates.
- * @property {number} bpc - The phase-shift at which the line width of the dot
- * fluctuates.
- * @property {number} w - The thickness of the trail left by the dot.
- * @see {@link Hue}
- * @see {@link Luminosity}
- * @see {@link Saturation}
- * @see {@link Sinusoid}
- * @see {@link newDot}
- */
-
-/**
  * 
  * @typedef {Object} KeyBindingInfo
- * @property {Key} key - The name of the key being pressed, if this is a letter, or value that changes with the shift key, the actual value here depends on whether or not the shift key is pressed.
- * @property {KeyBindingCondition[]} conditions - An Array of {@link KeyBindingCondition} objects that describe conditionals required to trigger the binding. Only one of the conditions needs to be met.
- * @property {Function} handler - The event handler for the key binding.
+ * @property {Key} key 
+ *     The name of the key being pressed, if this is a letter, or value that changes with
+ *     the shift key, the actual value here depends on whether or not the shift key is pressed.
+ * @property {KeyBindingCondition[]} conditions 
+ *     An Array of {@link KeyBindingCondition} objects that describe conditionals required to
+ *     trigger the binding. Only one of the conditions needs to be met.
+ * @property {Function} handler 
+ *     The event handler for the key binding.
  */
 
 /**
  * Conditions that must be met in order to run the key binding. All specified
  * properties must have their respective keys set to the specified state.
  * @typedef {Object} KeyBindingCondition
- * @property {boolean} ctrl - Required state of the CTRL key.
- * @property {boolean} alt - Required state of the ALT key.
- * @property {boolean} meta - Required state of the META key.
- * @property {boolean} shift - Required state of the SHIFT key.
+ * @property {boolean} ctrl
+ *     Required state of the CTRL key.
+ * @property {boolean} alt 
+ *     Required state of the ALT key.
+ * @property {boolean} meta 
+ *     Required state of the META key.
+ * @property {boolean} shift 
+ *     Required state of the SHIFT key.
  */
 
 /**
- * Represents the components that make up the internal state of a dot.
- * most of the property names are heavily abbreviated to make other pieces of
- * code more readable, at the expense of understanding what each property means.
- * Refer to the {@link newDot} function for information on the default values
- * of the following properties.
- * @typedef {Object} Dot
- * @property {number} x - The current x coordinate of the dot.
- * @property {number} y - The current y coordinate of the dot.
- * @property {number} s - The speed of the dot, in pixels per frame.
- * @property {number} a - The acceleration of the dot, in pixels per frame.
- * @property {number} c - The average hue of the dot.
- * @property {number} l - The average luminosity of the dot.
- * @property {number} sa - The average saturation of the dot.
- * @property {ColorRGB} c2 - The original RGB color of the dot, before the HSL
- * change. This property is unused. It's included for compatibility.
- * @property {number} f - The frame that the dot was created on, this is used
- * to phase shift the sinusoid function so that the oscillation starts on the
- * frame the dot was created, instead of where the oscillation would be at if
- * the dot was created on the first frame
- * @property {number} pa - The amplitude at which the luminosity of the dot
- * fluctuates.
- * @property {number} pb - The frequency at which the luminosity of the dot
- * fluctuates.
- * @property {number} pc - The phase-shift at which the luminosity of the dot
- * fluctuates.
- * @property {number} bpa - The amplitude at which the line width of the dot
- * fluctuates.
- * @property {number} bpb - The frequency at which the line width of the dot
- * fluctuates.
- * @property {number} bpc - The phase-shift at which the line width of the dot
- * fluctuates.
- * @property {number} w - The thickness of the trail left by the dot.
- * @see {@link Hue}
- * @see {@link Luminosity}
- * @see {@link Saturation}
- * @see {@link Sinusoid}
- * @see {@link newDot}
+ * Represents the delegate that is called to invoke the "format" property.
+ * @callback StatusElementPropertiesFormatCallback
+ * @param {object} obj
+ *     The input object being formatted.
+ * @returns {string}
+ *     A formatted string containing the object.
  */
 
+/**
+ * Represents the delegate that is called to invoke the "value" property.
+ * @callback StatusElementPropertiesValueCallback
+ * @returns {object|object[]}
+ *     The value of the StatusElement, or an array of such values if necessary.
+ */
+
+/**
+ *
+ * @typedef {object} StatusElementProperties
+ * @property {string} name
+ *     The text that is displayed on the HUD for this StatusElement. This property is required.
+ * @property {string} type
+ *     The type of StatusElement this is. The valid types are below:
+ *     + string
+ *         Indicates that the value is a textual value.
+ *     + range.*
+ *         Indicates that the value is a range between two values. The asterisk is another valid type
+ *         value.
+ *     + header
+ *         Indicates that the row is a header row that doesn't have a value. All properties aside from
+ *         {@link StatusElementProperties#show} and {@link StatusElementProperties#name} will be ignored.
+ *     + number.[integer|decimal|percentage]
+ *         Indicates that the value is a numeric value.
+ *         - The "integer" subtype indicates that only whole numbers are valid.
+ *         - The "decimal" subtype indicates that all numbers are valid.
+ *         - The "percentage" subtype indicates that the value will be displayed as a percentage.
+ *     + color.[rgb|rgba|hsl|hsla|red|blue|green|hue|sat|luma|alpha]
+ *         Indicates that the value is a color.
+ *         The subtypes are as follows:
+ *         - rgb / rgba
+ *             Specifies that color is an array of 3 to 4 numbers: [red, green, blue, alpha]
+ *         - hsl / hsla
+ *             Specifies that color is an array of 3 to 4 numbers: [hue, saturation, luminosity, alpha]
+ *         - red / green / blue / hue / sat / luma
+ *             Specifies that the color is a single number for the specified RGBA or HSLA component.
+ *     + flag
+ *         Indicates that the value is a boolean value that can be either true or false.
+ *     + custom
+ *         Indicates that the value is a custom value that has no set format. Generally, this will be
+ *         treated like "string", except the value is not necessarily a string value.
+ * @property {string|string[]} unit
+ *     Either a single string value or an array of string values that is displayed beside the value of
+ *     the StatusElement and acts as the units. Using an array of two strings and having the first string
+ *     be empty is a valid use case (eg: a range of pixels. Instead of ## pixels ## pixels, you can use
+ *     ["","pixels"] with the {@link StatusElementProperties#sep} property to get like ## x ## pixels).
+ * @property {StatusElementPropertiesFormatCallback} format
+ *     Used to format the {@link StatusElementProperties#value} property. Currently unused, I think.
+ *     I might end up removing it...
+ * @property {StatusElementPropertiesValueCallback} value
+ *     A callback function that is used to retrieve the value of the property.
+ * @property {boolean} show
+ *     Gets whether or not the property should be shown. This defaults to true, obviously.
+ *     As such, this property is generally omitted.
+ * @property {string} sep
+ *     A string value that is used to separate the values in a range. Defaults to an empty string.
+ * @see {@link StatusElement}
+ */
 
 
 
@@ -789,10 +785,29 @@ var LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
 var TRAIL_HSL_START = 180.0;
 var TRAIL_HSL_END = 240.0;
 var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
-var ani;
 
+/**
+ * Represents an individual settings element and provides methods and properties
+ * for updating the HUD on such elements.
+ */
 class StatusElement {
+    /**
+     * Creates a new {@link StatusElement} from the HTML node containing it and
+     * the settings configuration information it is based upon.
+     * @param {HTMLElement} tbody
+     *     The element (not necessarily a TBODY element) that will contain this
+     *     status element.
+     * @param {StatusElementProperties} statrow
+     *     An object with properties that describe the various aspects of the
+     *     status element.
+     */
     constructor(tbody, statrow) {
+        /**
+         * The original {@see StatusElementProperties} object from which this {@see StatusElement}
+         * is created from.
+         * @type {StatusElementProperties}
+         * @private
+         */
         this.__original = statrow;
         if (statrow.show !== undefined && !statrow.show) {
             return;
@@ -804,16 +819,32 @@ class StatusElement {
         var type = statrow.type.split(/\./g).map((t) => {
             return t.split(/,/g);
         });
+        /**
+         * A double-array of string objects that represent the types and subtypes of this
+         * {@link StatusElement}.
+         * @type {string[][]}
+         * @private
+         */
         this.pType = type;
         if (statrow.type !== "header") {
             c = trow.insertCell(-1);
+            /**
+             * The {@see HTMLElement} that this {@see StatusElement} is displayed via.
+             * @type {HTMLElement}
+             * @private
+             */
             this.widget = c;
+            /**
+             * The {@see HTMLElement} that this {@see StatusElement} is displayed via.
+             * @type {HTMLElement}
+             * @private
+             */
             this.owner = c;
             if (type[0][0] === "range") {
                 this.craftStatusElement(type.slice(1)[0][0], 0);
                 c = document.createElement("SPAN");
                 c.classList.add("range-to");
-                c.appendChild(document.createTextNode(this.sep));
+                c.appendChild(document.createTextNode(this.sep || ""));
                 this.owner.appendChild(c);
                 this.craftStatusElement(type.slice(1)[0][0], 1);
             } else {
@@ -824,15 +855,32 @@ class StatusElement {
             c.setAttribute("colspan", "2");
         }
     }
+    /**
+     * Gets the display name of the {@link StatusElement}.
+     * @returns {string} The display name of the {@link StatusElement}.
+     */
     get name() {
         return this.__original.name;
     }
+    /**
+     * Gets the type of the {@link StatusElement}.
+     * @returns {string} The type of the {@link StatusElement}.
+     * @see {@link StatusElementProperties#type}
+     */
     get type() {
         return this.__original.type;
     }
+    /**
+     * Gets the units of the {@link StatusElement}.
+     * @returns {string|string[]} The units of the {@link StatusElement}.
+     */
     get unit() {
         return this.__original.unit;
     }
+    /**
+     * Gets the value of the {@link StatusElement}.
+     * @returns {object} The value of the {@link StatusElement}.
+     */
     get value() {
         var fn = this.__original.value;
         if (fn instanceof Function) {
@@ -842,19 +890,30 @@ class StatusElement {
         }
         return undefined;
     }
-    get format() {
-        var fn = this.__original.format;
-        if (fn instanceof Function) {
-            return fn();
-        }
-        return undefined;
-    }
+    /**
+     * Gets the separators of the {@link StatusElement}.
+     * @returns {string|string[]} The separators of the {@link StatusElement}.
+     */
     get sep() {
         return this.__original.sep || " to ";
     }
+    /**
+     * Gets whether or not the {@link StatusElement} is visible.
+     * @returns {boolean} Whether or not the {@link StatusElement} is visible.
+     */
     get visible() {
         return this.__original.show === undefined || this.__original.show;
     }
+
+    /**
+     * An internal method that is called to update the value of this {@link StatusElement}.
+     * @param {string[][]} types
+     *     A double-array of string objects that represent the types and subtypes of this
+     *     {@link StatusElement}.
+     * @param {number} parameter
+     *     A number that indicates which value (if there are multiple) is being updated.
+     *     If there are not multiple values, this should be set to 0.
+     */
     __updateInternal(types, parameter) {
         var value = this.value[parameter];
         var widget = this[`param${parameter}`];
@@ -935,6 +994,16 @@ class StatusElement {
             break;
         }
     }
+
+    /**
+     * An internal method that is called to create the HTML necessary to render this
+     * {@link StatusElement} in the HUD.
+     * @param {string} type
+     *     A string containing the types and subtypes of this {@link StatusElement}.
+     * @param {number} parameter
+     *     A number that indicates which value (if there are multiple) is being updated.
+     *     If there are not multiple values, this should be set to 0.
+     */
     craftStatusElement(type, parameter) {
         var widget = document.createElement("DIV");
         switch (type) {
@@ -949,6 +1018,19 @@ class StatusElement {
             break;
         }
         this.owner.appendChild(widget);
+        /**
+         * The first of the two parameter value Elements that the value of this
+         * {@see StatusElement} is displayed via.
+         * @property {HTMLElement} param0
+         * @private
+         */
+        /**
+         * The second of the two parameter value Elements that the value of this
+         * {@see StatusElement} is displayed via.
+         * This property may not always be present
+         * @property {HTMLElement} param1
+         * @private
+         */
         this[`param${parameter}`] = widget;
         var units = (this.__original.unit instanceof Array)
             ? this.__original.unit[parameter]
@@ -964,6 +1046,9 @@ class StatusElement {
         return;
     }
 
+    /**
+     * Updates the value of this {@see StatusElement} and updates the HUD.
+     */
     update() {
         if (!this.visible) {
             return;
@@ -979,17 +1064,39 @@ class StatusElement {
     }
 }
 
+/**
+ * Represents a collection of settings elements and provides methods and properties
+ * for updating the HUD on such collections of elements.
+ */
 class StatusElementCollection {
+    /**
+     * Creates a new {@link StatusElementCollection} from the HTML node containing it
+     * and the settings configuration information it is based upon.
+     * @param {HTMLElement} output
+     *     The element that will contain this collection of status elements.
+     * @param {StatusElementProperties[]} rows
+     *     An array of object with properties that describe the various aspects of the
+     *     status elements.
+     */
     constructor(output, rows) {
         console.info("creating rows!");
         var nrows = [];
         rows.forEach((row) => {
             nrows.push(new StatusElement(output, row));
         });
+        /**
+         * The list of {@see StatusElement} objects in this {@see StatusElementCollection}.
+         * @type {StatusElement[]}
+         * @public
+         */
         this.rows = nrows;
     }
+
+    /**
+     * Updates the values of this {@see StatusElementCollection} and updates the HUD.
+     */
     update() {
-        if (!ani.statusEnabled) {
+        if (!Animation.statusEnabled) {
             return; //don't update, save the frames; kill the animals.
         }
         this.rows.forEach((row) => {
@@ -998,69 +1105,235 @@ class StatusElementCollection {
     }
 }
 
+/**
+ * Represents all of the properties that describe any individual dot used in
+ * the animation.
+ */
 class Dot {
-    constructor(ani) {
+    /**
+     * Creates a new {@link Dot}.
+     */
+    constructor() {
         var vpb = Dot.rand(LUMINOSITY_OSCILLATION_PERIOD_MIN, LUMINOSITY_OSCILLATION_PERIOD_MAX);
         var vbpb = Dot.rand(LINE_WIDTH_OSCILLATION_PERIOD_MIN, LINE_WIDTH_OSCILLATION_PERIOD_MAX);
         //See the typedef of Dot for explanations of the following.
 
-        //X-Coord: a random value between 0 and the size of the canvas.
-        //Y-Coord: the very bottom of the canvas.
-        //Speed: A random value between MIN/MAX SPEED.
-        //Acceleration: A random value between MIN/MAX ACCELERATION.
-        //Hue: A random value between TRAIL HSL START/END.
-        //Luminosity: A random value between TRAIL LUMINOSITY START/END.
-        //Saturation: A random value between TRAIL SATURATION START/END.
-        //Legacy RGB color, deprecated in favor of HSL's greater control of color.
-        //Creation Frame: current frame count.
-        //Luminosity Oscillation Amplitude: random value in between MIN/MAX.
-        //Luminosity Oscillation Frequency: the frequency when the period is a random value in between MIN/MAX.
-        //Luminosity Oscillation Period
-        //Luminosity Original Oscillation Period
-        //Luminosity Oscillation Phase Shift: creation frame number + PHASE SHIFT
-        //Line Width Oscillation Amplitude: random value in between MIN/MAX.
-        //Line Width Oscillation Frequency: the frequency when the period is a random value in between MIN/MAX.
-        //Line Width Oscillation Period
-        //Line Width Original Oscillation Period
-        //Line Width Oscillation Phase Shift: creation frame number + PHASE SHIFT
-        //Line Width: a random value between MIN/MAX.
-        //Sinusoidal frame helper value.
-        //Sinusoidal frame helper value.
-        //Old AUDIO_PEAK_MULTIPLIER.
-        this.x = Dot.rand(0, ani.size.width);
-        this.y = ani.size.height;
+        /**
+         * The x-coordinate of this {@see Dot}.
+         * 
+         * Default: A random value between 0 and the size of the canvas.
+         * @type {number}
+         * @public
+         */
+        this.x = Dot.rand(0, Animation.size.width);
+        /**
+         * The y-coordinate of this {@see Dot}.
+         * 
+         * Default: The very bottom of the canvas.
+         * @type {number}
+         * @public
+         */
+        this.y = Animation.size.height;
+        /**
+         * The speed of this {@see Dot}.
+         * 
+         * Default: A random value between {@see MIN_SPEED} and {@see MAX_SPEED}.
+         * @type {number}
+         * @public
+         */
         this.s = Dot.rand(MIN_SPEED, MAX_SPEED);
+        /**
+         * The acceleration of this {@see Dot}.
+         * 
+         * Default: A random value between {@see MIN_ACCEL} and {@see MAX_ACCEL}.
+         * @type {number}
+         * @public
+         */
         this.a = Dot.rand(MIN_ACCEL, MAX_ACCEL);
+        /**
+         * The hue of this {@see Dot}.
+         * 
+         * Default: A random value between {@see TRAIL_HSL_START} and {@see TRAIL_HSL_END}.
+         * @type {number}
+         * @public
+         */
         this.c = Dot.rand(TRAIL_HSL_START, TRAIL_HSL_END);
+        /**
+         * The luminosity of this {@see Dot}.
+         * 
+         * Default: A random value between {@see TRAIL_LUMINOSITY_MIN} and {@see TRAIL_LUMINOSITY_MAX}.
+         * @type {number}
+         * @public
+         */
         this.l = Dot.rand(TRAIL_LUMINOSITY_MIN, TRAIL_LUMINOSITY_MAX);
+        /**
+         * The saturation of this {@see Dot}.
+         * 
+         * Default: A random value between {@see TRAIL_SATURATION_MIN} and {@see TRAIL_SATURATION_MAX}.
+         * @type {number}
+         * @public
+         */
         this.sa = Dot.rand(TRAIL_SATURATION_MIN, TRAIL_SATURATION_MAX);
-        this.c2 = [Dot.randInt(0, 255), Dot.randInt(0, 255), Dot.randInt(0, 255)];
-        this.f = ani.frameCount;
+        /**
+         * The frame this {@see Dot} was created on.
+         * 
+         * Default: The value of {@see Animation.frameCount} at the time of creation.
+         * @type {number}
+         * @public
+         */
+        this.f = Animation.frameCount;
+        /**
+         * The amplitude of the sine wave that oscillates the luminosity of this {@see Dot}.
+         * 
+         * Default: A random value between {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MIN} and {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}.
+         * @type {number}
+         * @public
+         */
         this.pa = Dot.rand(LUMINOSITY_OSCILLATION_AMPLITUDE_MIN, LUMINOSITY_OSCILLATION_AMPLITUDE_MAX);
+        /**
+         * The frequency of the sine wave that oscillates the luminosity of this {@see Dot}.
+         *
+         * Default: The frequency, as calculated based on {@see Dot#pp}.
+         * @type {number}
+         * @public
+         */
         this.pb = Dot.getB(vpb);
+        /**
+         * The period of the sine wave that oscillates the luminosity of this {@see Dot}.
+         *
+         * Default: A random value between {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
+         * @type {number}
+         * @public
+         */
         this.pp = vpb;
+        /**
+         * The original period of the sine wave that oscillates the luminosity of this {@see Dot}.
+         *
+         * Default: A random value between {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
+         * @type {number}
+         * @public
+         */
         this.opp = vpb;
-        this.pc = ani.frameCount + LUMINOSITY_OSCILLATION_PHASE_SHIFT;
+        /**
+         * The phase shift of the sine wave that oscillates the luminosity of this {@see Dot}.
+         *
+         * Default: The sum of {@see Animation.frameCount} and {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
+         * @type {number}
+         * @public
+         */
+        this.pc = Animation.frameCount + LUMINOSITY_OSCILLATION_PHASE_SHIFT;
+        /**
+         * The amplitude of the sine wave that oscillates the line width of this {@see Dot}.
+         *
+         * Default: A random value between {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN} and {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}.
+         * @type {number}
+         * @public
+         */
         this.bpa = Dot.rand(LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN, LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX);
+        /**
+         * The frequency of the sine wave that oscillates the line width of this {@see Dot}.
+         *
+         * Default: The frequency, as calculated based on {@see Dot#bpp}.
+         * @type {number}
+         * @public
+         */
         this.bpb = Dot.getB(vbpb);
+        /**
+         * The period of the sine wave that oscillates the line width of this {@see Dot}.
+         *
+         * Default: A random value between {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
+         * @type {number}
+         * @public
+         */
         this.bpp = vbpb;
+        /**
+         * The original period of the sine wave that oscillates the line width of this {@see Dot}.
+         *
+         * Default: A random value between {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
+         * @type {number}
+         * @public
+         */
         this.obpp = vbpb;
-        this.bpc = ani.frameCount + LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
+        /**
+         * The phase shift of the sine wave that oscillates the line width of this {@see Dot}.
+         *
+         * Default: The sum of {@see Animation.frameCount} and {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
+         * @type {number}
+         * @public
+         */
+        this.bpc = Animation.frameCount + LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
+        /**
+         * The line width of this {@see Dot}.
+         *
+         * Default: A random value between {@see LINE_WIDTH_MIN} and {@see LINE_WIDTH_MAX}.
+         * @type {number}
+         * @public
+         */
         this.w = Dot.rand(LINE_WIDTH_MIN, LINE_WIDTH_MAX);
-        this.pfx = ani.frameCount;
-        this.bpfx = ani.frameCount;
+        /**
+         * A helper value that helps keep track of the frame number for the purposes of oscillating the
+         * luminosity of this {@see Dot}.
+         *
+         * Default: The value of {@see Animation.frameCount} at the time of creation.
+         * @type {number}
+         * @protected
+         */
+        this.pfx = Animation.frameCount;
+        /**
+         * A helper value that helps keep track of the frame number for the purposes of oscillating the
+         * line width of this {@see Dot}.
+         *
+         * Default: The value of {@see Animation.frameCount} at the time of creation.
+         * @type {number}
+         * @protected
+         */
+        this.bpfx = Animation.frameCount;
+        /**
+         * A helper value that helps keep track of the last AUDIO_PEAK_MULTIPLIER value fro the purposes
+         * of modifying the speed of the animation of this {@see Dot}.
+         *
+         * Default: 1
+         * @type {number}
+         * @protected
+         */
         this.oapm = 1;
+        /**
+         * The y-coordinate of the spot this {@see Dot} was on in the previous frame.
+         *
+         * Default: null
+         * @type {number}
+         * @public
+         */
         this.py = null;
+        /**
+         * The y-coordinate of the spot this {@see Dot} was on in the frame before the previous frame.
+         *
+         * Default: null
+         * @type {number}
+         * @public
+         */
         this.ppy = null;
+        /**
+         * The x-coordinate of the spot this {@see Dot} was on in the previous frame.
+         *
+         * Default: null
+         * @type {number}
+         * @public
+         */
         this.px = null;
+        /**
+         * The x-coordinate of the spot this {@see Dot} was on in the frame before the previous frame.
+         *
+         * Default: null
+         * @type {number}
+         * @public
+         */
         this.ppx = null;
         Dot.UpdateTrailDrift();
     }
-    //getter
-    get blah() {
-        return "blah";
-    }
-
+    /**
+     * Shifts the reference point coordinates for this {@see Dot}.
+     */
     shiftRefPoints() {
         if (this.py === null) {
             this.px = this.x;
@@ -1072,10 +1345,14 @@ class Dot {
         this.px = this.x;
         this.py = this.y;
     }
+    /**
+     * Updates the phase shifts of this {@see Dot} object so that modulating the frequency
+     * of the sine waves does not cause jittering during the animation.
+     */
     updatePhaseShifts() {
-        if (ani.audioPeakMultiplier !== this.oapm) {
-            var np = (1 / ani.audioPeakMultiplier) * this.opp;
-            var nbp = (1 / ani.audioPeakMultiplier) * this.obpp;
+        if (Animation.audioPeakMultiplier !== this.oapm) {
+            var np = (1 / Animation.audioPeakMultiplier) * this.opp;
+            var nbp = (1 / Animation.audioPeakMultiplier) * this.obpp;
             this.pc = Dot.getNewPhaseShift(this.opp, np, this.pc, this.pfx);
             this.pb = Dot.getB(np);
             this.pp = np;
@@ -1087,12 +1364,19 @@ class Dot {
         //keep the original period and the last period/phaseshift
         //new period is the multiplier*original
     }
+    /**
+     * Updates the speed of this {@see Dot} based on its acceleration and
+     * shifts the dot vertically based upon that speed.
+     */
     updateSpeedAndPosition() {
         //Move the dot upwards based on the dot's speed.
-        this.y -= this.s * ani.audioPeakMultiplier;
+        this.y -= this.s * Animation.audioPeakMultiplier;
         //Increase the dot's speed based on its acceleration.
         this.s += this.a;// * AUDIO_PEAK_MULTIPLIER;
     }
+    /**
+     * Draws the {@see Dot} to the canvas.
+     */
     draw() {
         //Skip the first and second frames of the animation to retrieve the
         //second and third of the three points necessary for the animation
@@ -1106,26 +1390,26 @@ class Dot {
         this.bpfx = (this.bpfx + 1) % this.bpp;
 
         //Set the line width
-        ani.context.lineWidth = this.currentLineWidth;
+        Animation.context.lineWidth = this.currentLineWidth;
 
         //Clear all preivous paths
-        ani.context.beginPath();
+        Animation.context.beginPath();
 
         //Set the stroke and fill styles to the color of the current dot.
-        ani.context.strokeStyle =
-            ani.context.fillStyle = this.colorHSL;
+        Animation.context.strokeStyle =
+            Animation.context.fillStyle = this.colorHSL;
 
         //Move to the oldest of the three reference points of the dot.
-        ani.context.moveTo(this.rppx, this.rppy);
+        Animation.context.moveTo(this.rppx, this.rppy);
         //Make a line to the second oldest of the three reference points of the dot.
-        ani.context.lineTo(this.rpx, this.rpy);
+        Animation.context.lineTo(this.rpx, this.rpy);
         //Draw the line.
-        ani.context.stroke();
+        Animation.context.stroke();
 
         //Make a line to the first (newest) of the three reference points of the dot
-        ani.context.lineTo(this.rx, this.ry);
+        Animation.context.lineTo(this.rx, this.ry);
         //Draw the line.
-        ani.context.stroke();
+        Animation.context.stroke();
 
         //Shift the reference points and update the speed, position, and phase shifts.
         this.shiftRefPoints();
@@ -1133,46 +1417,96 @@ class Dot {
         //this.updatePhaseShifts(); //BUGGED
 
         //Reset the line width
-        ani.context.lineWidth = 1;
+        Animation.context.lineWidth = 1;
     }
+
+    /**
+     * Gets a value that indicates whether or not more reference points are needed
+     * before this {@see Dot} can be animated properly.
+     * @returns {boolean} Whether or not more reference points are needed before this
+     * dot can be animated properly.
+     */
     get mustShift() {
         return (this.py === null) || (this.ppy === null);
     }
+    /**
+     * Gets the current luminosity of this {@see Dot}.
+     * @returns {number} The luminosity of this {@see Dot}.
+     */
     get currentLuminosity() {
         //Determine the current effective luminosity of the dot based on the
         //current frame count
         return Dot.sinusoidal(this.pa, this.pb, this.pc, this.l);
     }
+    /**
+     * Gets the current line width of this {@see Dot}.
+     * @returns {number} The line width of this {@see Dot}.
+     */
     get currentLineWidth() {
         //Determine the current effective line width of the dot based on the
         //current frame count
         return Dot.sinusoidal(this.bpa, this.bpb, this.bpc, this.w);
     }
+    /**
+     * Gets the color of this {@see Dot} as a valid CSS color tag.
+     * @returns {string} The color of this {@see Dot} as a valid CSS color tag.
+     */
     get colorHSL() {
         return `hsla(${this.c},${this.sa}%,${this.currentLuminosity}%,${TRAIL_OPACITY})`;
     }
+    /**
+     * Gets whether or not this {@see Dot} is off-screen.
+     * @returns {boolean} Whether or not this {@see Dot} is off-screen.
+     */
     get offScreen() {
         return this.ppy < 0;
     }
+    /**
+     * Gets the rounded x-coordinate of this {@see Dot} on the previous frame.
+     * @returns {number} The rounded x-coordinate of this {@see Dot} on the previous frame.
+     */
     get rpx() {
         return Math.round(this.px);
     }
+    /**
+     * Gets the rounded x-coordinate of this {@see Dot} on the frame before the previous frame.
+     * @returns {number} The rounded x-coordinate of this {@see Dot} on the frame before the previous frame.
+     */
     get rppx() {
         return Math.round(this.ppx);
     }
+    /**
+     * Gets the rounded y-coordinate of this {@see Dot} on the previous frame.
+     * @returns {number} The rounded y-coordinate of this {@see Dot} on the previous frame.
+     */
     get rpy() {
         return Math.round(this.py);
     }
+    /**
+     * Gets the rounded y-coordinate of this {@see Dot} on the frame before the previous frame.
+     * @returns {number} The rounded y-coordinate of this {@see Dot} on the frame before the previous frame.
+     */
     get rppy() {
         return Math.round(this.ppy);
     }
+    /**
+     * Gets the rounded x-coordinate of this {@see Dot}.
+     * @returns {number} The rounded x-coordinate of this {@see Dot}.
+     */
     get rx() {
         return Math.round(this.x);
     }
+    /**
+     * Gets the rounded y-coordinate of this {@see Dot}.
+     * @returns {number} The rounded y-coordinate of this {@see Dot}.
+     */
     get ry() {
         return Math.round(this.y);
     }
 
+    /**
+     * Drifts the trail color so that subsequent dots have a different and advancing range of colors they may be.
+     */
     static UpdateTrailDrift() {
         //Drift the Hue range, by HSL_DRIFT
         TRAIL_HSL_START += HSL_DRIFT;
@@ -1197,91 +1531,98 @@ class Dot {
     }
 
     /**
-        * A helper function used to get the new phase shift when changing the
-        * oscillation speed of the dots.
-        * See the comments below for more
-        * 
-        *
-        * To modify the trajectory of a sine wave, the following must occur:
-        *   - We must know the old period (eg: 1)
-        *   - We must know the new period (eg: 1.5)
-        *   - We must know the old phase shift (eg: 0)
-        *     - The phase shift is what will allow us to alter the frequency
-        *       of the sinusoid without altering the current position along
-        *       it. IE: it means that the last value was 1, it'll be 1--even
-        *       after the change in period.
-        *       This is necessary because what we are doing is effectively
-        *       shrinking the graph horizontally. Our position along the
-        *       X-axis isn't going to shrink with us, so, we shift the
-        *       graph to compensate for that.
-        *
-        * The calculation is:
-        *     new_phase_shift = ((old_period - new_period)
-        *         * (((frame - old_phase_shift) % old_period) / old_period)
-        *         + old_phase_shift) % new_period
-        * 2.5   2.5   5
-        * old_period = 15
-        * new_period = 20
-        * old_phase_shift = 2.5
-        * frame = 17.5
-        *
-        * Eg: if we have a sinusoid that repeats every 20 frames, that means
-        * that the period of that sinusoid is 20.
-        * Say we want to speed it up by 50%. How do we do that?
-        * Well, we know that to speed it up by 75% the new period has to be 15
-        * frames. If we assume that we weren't shifting the animation at all
-        * before this, that means the previous phase shift was 0 frames.
-        * So, if we are currently on frame 10, that means that the value of
-        * the sinusoid is 0, with the graph curving positive for 5 frames,
-        * then back to zero for another five frames before repeating from the
-        * start.
-        * IE:
-        *              _______
-        * |           /       \|
-        * |\---------/---------| (repeat) (dashed line is x-axis)
-        * | \_______/          |
-        *  ^ frame 0      ^ frame 15
-        *       ^ frame 5      ^ frame 20 (repeat)
-        *            ^ frame 10
-        * Without phase shifting, the new graph would look like this:
-        *           _____          _____
-        * |        /     \|       /     \|
-        * |\------/-------\------/-------| (repeat) (dashed line is x-axis)
-        * | \____/        |\____/        |
-        *  ^ frame 0      ^ frame 15
-        *       ^ frame 5      ^ frame 20 (repeat)
-        *            ^ frame 10
-        *
-        * Now, frame 0 suddenly goes from a value of 0 to nearing 1.
-        * If we don't rectify this, the animation will appear jittery as the
-        * change in function will cause drastic and frequent alterations.
-        * To fix this, we just need to shift the graph over until frame 10 has
-        * the right value and the right direction. IE:
-        *
-        *  __          _____          _____
-        * |  \|       /     \|       /     \|
-        * |---\------/-------\------/-------| (repeat) (dashed line is x-axis)
-        * |   |\____/        |\____/        |
-        *  ^ frame 0      ^ frame 15
-        *       ^ frame 5      ^ frame 20 (repeat)
-        *            ^ frame 10
-        * So: if the old period was 20, the new one is 15, and phase shift was 0
-        * shift it by "(20 - 15) + 0" = "5" (it's actually 2.5...?)
-        *
-        * so, from 20 ==> 15 (frame 10), it's 2.5 (frame 10 is 50% to looping
-        *    so 5 * 50% = 2.5)
-        * from 20 ==> 15 ==> 20 (frame 17.5), it's -2.5 (that's at 0% to looping, so)
-        *
-        *  +   2.5,   2.5  + -12.5, -12.5 (or -12.5) (because halfway) (frame 10 0.5) 20>15 = 5
-        *  + - 5.0, - 2.5  +  15.0,   2.5 (or +15) (frame 17.5 0.0/1.0) 15>20
-        *  +   7.5,   5.0  + - 7.5, - 5.0 (or -7.5) (frame 27.5 0.5) 20>15   17.5%15 =2.5
-        *  + -10.0, -10.0           (or +10) (frame 35 0.0/1.0) 15>20
-        *
-        *  12.5 17.5 25.0 35
-        *
-        *  if we mod by new period then subtract the phase shift
-        * @function
-        */
+     * A helper function used to get the new phase shift when changing the
+     * oscillation speed of the dots.
+     * See the comments below for more
+     * 
+     *
+     * To modify the trajectory of a sine wave, the following must occur:
+     *   - We must know the old period (eg: 1)
+     *   - We must know the new period (eg: 1.5)
+     *   - We must know the old phase shift (eg: 0)
+     *     - The phase shift is what will allow us to alter the frequency
+     *       of the sinusoid without altering the current position along
+     *       it. IE: it means that the last value was 1, it'll be 1--even
+     *       after the change in period.
+     *       This is necessary because what we are doing is effectively
+     *       shrinking the graph horizontally. Our position along the
+     *       X-axis isn't going to shrink with us, so, we shift the
+     *       graph to compensate for that.
+     *
+     * The calculation is:
+     *     new_phase_shift = ((old_period - new_period)
+     *         * (((frame - old_phase_shift) % old_period) / old_period)
+     *         + old_phase_shift) % new_period
+     * 2.5   2.5   5
+     * old_period = 15
+     * new_period = 20
+     * old_phase_shift = 2.5
+     * frame = 17.5
+     *
+     * Eg: if we have a sinusoid that repeats every 20 frames, that means
+     * that the period of that sinusoid is 20.
+     * Say we want to speed it up by 50%. How do we do that?
+     * Well, we know that to speed it up by 75% the new period has to be 15
+     * frames. If we assume that we weren't shifting the animation at all
+     * before this, that means the previous phase shift was 0 frames.
+     * So, if we are currently on frame 10, that means that the value of
+     * the sinusoid is 0, with the graph curving positive for 5 frames,
+     * then back to zero for another five frames before repeating from the
+     * start.
+     * IE:
+     *              _______
+     * |           /       \|
+     * |\---------/---------| (repeat) (dashed line is x-axis)
+     * | \_______/          |
+     *  ^ frame 0      ^ frame 15
+     *       ^ frame 5      ^ frame 20 (repeat)
+     *            ^ frame 10
+     * Without phase shifting, the new graph would look like this:
+     *           _____          _____
+     * |        /     \|       /     \|
+     * |\------/-------\------/-------| (repeat) (dashed line is x-axis)
+     * | \____/        |\____/        |
+     *  ^ frame 0      ^ frame 15
+     *       ^ frame 5      ^ frame 20 (repeat)
+     *            ^ frame 10
+     *
+     * Now, frame 0 suddenly goes from a value of 0 to nearing 1.
+     * If we don't rectify this, the animation will appear jittery as the
+     * change in function will cause drastic and frequent alterations.
+     * To fix this, we just need to shift the graph over until frame 10 has
+     * the right value and the right direction. IE:
+     *
+     *  __          _____          _____
+     * |  \|       /     \|       /     \|
+     * |---\------/-------\------/-------| (repeat) (dashed line is x-axis)
+     * |   |\____/        |\____/        |
+     *  ^ frame 0      ^ frame 15
+     *       ^ frame 5      ^ frame 20 (repeat)
+     *            ^ frame 10
+     * So: if the old period was 20, the new one is 15, and phase shift was 0
+     * shift it by "(20 - 15) + 0" = "5" (it's actually 2.5...?)
+     *
+     * so, from 20 ==> 15 (frame 10), it's 2.5 (frame 10 is 50% to looping
+     *    so 5 * 50% = 2.5)
+     * from 20 ==> 15 ==> 20 (frame 17.5), it's -2.5 (that's at 0% to looping, so)
+     *
+     *  +   2.5,   2.5  + -12.5, -12.5 (or -12.5) (because halfway) (frame 10 0.5) 20>15 = 5
+     *  + - 5.0, - 2.5  +  15.0,   2.5 (or +15) (frame 17.5 0.0/1.0) 15>20
+     *  +   7.5,   5.0  + - 7.5, - 5.0 (or -7.5) (frame 27.5 0.5) 20>15   17.5%15 =2.5
+     *  + -10.0, -10.0           (or +10) (frame 35 0.0/1.0) 15>20
+     *
+     *  12.5 17.5 25.0 35
+     *
+     *  if we mod by new period then subtract the phase shift
+     * @param {number} oldPeriod
+     *     The old period of the sine wave.
+     * @param {number} newPeriod
+     *     The new period of the sine wave.
+     * @param {number} oldPhaseShift
+     *     The old phase shift of the sine wave.
+     * @param {number} x
+     *     The current frame.
+     */
     static getNewPhaseShift(oldPeriod, newPeriod, oldPhaseShift, x) {
         return ((oldPeriod - newPeriod) * (
             ((x - oldPhaseShift) % oldPeriod) / oldPeriod)
@@ -1297,16 +1638,19 @@ class Dot {
      * The function uses the current [frame count]{@link FRAME_COUNT} as the value
      * of the "x" parameter.
      * @see {@link Sinusoid}
-     * @function
-     * @param {number} a - The amplitude of the function.
-     * @param {number} b - The frequency of the function.
-     * @param {number} c - The phase-shift of the function.
-     * @param {number} d - The vertical-shift of the function.
+     * @param {number} a 
+     *     The amplitude of the function.
+     * @param {number} b 
+     *     The frequency of the function.
+     * @param {number} c 
+     *     The phase-shift of the function.
+     * @param {number} d 
+     *     The vertical-shift of the function.
      * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
      * where x is equal to the the current [frame count]{@link FRAME_COUNT}
      */
     static sinusoidal(a, b, c, d) {
-        return Dot.sinusoidal2(a, b, c, d, ani.frameCount);
+        return Dot.sinusoidal2(a, b, c, d, Animation.frameCount);
     }
     /**
      * Calculates the value of a sinusoid equation given the four possible
@@ -1315,12 +1659,16 @@ class Dot {
      * The function uses the current [frame count]{@link FRAME_COUNT} as the value
      * of the "x" parameter.
      * @see {@link Sinusoid}
-     * @function
-     * @param {number} a - The amplitude of the function.
-     * @param {number} b - The frequency of the function.
-     * @param {number} c - The phase-shift of the function.
-     * @param {number} d - The vertical-shift of the function.
-     * @param {number} x - The x-value.
+     * @param {number} a 
+     *     The amplitude of the function.
+     * @param {number} b 
+     *     The frequency of the function.
+     * @param {number} c 
+     *     The phase-shift of the function.
+     * @param {number} d 
+     *     The vertical-shift of the function.
+     * @param {number} x 
+     *     The x-value.
      * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
      * where x is equal to the the current [frame count]{@link FRAME_COUNT}
      */
@@ -1332,9 +1680,10 @@ class Dot {
     /**
      * Generates a random floating-point number between "min" and "max".
      * If you need an integer instead, call the {@link randInt} function.
-     * @function
-     * @param {number} min - The inclusive lower bound of the random number.
-     * @param {number} max - The exclusive upper bound of the random number.
+     * @param {number} min 
+     *     The inclusive lower bound of the random number.
+     * @param {number} max 
+     *     The exclusive upper bound of the random number.
      * @returns {number} The pseudorandom number that was generated.
      */
     static rand(min, max) {
@@ -1343,9 +1692,10 @@ class Dot {
 
     /**
      * Generates a random integer number between "min" and "max".
-     * @function
-     * @param {number} min - The inclusive lower bound of the random number.
-     * @param {number} max - The exclusive upper bound of the random number.
+     * @param {number} min 
+     *     The inclusive lower bound of the random number.
+     * @param {number} max 
+     *     The exclusive upper bound of the random number.
      * @returns {number} The pseudorandom number that was generated.
      */
     static randInt(min, max) {
@@ -1355,8 +1705,8 @@ class Dot {
     /**
      * Determines the frequency of a sinusoidal equation based on a given period.
      * @see {@link Sinusoid}
-     * @function
-     * @param {number} period - The period of the sinusoidal function.
+     * @param {number} period 
+     *     The period of the sinusoidal function.
      * @returns {number} The frequency of the sinusoidal function.
      */
     static getB(period) {
@@ -1364,8 +1714,16 @@ class Dot {
     }
 }
 
+/**
+ * A static class that contains methods and properties that can be used
+ * to manage the animation being run.
+ */
 class Animation {
-    constructor() {
+    /**
+     * A static constructor of sorts that is run when starting the animation.
+     * @private
+     */
+    static __constructor() {
         var status_rows = [
             {
                 "name": "General",
@@ -1375,7 +1733,7 @@ class Animation {
                 "type": "range.number.integer",
                 "unit": ["", "pixels"],
                 "sep": " x ",
-                "value": () => [ani.size.width, ani.size.height]
+                "value": () => [Animation.size.width, Animation.size.height]
             }, {
                 "name": "Version",
                 "type": "string",
@@ -1405,12 +1763,12 @@ class Animation {
                 "name": "Achieved FPS",
                 "type": "string",
                 "unit": "frames/second",
-                "value": () => (Math.round((ani.frameCount / (((new Date()).getTime() - ani.startTime) / 1000)) * 100) / 100).toFixed(2)
+                "value": () => (Math.round((Animation.frameCount / (((new Date()).getTime() - Animation.startTime) / 1000)) * 100) / 100).toFixed(2)
             }, {
                 "name": "Frame Count",
                 "type": "number.integer",
                 "unit": "frames",
-                "value": () => ani.frameCount
+                "value": () => Animation.frameCount
             }, {
                 "name": "Dot Statistics",
                 "type": "header"
@@ -1429,7 +1787,7 @@ class Animation {
                 "type": "range.number.integer",
                 "unit": ["", "dots"],
                 "sep": " of ",
-                "value": () => [ani.dots.length, MAX_DOTS]
+                "value": () => [Animation.dots.length, MAX_DOTS]
             }, {
                 "name": "Dot Rate",
                 "type": "number.integer",
@@ -1530,23 +1888,71 @@ class Animation {
                 "value": () => LINE_WIDTH_OSCILLATION_PHASE_SHIFT.toFixed(2)
             }
         ];
+
+        /**
+         * An array of all of the dots in the animation.
+         * @type {Dot[]}
+         * @public
+         */
         this.dots = [];
+        /**
+         * A number that is used as a multiplier for modulating the animation based
+         * on system audio volume.
+         * @type {number}
+         * @public
+         */
         this.audioPeakMultiplier = 1;
 
+        /**
+         * An object that is used to update the status HUD screen.
+         * @type {StatusElementCollection}
+         * @public
+         */
         this.status = new StatusElementCollection(
             document.getElementById("status-table-body"),
             status_rows);
+        /**
+         * A boolean value indicating whether or not the status HUD is being displayed.
+         * @type {boolean}
+         * @public
+         */
         this.statusEnabled = false;
     }
-    start() {
+
+    /**
+     * A static method of sorts that is used to start the animation.
+     * @private
+     */
+    static __start() {
+        /**
+         * The number of frames that have been rendered for the animation.
+         * @type {number}
+         * @public
+         */
+        this.frameCount = 0;
         //Retrieve the CANVAS element
+        /**
+         * The CANVAS element being rendered to.
+         * @type {HTMLCanvasElement}
+         * @public
+         */
         this.canvas = document.querySelector("canvas");
 
         //Get a 2D drawing context for the canvas
+        /**
+         * The rendering context for the CANVAS element being rendered to.
+         * @type {CanvasRenderingContext2D}
+         * @public
+         */
         this.context = this.canvas.getContext("2d");
 
         //Get the size of the canvas, which should be stretched to the full size of
         //the window.
+        /**
+         * The bounding rectangle that the canvas is displaying in.
+         * @type {DOMRect}
+         * @public
+         */
         this.size = this.canvas.getBoundingClientRect();
 
         //Set the width and height of the canvas internally, so that the canvas has
@@ -1568,15 +1974,28 @@ class Animation {
         window.setTimeout(Animation.animate, FRAME_INTERVAL);
         this.status.update();
     }
-    get width() {
+
+    /**
+     * Gets the rounded width of the animation canvas.
+     * @returns {number} The rounded width of the animation canvas.
+     */
+    static get width() {
         return Math.round(this.size.width);
     }
-    get height() {
+    /**
+     * Gets the rounded height of the animation canvas.
+     * @returns {number} The rounded height of the animation canvas.
+     */
+    static get height() {
         return Math.round(this.size.height);
     }
-    animate() {
+
+    /**
+     * Renders the next animation frame.
+     */
+    static animate() {
         try {
-            this.__animateInternal();
+            Animation.__animateInternal();
         } catch (e) {
             console.error(e);
         }
@@ -1584,7 +2003,12 @@ class Animation {
         //frame.
         window.setTimeout(Animation.animate, FRAME_INTERVAL);
     }
-    updateSize() {
+
+    /**
+     * Updates the size of the canvas the animation is rendering to.
+     * This would usually be called if the user resizes the window.
+     */
+    static updateSize() {
         //Initialize variables.
         var i;
         var osize = this.size;
@@ -1616,11 +2040,14 @@ class Animation {
     /**
      * A function that represents the computation required to complete a single
      * frame in the animation.
-     * @function
+     * @private
      */
-    __animateInternal() {
-        this.frameCount = 0;
+    static __animateInternal() {
         if (!this.startTime) {
+            /**
+             * The time in which the animation was first started.
+             * @returns {number} The milliseconds since 1970-01-01T00:00.
+             */
             this.startTime = (new Date()).getTime();
         }
         //Increment the frame counter.
@@ -1651,9 +2078,9 @@ class Animation {
 
     /**
      * A helper function used to move all the dots.
-     * @function
+     * @protected
      */
-    moveAllDots() {
+    static moveAllDots() {
         var i;
 
         //Iterate over every dot.
@@ -1668,7 +2095,11 @@ class Animation {
         }
     }
 
-    addNewDots() {
+    /**
+     * A helper function used to add new dots to the animation.
+     * @protected
+     */
+    static addNewDots() {
         var i;
         for (i = 0; i < DOT_RATE * this.audioPeakMultiplier; i += 1) {
             if (this.dots.length >= MAX_DOTS) {
@@ -1680,15 +2111,9 @@ class Animation {
         }
     }
 
-    static animate() {
-        ani.animate();
-    }
-
     /**
-     * A setup function, called when the page loads. It sets up the initial values
-     * of the {@link canvas}, {@link context}, and {@link size} variables; sets up
-     * the canvas, and begins the animation.
-     * @function
+     * A setup function, called when the page loads. It sets up the canvas and begins
+     * the animation.
      */
     static start() {
 
@@ -1703,23 +2128,23 @@ class Animation {
             }, {
                 "key": "s",
                 "conditions": [{ "ctrl": false }],
-                "handler": () => ani.toggleStatus()
+                "handler": Animation.toggleStatus
             }, {
                 "key": "v",
                 "conditions": [{ "ctrl": false }],
-                "handler": () => ani.toggleVerboseStatus()
+                "handler": Animation.toggleVerboseStatus
             }, {
                 "key": "d",
                 "conditions": [{ "ctrl": false }],
-                "handler": () => console.info(`${ani.dots.length} active dot(s).`)
+                "handler": () => console.info(`${Animation.dots.length} active dot(s).`)
             }, {
                 "key": "r",
                 "conditions": [{ "ctrl": false }],
-                "handler": () => ani.reset()
+                "handler": Animation.reset
             }, {
                 "key": "h",
                 "conditions": [{ "ctrl": false }],
-                "handler": () => ani.help()
+                "handler": Animation.help
             }, {
                 "key": "+",
                 "conditions": [{ "ctrl": false }],
@@ -1740,7 +2165,8 @@ class Animation {
         ];
 
         var timeout = null;
-        ani = new Animation();
+        Animation.__constructor();
+
         document.body.addEventListener("mousemove", () => {
             document.body.style.cursor = "default";
             if (timeout !== null) {
@@ -1772,26 +2198,23 @@ class Animation {
                 binding.handler(e);
             });
         });
-        window.addEventListener("resize", () => {
-            ani.updateSize();
-        });
+        window.addEventListener("resize", this.updateSize);
         //check if peaks app is enabled for more dynamic animations.
         if (PEAKS_APP_ENABLED) {
             try {
-                ani.loadPeaksApp();
+                Animation.loadPeaksApp();
             } catch (e) {
                 console.log("Failed to load peaks app: ", e);
             }
         }
-        ani.start();
+        Animation.__start();
     }
 
     /**
      * A function that loads the audio peaks subsystem to enable dynamic animations
      * that respond to the audio levels on your computer.
-     * @function
      */
-    loadPeaksApp() {
+    static loadPeaksApp() {
         //peaks socket
         var socket;
         function connect() {
@@ -1808,7 +2231,7 @@ class Animation {
                     window.setTimeout(connect, PEAKS_APP_ERROR_RECONNECT_WAIT);
                     reconnect = true;
                 }
-                ani.audioPeakMultiplier = 1;
+                Animation.audioPeakMultiplier = 1;
             });
             socket.addEventListener("close", function () {
                 console.info("Lost the connection to the audio peaks server.");
@@ -1817,7 +2240,7 @@ class Animation {
                     window.setTimeout(connect, PEAKS_APP_RECONNECT_WAIT);
                     reconnect = true;
                 }
-                ani.audioPeakMultiplier = 1;
+                Animation.audioPeakMultiplier = 1;
             });
             socket.addEventListener("message", function (e) {
                 var message = JSON.parse(e.data);
@@ -1825,12 +2248,12 @@ class Animation {
                     case "Success":
                         var peak = message.data.max;
                         if (peak === 0.5) {
-                            ani.audioPeakMultiplier = 1;
+                            Animation.audioPeakMultiplier = 1;
                         } else if (peak < 0.5) {
-                            ani.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 -
+                            Animation.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 -
                                 AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER));
                         } else { // > 0.5
-                            ani.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (
+                            Animation.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (
                                 AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER - 1));
                         }
                         break;
@@ -1876,6 +2299,13 @@ class Animation {
         connect();
     }
 
+
+    /**
+     * A function that updates the FPS of the animation and the variables that rely on the FPS
+     * of the animation.
+     * @param {number} _fps
+     *     The new FPS.
+     */
     static updateFPS(_fps) {
         FPS = _fps;
         FRAME_INTERVAL = FRAME_INTERVAL_();
@@ -1884,10 +2314,17 @@ class Animation {
         LINE_WIDTH_OSCILLATION_PERIOD_MAX = LINE_WIDTH_OSCILLATION_PERIOD_MAX_();
         LINE_WIDTH_OSCILLATION_PERIOD_MIN = LINE_WIDTH_OSCILLATION_PERIOD_MIN_();
     }
+
+    /**
+     * Steps the FPS up by 5 frames per second.
+     */
     static upFPS() {
         Animation.updateFPS(FPS + 5);
         console.info(`Now targeting ${FPS} frames per second.`);
     }
+    /**
+     * Steps the FPS down by 5 frames per second.
+     */
     static downFPS() {
         var old_fps = FPS;
         Animation.updateFPS(Math.max(FPS - 5, 5));
@@ -1898,45 +2335,71 @@ class Animation {
         }
     }
 
-    reset() {
-        this.startTime = (new Date()).getTime();
-        this.dots = [];
-        this.frameCount = 0;
+    /**
+     * Resets the animation.
+     */
+    static reset() {
+        Animation.startTime = (new Date()).getTime();
+        Animation.dots = [];
+        Animation.frameCount = 0;
         TRAIL_HSL_END = DEFAULT_TRAIL_HSL_END;
         TRAIL_HSL_START = DEFAULT_TRAIL_HSL_START;
         //Clear all prior paths.
-        this.context.beginPath();
+        Animation.context.beginPath();
 
         //Set the fill and stroke styles to the background color at full opacity.
-        this.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
-        this.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        Animation.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        Animation.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
 
         //Fill the entire canvas with the current fill style.
-        this.context.fillRect(0, 0, this.width, this.height);
+        Animation.context.fillRect(0, 0, Animation.width, Animation.height);
     }
-    toggleStatus() {
-        this.statusEnabled = !this.statusEnabled;
-        if (this.statusEnabled) {
+
+    /**
+     * Toggles whether or not the status overlay is enabled and displayed.
+     */
+    static toggleStatus() {
+        Animation.statusEnabled = !Animation.statusEnabled;
+        if (Animation.statusEnabled) {
             document.getElementById("status-info").style = "";
             console.info("Turned on the status info overlay.");
-            this.statusInterval = window.setInterval(() => {
-                this.status.update();
+
+            /**
+             * The interval, as obtained from {@see Window.setInterval}, that the status
+             * overlay uses to refresh its information.
+             * @type {number}
+             */
+            Animation.statusInterval = window.setInterval(() => {
+                Animation.status.update();
             }, 10);
         } else {
             document.getElementById("status-info").style.display = "none";
             console.info("Turned off the status info overlay.");
-            if (this.statusInterval) {
-                window.clearInterval(this.statusInterval, 10);
+            if (Animation.statusInterval) {
+                window.clearInterval(Animation.statusInterval, 10);
                 window.statusInterval = undefined;
             }
         }
     }
-    toggleVerboseStatus() {
-        this.verbose = !this.verbose;
-        console.info(`Now ${this.verbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
+    /**
+     * Toggles whether or not verbose information is displayed in the status overlay.
+     */
+    static toggleVerboseStatus() {
+
+        /**
+         * Whether or not verbose information is displayed in the status overlay.
+         * @property {boolean} verbose
+         * @static
+         */
+        Animation.verbose = !Animation.verbose;
+        console.info(`Now ${Animation.verbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
 
     }
-    help() {
+
+    /**
+     * Outputs help information to the console.
+     */
+    static help() {
         console.clear();
         console.info("KEYBINDINGS:");
         console.info("r(e)fresh -- Refreshes the page.");
@@ -1973,5 +2436,5 @@ Settings.__constructor(); //basically emulating static constructors
  * @todo Add settings rows for the audio peaks settings
  * @todo Add in keybinds to enable/disable audio peaks
  * @todo Store settings in localStorage or IDB to use later on (see commented out code at top)
- * @todo Complete documentation.
+ * @todo Complete documentation. (kinda done...?)
  */
