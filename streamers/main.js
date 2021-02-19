@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.2.0
+ * @version 2.1.2.1
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.2.0";
+const VERSION = "2.1.2.1";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -782,9 +782,10 @@ var LINE_WIDTH_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
 var LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
 var LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
 var LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
+var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
 var TRAIL_HSL_START = 180.0;
 var TRAIL_HSL_END = 240.0;
-var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
+//All vars above... TO BE DELETED (less TRAIL_HSL_START and TRAIL_HSL_END)
 
 /**
  * Represents an individual settings element and provides methods and properties
@@ -1096,7 +1097,7 @@ class StatusElementCollection {
      * Updates the values of this {@see StatusElementCollection} and updates the HUD.
      */
     update() {
-        if (!MyAnimation.statusEnabled) {
+        if (!Ani.statusEnabled) {
             return; //don't update, save the frames; kill the animals.
         }
         this.rows.forEach((row) => {
@@ -1125,7 +1126,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.x = Dot.rand(0, MyAnimation.size.width);
+        this.x = Dot.rand(0, Ani.size.width);
         /**
          * The y-coordinate of this {@see Dot}.
          * 
@@ -1133,7 +1134,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.y = MyAnimation.size.height;
+        this.y = Ani.size.height;
         /**
          * The speed of this {@see Dot}.
          * 
@@ -1177,11 +1178,11 @@ class Dot {
         /**
          * The frame this {@see Dot} was created on.
          * 
-         * Default: The value of {@see MyAnimation.frameCount} at the time of creation.
+         * Default: The value of {@see Ani.frameCount} at the time of creation.
          * @type {number}
          * @public
          */
-        this.f = MyAnimation.frameCount;
+        this.f = Ani.frameCount;
         /**
          * The amplitude of the sine wave that oscillates the luminosity of this {@see Dot}.
          * 
@@ -1217,11 +1218,11 @@ class Dot {
         /**
          * The phase shift of the sine wave that oscillates the luminosity of this {@see Dot}.
          *
-         * Default: The sum of {@see MyAnimation.frameCount} and {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
+         * Default: The sum of {@see Ani.frameCount} and {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
          * @type {number}
          * @public
          */
-        this.pc = MyAnimation.frameCount + LUMINOSITY_OSCILLATION_PHASE_SHIFT;
+        this.pc = Ani.frameCount + LUMINOSITY_OSCILLATION_PHASE_SHIFT;
         /**
          * The amplitude of the sine wave that oscillates the line width of this {@see Dot}.
          *
@@ -1257,11 +1258,11 @@ class Dot {
         /**
          * The phase shift of the sine wave that oscillates the line width of this {@see Dot}.
          *
-         * Default: The sum of {@see MyAnimation.frameCount} and {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
+         * Default: The sum of {@see Ani.frameCount} and {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
          * @type {number}
          * @public
          */
-        this.bpc = MyAnimation.frameCount + LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
+        this.bpc = Ani.frameCount + LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
         /**
          * The line width of this {@see Dot}.
          *
@@ -1274,20 +1275,20 @@ class Dot {
          * A helper value that helps keep track of the frame number for the purposes of oscillating the
          * luminosity of this {@see Dot}.
          *
-         * Default: The value of {@see MyAnimation.frameCount} at the time of creation.
+         * Default: The value of {@see Ani.frameCount} at the time of creation.
          * @type {number}
          * @protected
          */
-        this.pfx = MyAnimation.frameCount;
+        this.pfx = Ani.frameCount;
         /**
          * A helper value that helps keep track of the frame number for the purposes of oscillating the
          * line width of this {@see Dot}.
          *
-         * Default: The value of {@see MyAnimation.frameCount} at the time of creation.
+         * Default: The value of {@see Ani.frameCount} at the time of creation.
          * @type {number}
          * @protected
          */
-        this.bpfx = MyAnimation.frameCount;
+        this.bpfx = Ani.frameCount;
         /**
          * A helper value that helps keep track of the last AUDIO_PEAK_MULTIPLIER value fro the purposes
          * of modifying the speed of the animation of this {@see Dot}.
@@ -1350,9 +1351,9 @@ class Dot {
      * of the sine waves does not cause jittering during the animation.
      */
     updatePhaseShifts() {
-        if (MyAnimation.audioPeakMultiplier !== this.oapm) {
-            var np = (1 / MyAnimation.audioPeakMultiplier) * this.opp;
-            var nbp = (1 / MyAnimation.audioPeakMultiplier) * this.obpp;
+        if (Ani.audioPeakMultiplier !== this.oapm) {
+            var np = (1 / Ani.audioPeakMultiplier) * this.opp;
+            var nbp = (1 / Ani.audioPeakMultiplier) * this.obpp;
             this.pc = Dot.getNewPhaseShift(this.opp, np, this.pc, this.pfx);
             this.pb = Dot.getB(np);
             this.pp = np;
@@ -1370,7 +1371,7 @@ class Dot {
      */
     updateSpeedAndPosition() {
         //Move the dot upwards based on the dot's speed.
-        this.y -= this.s * MyAnimation.audioPeakMultiplier;
+        this.y -= this.s * Ani.audioPeakMultiplier;
         //Increase the dot's speed based on its acceleration.
         this.s += this.a;// * AUDIO_PEAK_MULTIPLIER;
     }
@@ -1390,26 +1391,26 @@ class Dot {
         this.bpfx = (this.bpfx + 1) % this.bpp;
 
         //Set the line width
-        MyAnimation.context.lineWidth = this.currentLineWidth;
+        Ani.context.lineWidth = this.currentLineWidth;
 
         //Clear all preivous paths
-        MyAnimation.context.beginPath();
+        Ani.context.beginPath();
 
         //Set the stroke and fill styles to the color of the current dot.
-        MyAnimation.context.strokeStyle =
-            MyAnimation.context.fillStyle = this.colorHSL;
+        Ani.context.strokeStyle =
+            Ani.context.fillStyle = this.colorHSL;
 
         //Move to the oldest of the three reference points of the dot.
-        MyAnimation.context.moveTo(this.rppx, this.rppy);
+        Ani.context.moveTo(this.rppx, this.rppy);
         //Make a line to the second oldest of the three reference points of the dot.
-        MyAnimation.context.lineTo(this.rpx, this.rpy);
+        Ani.context.lineTo(this.rpx, this.rpy);
         //Draw the line.
-        MyAnimation.context.stroke();
+        Ani.context.stroke();
 
         //Make a line to the first (newest) of the three reference points of the dot
-        MyAnimation.context.lineTo(this.rx, this.ry);
+        Ani.context.lineTo(this.rx, this.ry);
         //Draw the line.
-        MyAnimation.context.stroke();
+        Ani.context.stroke();
 
         //Shift the reference points and update the speed, position, and phase shifts.
         this.shiftRefPoints();
@@ -1417,7 +1418,7 @@ class Dot {
         //this.updatePhaseShifts(); //BUGGED
 
         //Reset the line width
-        MyAnimation.context.lineWidth = 1;
+        Ani.context.lineWidth = 1;
     }
 
     /**
@@ -1650,7 +1651,7 @@ class Dot {
      * where x is equal to the the current [frame count]{@link FRAME_COUNT}
      */
     static sinusoidal(a, b, c, d) {
-        return Dot.sinusoidal2(a, b, c, d, MyAnimation.frameCount);
+        return Dot.sinusoidal2(a, b, c, d, Ani.frameCount);
     }
     /**
      * Calculates the value of a sinusoid equation given the four possible
@@ -1718,7 +1719,7 @@ class Dot {
  * A static class that contains methods and properties that can be used
  * to manage the animation being run.
  */
-class MyAnimation {
+class Ani {
     /**
      * A static constructor of sorts that is run when starting the animation.
      * @private
@@ -1733,7 +1734,7 @@ class MyAnimation {
                 "type": "range.number.integer",
                 "unit": ["", "pixels"],
                 "sep": " x ",
-                "value": () => [MyAnimation.size.width, MyAnimation.size.height]
+                "value": () => [Ani.size.width, Ani.size.height]
             }, {
                 "name": "Version",
                 "type": "string",
@@ -1763,12 +1764,12 @@ class MyAnimation {
                 "name": "Achieved FPS",
                 "type": "string",
                 "unit": "frames/second",
-                "value": () => (Math.round((MyAnimation.frameCount / (((new Date()).getTime() - MyAnimation.startTime) / 1000)) * 100) / 100).toFixed(2)
+                "value": () => (Math.round((Ani.frameCount / (((new Date()).getTime() - Ani.startTime) / 1000)) * 100) / 100).toFixed(2)
             }, {
                 "name": "Frame Count",
                 "type": "number.integer",
                 "unit": "frames",
-                "value": () => MyAnimation.frameCount
+                "value": () => Ani.frameCount
             }, {
                 "name": "Dot Statistics",
                 "type": "header"
@@ -1787,7 +1788,7 @@ class MyAnimation {
                 "type": "range.number.integer",
                 "unit": ["", "dots"],
                 "sep": " of ",
-                "value": () => [MyAnimation.dots.length, MAX_DOTS]
+                "value": () => [Ani.dots.length, MAX_DOTS]
             }, {
                 "name": "Dot Rate",
                 "type": "number.integer",
@@ -1971,7 +1972,7 @@ class MyAnimation {
         this.context.fillRect(0, 0, this.width, this.height);
 
         //Create a timer to start the animation.
-        window.setTimeout(MyAnimation.animate, FRAME_INTERVAL);
+        window.setTimeout(Ani.animate, FRAME_INTERVAL);
         this.status.update();
     }
 
@@ -1995,13 +1996,13 @@ class MyAnimation {
      */
     static animate() {
         try {
-            MyAnimation.__animateInternal();
+            Ani.__animateInternal();
         } catch (e) {
             console.error(e);
         }
         //set a timer to run this same function, when we need to animate the next
         //frame.
-        window.setTimeout(MyAnimation.animate, FRAME_INTERVAL);
+        window.setTimeout(Ani.animate, FRAME_INTERVAL);
     }
 
     /**
@@ -2128,44 +2129,44 @@ class MyAnimation {
             }, {
                 "key": "s",
                 "conditions": [{ "ctrl": false }],
-                "handler": MyAnimation.toggleStatus
+                "handler": Ani.toggleStatus
             }, {
                 "key": "v",
                 "conditions": [{ "ctrl": false }],
-                "handler": MyAnimation.toggleVerboseStatus
+                "handler": Ani.toggleVerboseStatus
             }, {
                 "key": "d",
                 "conditions": [{ "ctrl": false }],
-                "handler": () => console.info(`${MyAnimation.dots.length} active dot(s).`)
+                "handler": () => console.info(`${Ani.dots.length} active dot(s).`)
             }, {
                 "key": "r",
                 "conditions": [{ "ctrl": false }],
-                "handler": MyAnimation.reset
+                "handler": Ani.reset
             }, {
                 "key": "h",
                 "conditions": [{ "ctrl": false }],
-                "handler": MyAnimation.help
+                "handler": Ani.help
             }, {
                 "key": "+",
                 "conditions": [{ "ctrl": false }],
-                "handler": MyAnimation.upFPS
+                "handler": Ani.upFPS
             }, {
                 "key": "-",
                 "conditions": [{ "ctrl": false }],
-                "handler": MyAnimation.downFPS
+                "handler": Ani.downFPS
             }, {
                 "key": "_",
                 "conditions": [{ "ctrl": false, "shift": true }],
-                "handler": MyAnimation.downFPS
+                "handler": Ani.downFPS
             }, {
                 "key": "=",
                 "conditions": [{ "ctrl": false, "shift": false }],
-                "handler": MyAnimation.upFPS
+                "handler": Ani.upFPS
             }
         ];
 
         var timeout = null;
-        MyAnimation.__constructor();
+        Ani.__constructor();
 
         document.body.addEventListener("mousemove", () => {
             document.body.style.cursor = "default";
@@ -2202,13 +2203,17 @@ class MyAnimation {
         //check if peaks app is enabled for more dynamic animations.
         if (PEAKS_APP_ENABLED) {
             try {
-                MyAnimation.loadPeaksApp();
+                Ani.loadPeaksApp();
             } catch (e) {
                 console.log("Failed to load peaks app: ", e);
             }
         }
-        MyAnimation.loadSettings();
+        Ani.loadSettings();
     }
+
+    /**
+     * Loads the saved application settings.
+     */
     static loadSettings() {
         /**
          * An object used to obtain application settings.
@@ -2222,26 +2227,26 @@ class MyAnimation {
          * @type {Settings}
          * @public
          */
-        this.settings = null;
+        this.sObj = null;
 
         this.settingsFactory.addEventListener("open", function () {
-            MyAnimation.settingsFactory.loadSettings("(default)").then(function (s) {
-                MyAnimation.settings = s;
-                MyAnimation.__start();
+            Ani.settingsFactory.loadSettings("(default)").then(function (s) {
+                Ani.sObj = s;
+                Ani.__start();
             }).catch(function () {
                 console.error("Failed to load/parse IDB settings... :(");
-                MyAnimation.settings = new Settings(
-                    MyAnimation.settingsFactory,
+                Ani.sObj = new Settings(
+                    Ani.settingsFactory,
                     "(default)",
                     "{}");
-                MyAnimation.settings.save();
-                MyAnimation.__start();
+                Ani.sObj.save();
+                Ani.__start();
             });
         });
         this.settingsFactory.addEventListener("error", function () {
             console.error("Failed to load IDB settings... :(");
-            MyAnimation.settings = new Settings(null, "(default)", "{}");
-            MyAnimation.__start();
+            Ani.sObj = new Settings(null, "(default)", "{}");
+            Ani.__start();
         });
         this.settingsFactory.open();
     }
@@ -2267,7 +2272,7 @@ class MyAnimation {
                     window.setTimeout(connect, PEAKS_APP_ERROR_RECONNECT_WAIT);
                     reconnect = true;
                 }
-                MyAnimation.audioPeakMultiplier = 1;
+                Ani.audioPeakMultiplier = 1;
             });
             socket.addEventListener("close", function () {
                 console.info("Lost the connection to the audio peaks server.");
@@ -2276,7 +2281,7 @@ class MyAnimation {
                     window.setTimeout(connect, PEAKS_APP_RECONNECT_WAIT);
                     reconnect = true;
                 }
-                MyAnimation.audioPeakMultiplier = 1;
+                Ani.audioPeakMultiplier = 1;
             });
             socket.addEventListener("message", function (e) {
                 var message = JSON.parse(e.data);
@@ -2284,12 +2289,12 @@ class MyAnimation {
                     case "Success":
                         var peak = message.data.max;
                         if (peak === 0.5) {
-                            MyAnimation.audioPeakMultiplier = 1;
+                            Ani.audioPeakMultiplier = 1;
                         } else if (peak < 0.5) {
-                            MyAnimation.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 -
+                            Ani.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 -
                                 AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER));
                         } else { // > 0.5
-                            MyAnimation.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (
+                            Ani.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (
                                 AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER - 1));
                         }
                         break;
@@ -2355,7 +2360,7 @@ class MyAnimation {
      * Steps the FPS up by 5 frames per second.
      */
     static upFPS() {
-        MyAnimation.updateFPS(FPS + 5);
+        Ani.updateFPS(FPS + 5);
         console.info(`Now targeting ${FPS} frames per second.`);
     }
     /**
@@ -2363,7 +2368,7 @@ class MyAnimation {
      */
     static downFPS() {
         var old_fps = FPS;
-        MyAnimation.updateFPS(Math.max(FPS - 5, 5));
+        Ani.updateFPS(Math.max(FPS - 5, 5));
         if (old_fps !== FPS) {
             console.info(`Now targeting ${FPS} frames per second.`);
         } else {
@@ -2375,28 +2380,28 @@ class MyAnimation {
      * Resets the animation.
      */
     static reset() {
-        MyAnimation.startTime = (new Date()).getTime();
-        MyAnimation.dots = [];
-        MyAnimation.frameCount = 0;
+        Ani.startTime = (new Date()).getTime();
+        Ani.dots = [];
+        Ani.frameCount = 0;
         TRAIL_HSL_END = DEFAULT_TRAIL_HSL_END;
         TRAIL_HSL_START = DEFAULT_TRAIL_HSL_START;
         //Clear all prior paths.
-        MyAnimation.context.beginPath();
+        Ani.context.beginPath();
 
         //Set the fill and stroke styles to the background color at full opacity.
-        MyAnimation.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
-        MyAnimation.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        Ani.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        Ani.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
 
         //Fill the entire canvas with the current fill style.
-        MyAnimation.context.fillRect(0, 0, MyAnimation.width, MyAnimation.height);
+        Ani.context.fillRect(0, 0, Ani.width, Ani.height);
     }
 
     /**
      * Toggles whether or not the status overlay is enabled and displayed.
      */
     static toggleStatus() {
-        MyAnimation.statusEnabled = !MyAnimation.statusEnabled;
-        if (MyAnimation.statusEnabled) {
+        Ani.statusEnabled = !Ani.statusEnabled;
+        if (Ani.statusEnabled) {
             document.getElementById("status-info").style = "";
             console.info("Turned on the status info overlay.");
 
@@ -2405,14 +2410,14 @@ class MyAnimation {
              * overlay uses to refresh its information.
              * @type {number}
              */
-            MyAnimation.statusInterval = window.setInterval(() => {
-                MyAnimation.status.update();
+            Ani.statusInterval = window.setInterval(() => {
+                Ani.status.update();
             }, 10);
         } else {
             document.getElementById("status-info").style.display = "none";
             console.info("Turned off the status info overlay.");
-            if (MyAnimation.statusInterval) {
-                window.clearInterval(MyAnimation.statusInterval, 10);
+            if (Ani.statusInterval) {
+                window.clearInterval(Ani.statusInterval, 10);
                 window.statusInterval = undefined;
             }
         }
@@ -2427,8 +2432,8 @@ class MyAnimation {
          * @property {boolean} verbose
          * @static
          */
-        MyAnimation.verbose = !MyAnimation.verbose;
-        console.info(`Now ${MyAnimation.verbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
+        Ani.verbose = !Ani.verbose;
+        console.info(`Now ${Ani.verbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
 
     }
 
@@ -2445,6 +2450,193 @@ class MyAnimation {
         console.info("(r)eset   -- Resets the animation.");
         console.info("(+)       -- Increase the FPS by five frames per second.");
         console.info("(-)       -- Decrease the FPS by five frames per second.");
+    }
+
+
+    static get cBackground() {
+        return this.sObj.cBackground;
+    }
+    static get cDot() {
+        return this.sObj.cDot;
+    }
+    static get oTrail() {
+        return this.sObj.oTrail;
+    }
+    static get cTrail() {
+        return this.sObj.cTrail;
+    }
+    static get snTrail() {
+        return this.sObj.snTrail;
+    }
+    static get sxTrail() {
+        return this.sObj.sxTrail;
+    }
+    static get lnTrail() {
+        return this.sObj.lnTrail;
+    }
+    static get lxTrail() {
+        return this.sObj.lxTrail;
+    }
+    static get driftHsl() {
+        return this.sObj.driftHsl;
+    }
+    static get nSpeed() {
+        return this.sObj.nSpeed;
+    }
+    static get xSpeed() {
+        return this.sObj.xSpeed;
+    }
+    static get nAccel() {
+        return this.sObj.nAccel;
+    }
+    static get xAccel() {
+        return this.sObj.xAccel;
+    }
+    static get xDots() {
+        return this.sObj.xDots;
+    }
+    static get rDot() {
+        return this.sObj.rDot;
+    }
+    static get oFade() {
+        return this.sObj.oFade;
+    }
+    static get fps() {
+        return this.sObj.fps;
+    }
+    static get iFrame() {
+        return this.sObj.iFrame;
+    } //NO SETTER
+    static get wnLine() {
+        return this.sObj.wnLine;
+    }
+    static get wxLine() {
+        return this.sObj.wxLine;
+    }
+    static get opnLum() {
+        return this.sObj.opnLum;
+    }
+    static get opxLum() {
+        return this.sObj.opxLum;
+    }
+    static get oanLum() {
+        return this.sObj.oanLum;
+    }
+    static get oaxLum() {
+        return this.sObj.oaxLum;
+    }
+    static get opsLum() {
+        return this.sObj.opsLum;
+    }
+    static get opnwLine() {
+        return this.sObj.opnwLine;
+    }
+    static get opxwLine() {
+        return this.sObj.opxwLine;
+    }
+    static get oanwLine() {
+        return this.sObj.oanwLine;
+    }
+    static get oaxwLine() {
+        return this.sObj.oaxwLine;
+    }
+    static get opswLine() {
+        return this.sObj.opswLine;
+    }
+    static get resize() {
+        return this.sObj.resize;
+    }
+
+
+    static set cBackground(value) {
+        this.sObj.cBackground = value;
+    }
+    static set cDot(value) {
+        this.sObj.cDot = value;
+    }
+    static set oTrail(value) {
+        this.sObj.oTrail = value;
+    }
+    static set cTrail(value) {
+        this.sObj.cTrail = value;
+    }
+    static set snTrail(value) {
+        this.sObj.snTrail = value;
+    }
+    static set sxTrail(value) {
+        this.sObj.sxTrail = value;
+    }
+    static set lnTrail(value) {
+        this.sObj.lnTrail = value;
+    }
+    static set lxTrail(value) {
+        this.sObj.lxTrail = value;
+    }
+    static set driftHsl(value) {
+        this.sObj.driftHsl = value;
+    }
+    static set nSpeed(value) {
+        this.sObj.nSpeed = value;
+    }
+    static set xSpeed(value) {
+        this.sObj.xSpeed = value;
+    }
+    static set nAccel(value) {
+        this.sObj.nAccel = value;
+    }
+    static set xAccel(value) {
+        this.sObj.xAccel = value;
+    }
+    static set xDots(value) {
+        this.sObj.xDots = value;
+    }
+    static set rDot(value) {
+        this.sObj.rDot = value;
+    }
+    static set oFade(value) {
+        this.sObj.oFade = value;
+    }
+    static set fps(value) {
+        this.sObj.fps = value;
+    }
+    static set wnLine(value) {
+        this.sObj.wnLine = value;
+    }
+    static set wxLine(value) {
+        this.sObj.wxLine = value;
+    }
+    static set opnLum(value) {
+        this.sObj.opnLum = value;
+    }
+    static set opxLum(value) {
+        this.sObj.opxLum = value;
+    }
+    static set oanLum(value) {
+        this.sObj.oanLum = value;
+    }
+    static set oaxLum(value) {
+        this.sObj.oaxLum = value;
+    }
+    static set opsLum(value) {
+        this.sObj.opsLum = value;
+    }
+    static set opnwLine(value) {
+        this.sObj.opnwLine = value;
+    }
+    static set opxwLine(value) {
+        this.sObj.opxwLine = value;
+    }
+    static set oanwLine(value) {
+        this.sObj.oanwLine = value;
+    }
+    static set oaxwLine(value) {
+        this.sObj.oaxwLine = value;
+    }
+    static set opswLine(value) {
+        this.sObj.opswLine = value;
+    }
+    static set resize(value) {
+        this.sObj.resize = value;
     }
 }
 
@@ -3068,7 +3260,8 @@ class Settings {
     //a = amplitude, c = color, h = height, i = interval, l = luminosity, o = opacity,
     //p = period, ps = phase shift, r = rate, s = saturation, w = width
     //-n = min, -x = max
-    //need setters too. (make sure to refresh __keys)
+
+    //Ani.cBackground
 }
 /*
 var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
@@ -3115,9 +3308,9 @@ var TRAIL_HSL_END = 240.0; //do not save
 var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
 */
 if (document.readyState !== "complete") {
-    window.addEventListener("load", MyAnimation.start);
+    window.addEventListener("load", Ani.start);
 } else {
-    MyAnimation.start();
+    Ani.start();
 }
 
 
@@ -3127,5 +3320,5 @@ if (document.readyState !== "complete") {
  * @todo Add settings rows for the audio peaks settings
  * @todo Add in keybinds to enable/disable audio peaks
  * @todo Actually implement Settings object.
- * @todo Complete documentation. (kinda done...?)
+ * @todo Complete documentation.
  */
