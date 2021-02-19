@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.1.0
+ * @version 2.1.2.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.1.0";
+const VERSION = "2.1.2.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -319,7 +319,7 @@ const DEFAULT_TRAIL_SATURATION_MAX = 100.0;
  * @constant {Luminosity}
  * @default 25.0
  */
-const DEFAULT_LUMINOSITY_MIN = 25.0;
+const DEFAULT_TRAIL_LUMINOSITY_MIN = 25.0;
 
 /**
  * The maximum luminosity allowed for trail components.
@@ -1096,7 +1096,7 @@ class StatusElementCollection {
      * Updates the values of this {@see StatusElementCollection} and updates the HUD.
      */
     update() {
-        if (!Animation.statusEnabled) {
+        if (!MyAnimation.statusEnabled) {
             return; //don't update, save the frames; kill the animals.
         }
         this.rows.forEach((row) => {
@@ -1125,7 +1125,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.x = Dot.rand(0, Animation.size.width);
+        this.x = Dot.rand(0, MyAnimation.size.width);
         /**
          * The y-coordinate of this {@see Dot}.
          * 
@@ -1133,7 +1133,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.y = Animation.size.height;
+        this.y = MyAnimation.size.height;
         /**
          * The speed of this {@see Dot}.
          * 
@@ -1177,11 +1177,11 @@ class Dot {
         /**
          * The frame this {@see Dot} was created on.
          * 
-         * Default: The value of {@see Animation.frameCount} at the time of creation.
+         * Default: The value of {@see MyAnimation.frameCount} at the time of creation.
          * @type {number}
          * @public
          */
-        this.f = Animation.frameCount;
+        this.f = MyAnimation.frameCount;
         /**
          * The amplitude of the sine wave that oscillates the luminosity of this {@see Dot}.
          * 
@@ -1217,11 +1217,11 @@ class Dot {
         /**
          * The phase shift of the sine wave that oscillates the luminosity of this {@see Dot}.
          *
-         * Default: The sum of {@see Animation.frameCount} and {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
+         * Default: The sum of {@see MyAnimation.frameCount} and {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
          * @type {number}
          * @public
          */
-        this.pc = Animation.frameCount + LUMINOSITY_OSCILLATION_PHASE_SHIFT;
+        this.pc = MyAnimation.frameCount + LUMINOSITY_OSCILLATION_PHASE_SHIFT;
         /**
          * The amplitude of the sine wave that oscillates the line width of this {@see Dot}.
          *
@@ -1257,11 +1257,11 @@ class Dot {
         /**
          * The phase shift of the sine wave that oscillates the line width of this {@see Dot}.
          *
-         * Default: The sum of {@see Animation.frameCount} and {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
+         * Default: The sum of {@see MyAnimation.frameCount} and {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
          * @type {number}
          * @public
          */
-        this.bpc = Animation.frameCount + LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
+        this.bpc = MyAnimation.frameCount + LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
         /**
          * The line width of this {@see Dot}.
          *
@@ -1274,20 +1274,20 @@ class Dot {
          * A helper value that helps keep track of the frame number for the purposes of oscillating the
          * luminosity of this {@see Dot}.
          *
-         * Default: The value of {@see Animation.frameCount} at the time of creation.
+         * Default: The value of {@see MyAnimation.frameCount} at the time of creation.
          * @type {number}
          * @protected
          */
-        this.pfx = Animation.frameCount;
+        this.pfx = MyAnimation.frameCount;
         /**
          * A helper value that helps keep track of the frame number for the purposes of oscillating the
          * line width of this {@see Dot}.
          *
-         * Default: The value of {@see Animation.frameCount} at the time of creation.
+         * Default: The value of {@see MyAnimation.frameCount} at the time of creation.
          * @type {number}
          * @protected
          */
-        this.bpfx = Animation.frameCount;
+        this.bpfx = MyAnimation.frameCount;
         /**
          * A helper value that helps keep track of the last AUDIO_PEAK_MULTIPLIER value fro the purposes
          * of modifying the speed of the animation of this {@see Dot}.
@@ -1350,9 +1350,9 @@ class Dot {
      * of the sine waves does not cause jittering during the animation.
      */
     updatePhaseShifts() {
-        if (Animation.audioPeakMultiplier !== this.oapm) {
-            var np = (1 / Animation.audioPeakMultiplier) * this.opp;
-            var nbp = (1 / Animation.audioPeakMultiplier) * this.obpp;
+        if (MyAnimation.audioPeakMultiplier !== this.oapm) {
+            var np = (1 / MyAnimation.audioPeakMultiplier) * this.opp;
+            var nbp = (1 / MyAnimation.audioPeakMultiplier) * this.obpp;
             this.pc = Dot.getNewPhaseShift(this.opp, np, this.pc, this.pfx);
             this.pb = Dot.getB(np);
             this.pp = np;
@@ -1370,7 +1370,7 @@ class Dot {
      */
     updateSpeedAndPosition() {
         //Move the dot upwards based on the dot's speed.
-        this.y -= this.s * Animation.audioPeakMultiplier;
+        this.y -= this.s * MyAnimation.audioPeakMultiplier;
         //Increase the dot's speed based on its acceleration.
         this.s += this.a;// * AUDIO_PEAK_MULTIPLIER;
     }
@@ -1390,26 +1390,26 @@ class Dot {
         this.bpfx = (this.bpfx + 1) % this.bpp;
 
         //Set the line width
-        Animation.context.lineWidth = this.currentLineWidth;
+        MyAnimation.context.lineWidth = this.currentLineWidth;
 
         //Clear all preivous paths
-        Animation.context.beginPath();
+        MyAnimation.context.beginPath();
 
         //Set the stroke and fill styles to the color of the current dot.
-        Animation.context.strokeStyle =
-            Animation.context.fillStyle = this.colorHSL;
+        MyAnimation.context.strokeStyle =
+            MyAnimation.context.fillStyle = this.colorHSL;
 
         //Move to the oldest of the three reference points of the dot.
-        Animation.context.moveTo(this.rppx, this.rppy);
+        MyAnimation.context.moveTo(this.rppx, this.rppy);
         //Make a line to the second oldest of the three reference points of the dot.
-        Animation.context.lineTo(this.rpx, this.rpy);
+        MyAnimation.context.lineTo(this.rpx, this.rpy);
         //Draw the line.
-        Animation.context.stroke();
+        MyAnimation.context.stroke();
 
         //Make a line to the first (newest) of the three reference points of the dot
-        Animation.context.lineTo(this.rx, this.ry);
+        MyAnimation.context.lineTo(this.rx, this.ry);
         //Draw the line.
-        Animation.context.stroke();
+        MyAnimation.context.stroke();
 
         //Shift the reference points and update the speed, position, and phase shifts.
         this.shiftRefPoints();
@@ -1417,7 +1417,7 @@ class Dot {
         //this.updatePhaseShifts(); //BUGGED
 
         //Reset the line width
-        Animation.context.lineWidth = 1;
+        MyAnimation.context.lineWidth = 1;
     }
 
     /**
@@ -1650,7 +1650,7 @@ class Dot {
      * where x is equal to the the current [frame count]{@link FRAME_COUNT}
      */
     static sinusoidal(a, b, c, d) {
-        return Dot.sinusoidal2(a, b, c, d, Animation.frameCount);
+        return Dot.sinusoidal2(a, b, c, d, MyAnimation.frameCount);
     }
     /**
      * Calculates the value of a sinusoid equation given the four possible
@@ -1718,7 +1718,7 @@ class Dot {
  * A static class that contains methods and properties that can be used
  * to manage the animation being run.
  */
-class Animation {
+class MyAnimation {
     /**
      * A static constructor of sorts that is run when starting the animation.
      * @private
@@ -1733,7 +1733,7 @@ class Animation {
                 "type": "range.number.integer",
                 "unit": ["", "pixels"],
                 "sep": " x ",
-                "value": () => [Animation.size.width, Animation.size.height]
+                "value": () => [MyAnimation.size.width, MyAnimation.size.height]
             }, {
                 "name": "Version",
                 "type": "string",
@@ -1763,12 +1763,12 @@ class Animation {
                 "name": "Achieved FPS",
                 "type": "string",
                 "unit": "frames/second",
-                "value": () => (Math.round((Animation.frameCount / (((new Date()).getTime() - Animation.startTime) / 1000)) * 100) / 100).toFixed(2)
+                "value": () => (Math.round((MyAnimation.frameCount / (((new Date()).getTime() - MyAnimation.startTime) / 1000)) * 100) / 100).toFixed(2)
             }, {
                 "name": "Frame Count",
                 "type": "number.integer",
                 "unit": "frames",
-                "value": () => Animation.frameCount
+                "value": () => MyAnimation.frameCount
             }, {
                 "name": "Dot Statistics",
                 "type": "header"
@@ -1787,7 +1787,7 @@ class Animation {
                 "type": "range.number.integer",
                 "unit": ["", "dots"],
                 "sep": " of ",
-                "value": () => [Animation.dots.length, MAX_DOTS]
+                "value": () => [MyAnimation.dots.length, MAX_DOTS]
             }, {
                 "name": "Dot Rate",
                 "type": "number.integer",
@@ -1971,7 +1971,7 @@ class Animation {
         this.context.fillRect(0, 0, this.width, this.height);
 
         //Create a timer to start the animation.
-        window.setTimeout(Animation.animate, FRAME_INTERVAL);
+        window.setTimeout(MyAnimation.animate, FRAME_INTERVAL);
         this.status.update();
     }
 
@@ -1995,13 +1995,13 @@ class Animation {
      */
     static animate() {
         try {
-            Animation.__animateInternal();
+            MyAnimation.__animateInternal();
         } catch (e) {
             console.error(e);
         }
         //set a timer to run this same function, when we need to animate the next
         //frame.
-        window.setTimeout(Animation.animate, FRAME_INTERVAL);
+        window.setTimeout(MyAnimation.animate, FRAME_INTERVAL);
     }
 
     /**
@@ -2128,44 +2128,44 @@ class Animation {
             }, {
                 "key": "s",
                 "conditions": [{ "ctrl": false }],
-                "handler": Animation.toggleStatus
+                "handler": MyAnimation.toggleStatus
             }, {
                 "key": "v",
                 "conditions": [{ "ctrl": false }],
-                "handler": Animation.toggleVerboseStatus
+                "handler": MyAnimation.toggleVerboseStatus
             }, {
                 "key": "d",
                 "conditions": [{ "ctrl": false }],
-                "handler": () => console.info(`${Animation.dots.length} active dot(s).`)
+                "handler": () => console.info(`${MyAnimation.dots.length} active dot(s).`)
             }, {
                 "key": "r",
                 "conditions": [{ "ctrl": false }],
-                "handler": Animation.reset
+                "handler": MyAnimation.reset
             }, {
                 "key": "h",
                 "conditions": [{ "ctrl": false }],
-                "handler": Animation.help
+                "handler": MyAnimation.help
             }, {
                 "key": "+",
                 "conditions": [{ "ctrl": false }],
-                "handler": Animation.upFPS
+                "handler": MyAnimation.upFPS
             }, {
                 "key": "-",
                 "conditions": [{ "ctrl": false }],
-                "handler": Animation.downFPS
+                "handler": MyAnimation.downFPS
             }, {
                 "key": "_",
                 "conditions": [{ "ctrl": false, "shift": true }],
-                "handler": Animation.downFPS
+                "handler": MyAnimation.downFPS
             }, {
                 "key": "=",
                 "conditions": [{ "ctrl": false, "shift": false }],
-                "handler": Animation.upFPS
+                "handler": MyAnimation.upFPS
             }
         ];
 
         var timeout = null;
-        Animation.__constructor();
+        MyAnimation.__constructor();
 
         document.body.addEventListener("mousemove", () => {
             document.body.style.cursor = "default";
@@ -2202,12 +2202,48 @@ class Animation {
         //check if peaks app is enabled for more dynamic animations.
         if (PEAKS_APP_ENABLED) {
             try {
-                Animation.loadPeaksApp();
+                MyAnimation.loadPeaksApp();
             } catch (e) {
                 console.log("Failed to load peaks app: ", e);
             }
         }
-        Animation.__start();
+        MyAnimation.loadSettings();
+    }
+    static loadSettings() {
+        /**
+         * An object used to obtain application settings.
+         * @type {SettingsDB}
+         * @private
+         */
+        this.settingsFactory = new SettingsDB();
+
+        /**
+         * The current application settings.
+         * @type {Settings}
+         * @public
+         */
+        this.settings = null;
+
+        this.settingsFactory.addEventListener("open", function () {
+            MyAnimation.settingsFactory.loadSettings("(default)").then(function (s) {
+                MyAnimation.settings = s;
+                MyAnimation.__start();
+            }).catch(function () {
+                console.error("Failed to load/parse IDB settings... :(");
+                MyAnimation.settings = new Settings(
+                    MyAnimation.settingsFactory,
+                    "(default)",
+                    "{}");
+                MyAnimation.settings.save();
+                MyAnimation.__start();
+            });
+        });
+        this.settingsFactory.addEventListener("error", function () {
+            console.error("Failed to load IDB settings... :(");
+            MyAnimation.settings = new Settings(null, "(default)", "{}");
+            MyAnimation.__start();
+        });
+        this.settingsFactory.open();
     }
 
     /**
@@ -2231,7 +2267,7 @@ class Animation {
                     window.setTimeout(connect, PEAKS_APP_ERROR_RECONNECT_WAIT);
                     reconnect = true;
                 }
-                Animation.audioPeakMultiplier = 1;
+                MyAnimation.audioPeakMultiplier = 1;
             });
             socket.addEventListener("close", function () {
                 console.info("Lost the connection to the audio peaks server.");
@@ -2240,7 +2276,7 @@ class Animation {
                     window.setTimeout(connect, PEAKS_APP_RECONNECT_WAIT);
                     reconnect = true;
                 }
-                Animation.audioPeakMultiplier = 1;
+                MyAnimation.audioPeakMultiplier = 1;
             });
             socket.addEventListener("message", function (e) {
                 var message = JSON.parse(e.data);
@@ -2248,12 +2284,12 @@ class Animation {
                     case "Success":
                         var peak = message.data.max;
                         if (peak === 0.5) {
-                            Animation.audioPeakMultiplier = 1;
+                            MyAnimation.audioPeakMultiplier = 1;
                         } else if (peak < 0.5) {
-                            Animation.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 -
+                            MyAnimation.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 -
                                 AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER));
                         } else { // > 0.5
-                            Animation.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (
+                            MyAnimation.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (
                                 AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER - 1));
                         }
                         break;
@@ -2319,7 +2355,7 @@ class Animation {
      * Steps the FPS up by 5 frames per second.
      */
     static upFPS() {
-        Animation.updateFPS(FPS + 5);
+        MyAnimation.updateFPS(FPS + 5);
         console.info(`Now targeting ${FPS} frames per second.`);
     }
     /**
@@ -2327,7 +2363,7 @@ class Animation {
      */
     static downFPS() {
         var old_fps = FPS;
-        Animation.updateFPS(Math.max(FPS - 5, 5));
+        MyAnimation.updateFPS(Math.max(FPS - 5, 5));
         if (old_fps !== FPS) {
             console.info(`Now targeting ${FPS} frames per second.`);
         } else {
@@ -2339,28 +2375,28 @@ class Animation {
      * Resets the animation.
      */
     static reset() {
-        Animation.startTime = (new Date()).getTime();
-        Animation.dots = [];
-        Animation.frameCount = 0;
+        MyAnimation.startTime = (new Date()).getTime();
+        MyAnimation.dots = [];
+        MyAnimation.frameCount = 0;
         TRAIL_HSL_END = DEFAULT_TRAIL_HSL_END;
         TRAIL_HSL_START = DEFAULT_TRAIL_HSL_START;
         //Clear all prior paths.
-        Animation.context.beginPath();
+        MyAnimation.context.beginPath();
 
         //Set the fill and stroke styles to the background color at full opacity.
-        Animation.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
-        Animation.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        MyAnimation.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        MyAnimation.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
 
         //Fill the entire canvas with the current fill style.
-        Animation.context.fillRect(0, 0, Animation.width, Animation.height);
+        MyAnimation.context.fillRect(0, 0, MyAnimation.width, MyAnimation.height);
     }
 
     /**
      * Toggles whether or not the status overlay is enabled and displayed.
      */
     static toggleStatus() {
-        Animation.statusEnabled = !Animation.statusEnabled;
-        if (Animation.statusEnabled) {
+        MyAnimation.statusEnabled = !MyAnimation.statusEnabled;
+        if (MyAnimation.statusEnabled) {
             document.getElementById("status-info").style = "";
             console.info("Turned on the status info overlay.");
 
@@ -2369,14 +2405,14 @@ class Animation {
              * overlay uses to refresh its information.
              * @type {number}
              */
-            Animation.statusInterval = window.setInterval(() => {
-                Animation.status.update();
+            MyAnimation.statusInterval = window.setInterval(() => {
+                MyAnimation.status.update();
             }, 10);
         } else {
             document.getElementById("status-info").style.display = "none";
             console.info("Turned off the status info overlay.");
-            if (Animation.statusInterval) {
-                window.clearInterval(Animation.statusInterval, 10);
+            if (MyAnimation.statusInterval) {
+                window.clearInterval(MyAnimation.statusInterval, 10);
                 window.statusInterval = undefined;
             }
         }
@@ -2391,8 +2427,8 @@ class Animation {
          * @property {boolean} verbose
          * @static
          */
-        Animation.verbose = !Animation.verbose;
-        console.info(`Now ${Animation.verbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
+        MyAnimation.verbose = !MyAnimation.verbose;
+        console.info(`Now ${MyAnimation.verbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
 
     }
 
@@ -2412,29 +2448,684 @@ class Animation {
     }
 }
 
-if (document.readyState !== "complete") {
-    window.addEventListener("load", Animation.start);
-} else {
-    Animation.start();
+/**
+ * A class that uses IndexedDB to store and retrieve application settings.
+ */
+class SettingsDB extends EventTarget {
+    /**
+     * Creates a new {@see SettingsDB} object.
+     */
+    constructor() {
+        super(); //Oh, so there is a way to do base() in JS. Kewl~.
+        /**
+         * @type {string}
+         * @private
+         */
+        this.__state = "closed";
+        /**
+         * The opened settings database.
+         * @type {IDBDatabase}
+         * @private
+         */
+        this.__db = null;
+        /*
+         * cancelled = dispatchEvent(new CustomEvent("name", {
+         *     "detail": object = null,
+         *     "bubbles": bool = false,
+         *     "cancelable": bool = false,
+         *     "composed": bool = false
+         * });
+         */
+    }
+    /**
+     * Indicates the state of the settings database. It's one of the
+     * following values:
+     * + closed
+     * + open
+     * + opening
+     */
+    get state() {
+        return this.__state;
+    }
+
+    /**
+     * Fired when the settings database is successfully opened.
+     * @event SettingsDB#event:open
+     * @type {object}
+     */
+
+    /**
+     * Fired when an error occurs while trying to open the settings database.
+     * @event SettingsDB#event:error
+     * @type {object}
+     */
+
+    /**
+     * Opens the settings database.
+     *
+     * @fires SettingsDB#event:open
+     * @fires SettingsDB#event:error
+     * @returns {boolean}
+     *     "true" if the database is actually being opened.
+     *     "false" if the state isn't "closed".
+     */
+    open() {
+        if (this.__state !== "closed") {
+            return false;
+        }
+        this.__state = "opening";
+        var self = this;
+        new Promise(function (resolve, reject) {
+            function create(db) {
+                try {
+                    db.createObjectStore("settings", { "keyPath": "id" });
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+            var request = indexedDB.open("settingsDB", SettingsDB.version);
+
+            request.addEventListener("success", function (e) {
+                var db = e.target.result;
+                db.addEventListener("error", reject);
+                if (db.setVersion) {
+                    if (db.version !== SettingsDB.version) {
+                        var sv = db.setVersion(SettingsDB.version);
+                        sv.addEventListener("success", function () {
+                            create(db)
+                                ? resolve(db)
+                                : reject();
+                        });
+                    } else {
+                        resolve(db);
+                    }
+                } else {
+                    resolve(db);
+                }
+            });
+            request.addEventListener("upgradeneeded", function (e) {
+                var db = e.target.result;
+                create(db)
+                    ? resolve(db)
+                    : reject();
+            });
+        }).then(function (db) {
+            self.__db = db;
+            self.__state = "open";
+            self.dispatchEvent(new CustomEvent("open"));
+        }).catch(function () {
+            self.__state = "closed";
+            self.dispatchEvent(new CustomEvent("error"));
+        });
+        return true;
+    }
+    /**
+     * Opens the specified settings store.
+     * 
+     * @param {string} id
+     *     The ID used to save the settings. This will be "(default)"
+     *     for the default settings.
+     *     
+     *     Passing any non-string value or an empty string will result in the
+     *     application using "(default)" instead.
+     *     
+     *     You can use this property to save multiple settings presets.
+     * @returns {Promise<Settings>}
+     *     The Settings object obtained, or "null" if the application was
+     *     unable to attempt this;
+     */
+    loadSettings(id) {
+        if (this.__state !== "open") {
+            return null;
+        }
+        if (!(id instanceof String) || (id.trim().length === 0)) {
+            id = "(default)";
+        }
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            var t = self.__db.transaction(["settings"], "readwrite");
+            t.addEventListener("error", reject);
+            var store = t.objectStore("settings");
+            var tr = store.get(id);
+            tr.addEventListener("error", reject);
+            tr.addEventListener("success", function (e) {
+                var result = e.target.result;
+                var sett;
+                if (result) {
+                    try {
+                        sett = new Settings(self, id, result.data);
+                    } catch (e) {
+                        reject();
+                    }
+                    resolve(sett);
+                } else {
+                    reject();
+                }
+            });
+        });
+    }
+
+    /**
+     * Saves the specified settings store.
+     *
+     * @param {string} id
+     *     The ID used to save the settings. This will be "(default)"
+     *     for the default settings.
+     *
+     *     Passing any non-string value or an empty string will result in the
+     *     application using "(default)" instead.
+     *
+     *     You can use this property to save multiple settings presets.
+     * @param {string} data
+     *     The settings data
+     * @returns {Promise<void>}
+     *     The Settings object obtained, or "null" if the application was
+     *     unable to attempt this;
+     * @protected
+     */
+    saveSettings(id, data) {
+        if (this.__state !== "open") {
+            return null;
+        }
+        if (!(id instanceof String) || (id.trim().length === 0)) {
+            id = "(default)";
+        }
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            var t = self.__db.transaction(["settings"], "readwrite");
+            t.addEventListener("error", reject);
+            t.addEventListener("complete", resolve);
+            var store = t.objectStore("settings");
+            store.put({
+                "id": id,
+                "data": data
+            });
+            t.commit();
+        });
+    }
+    /**
+     * Gets the current database version. Used to upgrade IDB objects in the
+     * event the database structure is changed.
+     * 
+     * This is currently: 2
+     */
+    static get version() {
+        return 2;
+    }
+    /**
+     * Static "constructor" that ensures the {@see window#indexedDB} and
+     * {@see window#IDBTransaction} values are set properly--even when accounting
+     * for differences in browser.
+     */
+    static __constructor() {
+        try {
+            window.indexedDB = window.indexedDB || window.webkitIndexedDB
+                || window.mozIndexedDB || window.OIndexedDB
+                || window.msIndexedDB;
+            window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction
+                || window.OIDBTransaction || window.msIDBTransaction;
+        } catch (e) {
+            return false;
+        }
+        
+    }
 }
+SettingsDB.__constructor();
+
+/**
+ * A class that represents the settings of the application.
+ */
+class Settings {
+    /**
+     * Creates a new {@see Settings} object from a {@see SettingsDB} object,
+     * the id of the settings, and the JSON string containing the raw settings.
+     * @protected
+     * @param {SettingsDB} db
+     *     The database backing-store for these settings, or null.
+     * @param {string} id
+     *     The id of the settings for DB use.
+     * @param {string} data
+     *     A JSON string containing the unparsed settings data.
+     */
+    constructor(db, id, data) {
+        /**
+         * @type {SettingsDB}
+         * @private
+         */
+        this.__db = db;
+        /**
+         * @type {string}
+         * @private
+         */
+        this.__id = id;
+        /**
+         * @type {object}
+         * @private
+         */
+        this.__data = JSON.parse(data);
+        /**
+         * @type {string[]}
+         * @private
+         */
+        this.__keys = Object.keys(this.__data);
+    }
+    /**
+     * Saves these settings to the {@see SettingsDB}.
+     * @returns {Promise<void>}
+     *     A promise object that determines if the data was saved successfully.
+     */
+    save() {
+        if (this.__db === null) {
+            return null;
+        }
+        return this.__db.saveSettings(
+            this.__id,
+            JSON.stringify(this.__data));
+    }
+    /**
+     * Refreshes the key cache of the settings object.
+     * @private
+     */
+    __refreshKeys() {
+        this.__keys = Object.keys(this.__data);
+    }
+    /**
+     * Renames this settings store and overwrites the database settings.
+     * @param {string} newID
+     *     The new ID to save the settings under;
+     * @returns {Promise<void>}
+     *     A promise that resolves once the settings have been renamed.
+     */
+    rename(newID) {
+        if (!(newID instanceof String)) {
+            return null;
+        }
+        if (this.__db === null) {
+            return null;
+        }
+        if (this.__id === newID) {
+            return null;
+        }
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            var id = self.__id;
+            self.__id = newID;
+            self.__db.saveSettings(self.__id, JSON.stringify(self.__data)).then(function () {
+                return self.__db.saveSettings(id, "");
+                //ahhh, I love stringing promises together.
+            }).then(resolve).catch(reject);
+        });
+    }
+
+    get cBackground() {
+        return this.__keys.includes("bg")
+            ? this.__data.bg
+            : DEFAULT_BACKGROUND;
+    }
+    get cDot() {
+        return this.__keys.includes("dc")
+            ? this.__data.dc
+            : DEFAULT_DOT_COLOR;
+    }
+    get oTrail() {
+        return this.__keys.includes("to")
+            ? this.__data.to
+            : DEFAULT_TRAIL_OPACITY;
+    }
+    get cTrail() {
+        return this.__keys.includes("tc")
+            ? this.__data.tc
+            : DEFAULT_TRAIL_COLOR;
+    }
+    get snTrail() {
+        return this.__keys.includes("tsn")
+            ? this.__data.tsn
+            : DEFAULT_TRAIL_SATURATION_MIN;
+    }
+    get sxTrail() {
+        return this.__keys.includes("tsx")
+            ? this.__data.tsx
+            : DEFAULT_TRAIL_SATURATION_MAX;
+    }
+    get lnTrail() {
+        return this.__keys.includes("tln")
+            ? this.__data.tln
+            : DEFAULT_TRAIL_LUMINOSITY_MIN;
+    }
+    get lxTrail() {
+        return this.__keys.includes("tlx")
+            ? this.__data.tlx
+            : DEFAULT_TRAIL_LUMINOSITY_MAX;
+    }
+    get driftHsl() {
+        return this.__keys.includes("hd")
+            ? this.__data.hd
+            : DEFAULT_HSL_DRIFT;
+    }
+    get nSpeed() {
+        return this.__keys.includes("ns")
+            ? this.__data.ns
+            : DEFAULT_MIN_SPEED;
+    }
+    get xSpeed() {
+        return this.__keys.includes("xs")
+            ? this.__data.xs
+            : DEFAULT_MAX_SPEED;
+    }
+    get nAccel() {
+        return this.__keys.includes("na")
+            ? this.__data.na
+            : DEFAULT_MIN_ACCEL;
+    }
+    get xAccel() {
+        return this.__keys.includes("xa")
+            ? this.__data.xa
+            : DEFAULT_MAX_ACCEL;
+    }
+    get xDots() {
+        return this.__keys.includes("xd")
+            ? this.__data.xd
+            : DEFAULT_MAX_DOTS;
+    }
+    get rDot() {
+        return this.__keys.includes("dr")
+            ? this.__data.dr
+            : DEFAULT_DOT_RATE;
+    }
+    get oFade() {
+        return this.__keys.includes("fo")
+            ? this.__data.fo
+            : DEFAULT_FADE_OPACITY;
+    }
+    get fps() {
+        return this.__keys.includes("f")
+            ? this.__data.f
+            : DEFAULT_FPS;
+    }
+    get iFrame() {
+        return this.__keys.includes("f")
+            ? 1000 / this.__data.f
+            : 1000 / DEFAULT_FPS;
+    } //NO SETTER
+    get wnLine() {
+        return this.__keys.includes("lwn")
+            ? this.__data.lwn
+            : DEFAULT_LINE_WIDTH_MIN;
+    }
+    get wxLine() {
+        return this.__keys.includes("lwx")
+            ? this.__data.lwx
+            : DEFAULT_LINE_WIDTH_MAX;
+    }
+    get opnLum() {
+        return this.__keys.includes("lopn")
+            ? this.__data.lopn
+            : DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN;
+    }
+    get opxLum() {
+        return this.__keys.includes("lopx")
+            ? this.__data.lopx
+            : DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX;
+    }
+    get oanLum() {
+        return this.__keys.includes("loan")
+            ? this.__data.loan
+            : DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN;
+    }
+    get oaxLum() {
+        return this.__keys.includes("loax")
+            ? this.__data.loax
+            : DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX;
+    }
+    get opsLum() {
+        return this.__keys.includes("lops")
+            ? this.__data.lops
+            : DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT;
+    }
+    get opnwLine() {
+        return this.__keys.includes("lwopn")
+            ? this.__data.lwopn
+            : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN;
+    }
+    get opxwLine() {
+        return this.__keys.includes("lwopx")
+            ? this.__data.lwopx
+            : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX;
+    }
+    get oanwLine() {
+        return this.__keys.includes("lwoan")
+            ? this.__data.lwoan
+            : DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN;
+    }
+    get oaxwLine() {
+        return this.__keys.includes("lwoax")
+            ? this.__data.lwoax
+            : DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX;
+    }
+    get opswLine() {
+        return this.__keys.includes("lwops")
+            ? this.__data.lwops
+            : DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
+    }
+    get resize() {
+        return this.__keys.includes("r")
+            ? this.__data.r
+            : DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE;
+    }
+
+    set cBackground(value) {
+        this.__data.bg = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set cDot(value) {
+        this.__data.dc = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set oTrail(value) {
+        this.__data.to = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set cTrail(value) {
+        this.__data.tc = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set snTrail(value) {
+        this.__data.tsn = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set sxTrail(value) {
+        this.__data.tsx = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set lnTrail(value) {
+        this.__data.tln = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set lxTrail(value) {
+        this.__data.tlx = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set driftHsl(value) {
+        this.__data.hd = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set nSpeed(value) {
+        this.__data.ns = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set xSpeed(value) {
+        this.__data.xs = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set nAccel(value) {
+        this.__data.na = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set xAccel(value) {
+        this.__data.xa = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set xDots(value) {
+        this.__data.xd = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set rDot(value) {
+        this.__data.dr = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set oFade(value) {
+        this.__data.fo = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set fps(value) {
+        this.__data.f = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set wnLine(value) {
+        this.__data.lwn = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set wxLine(value) {
+        this.__data.lwx = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opnLum(value) {
+        this.__data.lopn = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opxLum(value) {
+        this.__data.lopx = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set oanLum(value) {
+        this.__data.loan = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set oaxLum(value) {
+        this.__data.loax = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opsLum(value) {
+        this.__data.lops = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opnwLine(value) {
+        this.__data.lwopn = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opxwLine(value) {
+        this.__data.lwopx = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set oanwLine(value) {
+        this.__data.lwoan = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set oaxwLine(value) {
+        this.__data.lwoax = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opswLine(value) {
+        this.__data.lwops = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set resize(value) {
+        this.__data.r = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    //bg,dc,dr,f,fo,hd,loan,loax.lopn,lops,lopx,lwn,lwoan,lwoax,lwopn,lwops,lwopx,lwx,na,ns,r,tc,to,tsm,tsx,tln,tlx,xa,xd,xs
+    //a = amplitude, c = color, h = height, i = interval, l = luminosity, o = opacity,
+    //p = period, ps = phase shift, r = rate, s = saturation, w = width
+    //-n = min, -x = max
+    //need setters too. (make sure to refresh __keys)
+}
+/*
+var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
+*/
 
 /*
-class Settings {
-    constructor(local_settings) {
-        this.__internal__settings = local_settings;
-    }
-    get area() { }
-    calcArea() { }
-    set blah(value) { }
-    static method() { }
-    static __constructor() { }
-}
-Settings.__constructor(); //basically emulating static constructors
+var BACKGROUND = [0, 0, 0];
+var DOT_COLOR = [255, 255, 255, 1.0];
+var TRAIL_OPACITY = 1.0;
+var TRAIL_COLOR = [88, 0, 133, TRAIL_OPACITY];
+var TRAIL_SATURATION_MIN = 100.0;
+var TRAIL_SATURATION_MAX = 100.0;
+var TRAIL_LUMINOSITY_MIN = 25.0;
+var TRAIL_LUMINOSITY_MAX = 75.0;
+var HSL_DRIFT = 0.1;
+var MIN_SPEED = 0.1;
+var MAX_SPEED = 2.0;
+var MIN_ACCEL = 0.01;
+var MAX_ACCEL = 0.50;
+var MAX_DOTS = 250;
+var DOT_RATE = 2;
+var FADE_OPACITY = 0.2;
+var FPS = 30;
+var FRAME_INTERVAL = 1000 / FPS;
+var FRAME_INTERVAL_ = () => 1000 / FPS;
+var LINE_WIDTH_MIN = 0.5;
+var LINE_WIDTH_MAX = 3.0;
+var LUMINOSITY_OSCILLATION_PERIOD_MIN = FPS * 0.5;
+var LUMINOSITY_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
+var LUMINOSITY_OSCILLATION_PERIOD_MAX = FPS * 1;
+var LUMINOSITY_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
+var LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
+var LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
+var LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
+var LINE_WIDTH_OSCILLATION_PERIOD_MIN = FPS * 0.5;
+var LINE_WIDTH_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
+var LINE_WIDTH_OSCILLATION_PERIOD_MAX = FPS * 1;
+var LINE_WIDTH_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
+var LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
+var LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
+var LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
+var TRAIL_HSL_START = 180.0; //do not save
+var TRAIL_HSL_END = 240.0; //do not save
+var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
 */
+if (document.readyState !== "complete") {
+    window.addEventListener("load", MyAnimation.start);
+} else {
+    MyAnimation.start();
+}
+
+
+
 
 /**
  * @todo Add settings rows for the audio peaks settings
  * @todo Add in keybinds to enable/disable audio peaks
- * @todo Store settings in localStorage or IDB to use later on (see commented out code at top)
+ * @todo Actually implement Settings object.
  * @todo Complete documentation. (kinda done...?)
  */
