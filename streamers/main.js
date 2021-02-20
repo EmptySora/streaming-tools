@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.2.1
+ * @version 2.1.3.1
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.2.1";
+const VERSION = "2.1.3.1";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -25,242 +25,15 @@ const VERSION = "2.1.2.1";
  * left or right
  */
 
-/**
- * Represents a color using Red, Green, and Blue components in that order.
- * Each value should range from 0 - 255, or 0x00 - 0xFF.
- * 0 represents a full lack of that color, and 255 represents a full occurrence
- * of that color.
- * @typedef {number[]} ColorRGB
- */
+
 
 /**
- * Represents a color using Red, Green, Blue, and Alpha components in that
- * order.
- * The Red, Green, and Blue values should range from 0 - 255, or 0x00 - 0xFF.
- * 0 represents a full lack of that color, and 255 represents a full occurrence
- * of that color.
- * The Alpha value should range from 0.0 - 1.0.
- * 0.0 represents full transparancy, 1.0 represents full opacity.
- * @typedef {number[]} ColorRGBA
- * @see {@link Opacity}
+ * @todo DOCUMENT THESE
  */
-
-/**
- * Represents the opacity of a color ranging from 0.0 to 1.0.
- * 0.0 represents full transparancy, 1.0 represents full opacity.
- * @typedef {number} Opacity
- */
-
-/**
- * Represents the saturation of a color, or how "vibrant" the color appears,
- * ranging from 0.0 to 100.0.
- * 0.0 represents 0% saturation, or grayscale.
- * 100.0 represents 100% saturation, or complete vibrancy.
- *
- * Even though this value represents a percentage, you must express the value
- * as a number ranging from 0 to 100.
- * @typedef {number} Saturation
- */
-
-/**
- * Represents the luminosity of a color, or how much light the color gives off,
- * ranging from 0.0 to 100.0.
- * 0.0 represents 0% luminosity, or black.
- * 50.0 represents 50% luminosity, or "regular".
- * 100.0 represents 100% luminosity, or white.
- *
- * Luminosity, while related to the "Value" component in HSV, is not the same
- * thing as "Value". A "Value" of 100%, would be equal to a Luminosity of 50%.
- * Any Luminosity over 50% would still be equivalent to a "Value" of 100%, the
- * Saturation would instead decrease.
- * Refer to conical models of the HSL and HSV color spaces. HSV looks like an
- * upside-down cone, while HSL looks like a di-cone.
- * [(Image)]{@link https://learnui.design/blog/img/hsb/hsb-cone-and-hsl-dicone.png}
- 
- * Even though this value represents a percentage, you must express the value
- * as a number ranging from 0 to 100.
- * @typedef {number} Luminosity
- */
-
-/**
- * Represents the Hue of a color, as a measure of degrees (not radians), around
- * the color wheel.
- * The color wheel is split into 60° sections in the following order:
- * 330° -  30°  Red          (  0°/360° Completely Red)
- *  30° -  90°  Yellow       ( 60° Completely Red & Green (Yellow))
- *  90° - 150°  Green (Lime) (120° Completely Green)
- * 150° - 210°  Cyan         (180° Completely Green & Blue (Cyan))
- * 210° - 270°  Blue         (240° Completely Blue)
- * 270° - 330°  Magenta      (300° Completely Blue & Red (Magenta))
- * 
- * If you are familiar with the Additive (RGB) and Subtractive (CMY) color
- * models, you may notice that their respective components form the color wheel:
- * R > Y > G > C > B > M > R ...
- * As, RED + BLUE = MAGENTA, RED + GREEN = YELLOW, GREEN + BLUE = CYAN
- * and MAGENTA + CYAN = BLUE, CYAN + YELLOW = GREEN, YELLOW + MAGENTA = RED
- * @typedef {number} Hue
- */
-
-/**
- * This isn't an actual typedef. It's meant to be a pointer to common notes
- * regarding the calculation of sinusoidal functions, or functions that use
- * trigonometric functions like sine, cosine, or tangent (hence SINusoid).
- * 
- * Sinusoidal equations generally take the following forms:
- * F(x) = y = A x sin(B (x - C)) + D
- * G(x) = y = A x cos(B (x - C)) + D
- * where with F(x = 0) = 0 (sine)
- * and with G(x = 0) = 1 (sine)
- * Note that both F(x) and G(x) can be equated depending on their phase shifts
- * (the C)
- *
- * A = Amplitude
- * B = Frequency
- * C = Phase Shift
- * D = Vertical Shift
- * To calculate the period, or when the function repeats use: (2 x PI) / B
- *
- * Amplitude describes where the peaks of the function reach, for example, with
- * a Vertical Shift of 0 (no shift), and an amplitude of 3
- * (y = 3sin(1(x-0))+0 = 3sin(x) ), the value of "y" should range from -3 to 3
- * In other words, the Range of the function is [-|A|,+|A|]
- *
- * Frequency describes how quickly the function repeats itself. It's basically
- * used to modify the periodicity of the function. Sinusoid functions normally
- * have a period of 2 x PI. Using the B parameter you can change that.
- * To have the function repeat every 2 units, or to set the period equal to 2,
- * you would have to determine the value of B: 
- * B = (2 x PI) / Period
- * In this case: B = (2 x PI) / 2, since two is in both the numerator and
- * denominator, they cancel out leaving: B = PI, so setting B to "PI" makes
- * the function repeat every two units.
- *
- * Phase shift, or horizontal shift, describes how far the function is shifted
- * horizontally, through the first phase of the function (before it repeats).
- * Positive values for C, will shift the function to the right C units.
- * Negative values for C, will shift the function to the left C units.
- * If you use a phase shift that is equal to the period of the function, the
- * function is not affected by the phase shift. Using the previous example:
- * y = sin(pi * x)   which has a period of 2,
- * if we modified this to add a phase shift of positive 2:
- * y = sin(pi * (x - 2))
- * the function will produce the same results as the original, ie:
- * y = sin(pi * x) = sin(pi * (x - 2))
- * this holds true for all positive and negative multiples of the period as
- * well.
- * 
- * Vertical shift, describes how far the function is shifted vertically.
- * Positive values shift the function upwards D units.
- * Negative values shift the function downwards D units.
- *
- * Since trigonometry can be a bit confusing, feel free to google terms like:
- * "sine function formula" or "cosine function formula"
- * Or you can use this link: 
- * [image]{@link https://www.onlinemathlearning.com/image-files/transformation-trig-graphs.png}
- * You can also play with the graphs of sine functions on [graph.tk]{@link graph.tk}
- * as well. In the upper right is a "?" button, click there if you need help, as that
- * article explains how to type in the pi symbol.
- *
- * @typedef {undefined} Sinusoid
- */
-
-/**
- * 
- * @typedef {Object} KeyBindingInfo
- * @property {Key} key 
- *     The name of the key being pressed, if this is a letter, or value that changes with
- *     the shift key, the actual value here depends on whether or not the shift key is pressed.
- * @property {KeyBindingCondition[]} conditions 
- *     An Array of {@link KeyBindingCondition} objects that describe conditionals required to
- *     trigger the binding. Only one of the conditions needs to be met.
- * @property {Function} handler 
- *     The event handler for the key binding.
- */
-
-/**
- * Conditions that must be met in order to run the key binding. All specified
- * properties must have their respective keys set to the specified state.
- * @typedef {Object} KeyBindingCondition
- * @property {boolean} ctrl
- *     Required state of the CTRL key.
- * @property {boolean} alt 
- *     Required state of the ALT key.
- * @property {boolean} meta 
- *     Required state of the META key.
- * @property {boolean} shift 
- *     Required state of the SHIFT key.
- */
-
-/**
- * Represents the delegate that is called to invoke the "format" property.
- * @callback StatusElementPropertiesFormatCallback
- * @param {object} obj
- *     The input object being formatted.
- * @returns {string}
- *     A formatted string containing the object.
- */
-
-/**
- * Represents the delegate that is called to invoke the "value" property.
- * @callback StatusElementPropertiesValueCallback
- * @returns {object|object[]}
- *     The value of the StatusElement, or an array of such values if necessary.
- */
-
-/**
- *
- * @typedef {object} StatusElementProperties
- * @property {string} name
- *     The text that is displayed on the HUD for this StatusElement. This property is required.
- * @property {string} type
- *     The type of StatusElement this is. The valid types are below:
- *     + string
- *         Indicates that the value is a textual value.
- *     + range.*
- *         Indicates that the value is a range between two values. The asterisk is another valid type
- *         value.
- *     + header
- *         Indicates that the row is a header row that doesn't have a value. All properties aside from
- *         {@link StatusElementProperties#show} and {@link StatusElementProperties#name} will be ignored.
- *     + number.[integer|decimal|percentage]
- *         Indicates that the value is a numeric value.
- *         - The "integer" subtype indicates that only whole numbers are valid.
- *         - The "decimal" subtype indicates that all numbers are valid.
- *         - The "percentage" subtype indicates that the value will be displayed as a percentage.
- *     + color.[rgb|rgba|hsl|hsla|red|blue|green|hue|sat|luma|alpha]
- *         Indicates that the value is a color.
- *         The subtypes are as follows:
- *         - rgb / rgba
- *             Specifies that color is an array of 3 to 4 numbers: [red, green, blue, alpha]
- *         - hsl / hsla
- *             Specifies that color is an array of 3 to 4 numbers: [hue, saturation, luminosity, alpha]
- *         - red / green / blue / hue / sat / luma
- *             Specifies that the color is a single number for the specified RGBA or HSLA component.
- *     + flag
- *         Indicates that the value is a boolean value that can be either true or false.
- *     + custom
- *         Indicates that the value is a custom value that has no set format. Generally, this will be
- *         treated like "string", except the value is not necessarily a string value.
- * @property {string|string[]} unit
- *     Either a single string value or an array of string values that is displayed beside the value of
- *     the StatusElement and acts as the units. Using an array of two strings and having the first string
- *     be empty is a valid use case (eg: a range of pixels. Instead of ## pixels ## pixels, you can use
- *     ["","pixels"] with the {@link StatusElementProperties#sep} property to get like ## x ## pixels).
- * @property {StatusElementPropertiesFormatCallback} format
- *     Used to format the {@link StatusElementProperties#value} property. Currently unused, I think.
- *     I might end up removing it...
- * @property {StatusElementPropertiesValueCallback} value
- *     A callback function that is used to retrieve the value of the property.
- * @property {boolean} show
- *     Gets whether or not the property should be shown. This defaults to true, obviously.
- *     As such, this property is generally omitted.
- * @property {string} sep
- *     A string value that is used to separate the values in a range. Defaults to an empty string.
- * @see {@link StatusElement}
- */
-
-
-
+const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR = 0.5;
+const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR = 1;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR = 0.5;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR = 1;
 
 /**
  * The background color of the canvas.
@@ -423,9 +196,9 @@ const DEFAULT_FADE_OPACITY = 0.2;
  * Values greater than 30 will result in computational lag depending on other
  * settings.
  * @constant {number}
- * @default 20
+ * @default 30
  */
-const DEFAULT_FPS = 20;
+const DEFAULT_FPS = 30;
 
 /**
  * DO NOT MODIFY THIS CONSTANT!!!
@@ -473,7 +246,8 @@ const DEFAULT_LINE_WIDTH_MAX = 3.0;
  * @constant {number}
  * @default
  */
-const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
+const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS
+    * DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR;
 
 /**
  * The maximum amount of time before the luminosity of a dot, finishes an
@@ -486,7 +260,8 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
  * @constant {number}
  * @default
  */
-const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX = DEFAULT_FPS * 1;
+const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX = DEFAULT_FPS
+    * DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR;
 
 /**
  * The minimum variation in luminosity the dot should oscillate to/from.
@@ -535,7 +310,8 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
  * @constant {number}
  * @default
  */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS
+    * DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR;
 
 /**
  * The maximum amount of time before the line width of a dot, finishes an
@@ -549,7 +325,8 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS * 0.5;
  * @constant {number}
  * @default
  */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX = DEFAULT_FPS * 1;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX = DEFAULT_FPS
+    * DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR;
 
 /**
  * The minimum variation in line width the dot should oscillate to/from.
@@ -623,7 +400,7 @@ const DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
  * @var {number}
  * @default 180.0
  */
-const DEFAULT_TRAIL_HSL_START = TRAIL_HSL_START;
+const DEFAULT_TRAIL_HSL_START = 180.0;
 
 /**
  * Represents the initial maximum hue of the dots that are created in degrees
@@ -637,7 +414,9 @@ const DEFAULT_TRAIL_HSL_START = TRAIL_HSL_START;
  * @var {number}
  * @default 180.0
  */
-const DEFAULT_TRAIL_HSL_END = TRAIL_HSL_END;
+const DEFAULT_TRAIL_HSL_END = 240.0;
+
+
 
 
 
@@ -743,49 +522,244 @@ const AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
  */
 const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
 
-/*****************************************************************************
- *********************** END OF CONFIGURATION SETTINGS ***********************
- *****************************************************************************/
+/* *************************************************************************** *
+ * ********************** END OF CONFIGURATION SETTINGS ********************** *
+ * *************************************************************************** */
 
-var BACKGROUND = [0, 0, 0];
-var DOT_COLOR = [255, 255, 255, 1.0];
-var TRAIL_OPACITY = 1.0;
-var TRAIL_COLOR = [88, 0, 133, TRAIL_OPACITY];
-var TRAIL_SATURATION_MIN = 100.0;
-var TRAIL_SATURATION_MAX = 100.0;
-var TRAIL_LUMINOSITY_MIN = 25.0;
-var TRAIL_LUMINOSITY_MAX = 75.0;
-var HSL_DRIFT = 0.1;
-var MIN_SPEED = 0.1;
-var MAX_SPEED = 2.0;
-var MIN_ACCEL = 0.01;
-var MAX_ACCEL = 0.50;
-var MAX_DOTS = 250;
-var DOT_RATE = 2;
-var FADE_OPACITY = 0.2;
-var FPS = 30;
-var FRAME_INTERVAL = 1000 / FPS;
-var FRAME_INTERVAL_ = () => 1000 / FPS;
-var LINE_WIDTH_MIN = 0.5;
-var LINE_WIDTH_MAX = 3.0;
-var LUMINOSITY_OSCILLATION_PERIOD_MIN = FPS * 0.5;
-var LUMINOSITY_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
-var LUMINOSITY_OSCILLATION_PERIOD_MAX = FPS * 1;
-var LUMINOSITY_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
-var LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
-var LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
-var LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
-var LINE_WIDTH_OSCILLATION_PERIOD_MIN = FPS * 0.5;
-var LINE_WIDTH_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
-var LINE_WIDTH_OSCILLATION_PERIOD_MAX = FPS * 1;
-var LINE_WIDTH_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
-var LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
-var LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
-var LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
-var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
-var TRAIL_HSL_START = 180.0;
-var TRAIL_HSL_END = 240.0;
-//All vars above... TO BE DELETED (less TRAIL_HSL_START and TRAIL_HSL_END)
+/**
+ * Represents a color using Red, Green, and Blue components in that order.
+ * Each value should range from 0 - 255, or 0x00 - 0xFF.
+ * 0 represents a full lack of that color, and 255 represents a full occurrence
+ * of that color.
+ * @typedef {number[]} ColorRGB
+ */
+
+/**
+ * Represents a color using Red, Green, Blue, and Alpha components in that
+ * order.
+ * The Red, Green, and Blue values should range from 0 - 255, or 0x00 - 0xFF.
+ * 0 represents a full lack of that color, and 255 represents a full occurrence
+ * of that color.
+ * The Alpha value should range from 0.0 - 1.0.
+ * 0.0 represents full transparancy, 1.0 represents full opacity.
+ * @typedef {number[]} ColorRGBA
+ * @see {@link Opacity}
+ */
+
+/**
+ * Represents the opacity of a color ranging from 0.0 to 1.0.
+ * 0.0 represents full transparancy, 1.0 represents full opacity.
+ * @typedef {number} Opacity
+ */
+
+/**
+ * Represents the saturation of a color, or how "vibrant" the color appears,
+ * ranging from 0.0 to 100.0.
+ * 0.0 represents 0% saturation, or grayscale.
+ * 100.0 represents 100% saturation, or complete vibrancy.
+ *
+ * Even though this value represents a percentage, you must express the value
+ * as a number ranging from 0 to 100.
+ * @typedef {number} Saturation
+ */
+
+/**
+ * Represents the luminosity of a color, or how much light the color gives off,
+ * ranging from 0.0 to 100.0.
+ * 0.0 represents 0% luminosity, or black.
+ * 50.0 represents 50% luminosity, or "regular".
+ * 100.0 represents 100% luminosity, or white.
+ *
+ * Luminosity, while related to the "Value" component in HSV, is not the same
+ * thing as "Value". A "Value" of 100%, would be equal to a Luminosity of 50%.
+ * Any Luminosity over 50% would still be equivalent to a "Value" of 100%, the
+ * Saturation would instead decrease.
+ * Refer to conical models of the HSL and HSV color spaces. HSV looks like an
+ * upside-down cone, while HSL looks like a di-cone.
+ * [(Image)]{@link https://learnui.design/blog/img/hsb/hsb-cone-and-hsl-dicone.png}
+
+ * Even though this value represents a percentage, you must express the value
+ * as a number ranging from 0 to 100.
+ * @typedef {number} Luminosity
+ */
+
+/**
+ * Represents the Hue of a color, as a measure of degrees (not radians), around
+ * the color wheel.
+ * The color wheel is split into 60° sections in the following order:
+ * 330° -  30°  Red          (  0°/360° Completely Red)
+ *  30° -  90°  Yellow       ( 60° Completely Red & Green (Yellow))
+ *  90° - 150°  Green (Lime) (120° Completely Green)
+ * 150° - 210°  Cyan         (180° Completely Green & Blue (Cyan))
+ * 210° - 270°  Blue         (240° Completely Blue)
+ * 270° - 330°  Magenta      (300° Completely Blue & Red (Magenta))
+ *
+ * If you are familiar with the Additive (RGB) and Subtractive (CMY) color
+ * models, you may notice that their respective components form the color wheel:
+ * R > Y > G > C > B > M > R ...
+ * As, RED + BLUE = MAGENTA, RED + GREEN = YELLOW, GREEN + BLUE = CYAN
+ * and MAGENTA + CYAN = BLUE, CYAN + YELLOW = GREEN, YELLOW + MAGENTA = RED
+ * @typedef {number} Hue
+ */
+
+/**
+ * This isn't an actual typedef. It's meant to be a pointer to common notes
+ * regarding the calculation of sinusoidal functions, or functions that use
+ * trigonometric functions like sine, cosine, or tangent (hence SINusoid).
+ *
+ * Sinusoidal equations generally take the following forms:
+ * F(x) = y = A x sin(B (x - C)) + D
+ * G(x) = y = A x cos(B (x - C)) + D
+ * where with F(x = 0) = 0 (sine)
+ * and with G(x = 0) = 1 (sine)
+ * Note that both F(x) and G(x) can be equated depending on their phase shifts
+ * (the C)
+ *
+ * A = Amplitude
+ * B = Frequency
+ * C = Phase Shift
+ * D = Vertical Shift
+ * To calculate the period, or when the function repeats use: (2 x PI) / B
+ *
+ * Amplitude describes where the peaks of the function reach, for example, with
+ * a Vertical Shift of 0 (no shift), and an amplitude of 3
+ * (y = 3sin(1(x-0))+0 = 3sin(x) ), the value of "y" should range from -3 to 3
+ * In other words, the Range of the function is [-|A|,+|A|]
+ *
+ * Frequency describes how quickly the function repeats itself. It's basically
+ * used to modify the periodicity of the function. Sinusoid functions normally
+ * have a period of 2 x PI. Using the B parameter you can change that.
+ * To have the function repeat every 2 units, or to set the period equal to 2,
+ * you would have to determine the value of B:
+ * B = (2 x PI) / Period
+ * In this case: B = (2 x PI) / 2, since two is in both the numerator and
+ * denominator, they cancel out leaving: B = PI, so setting B to "PI" makes
+ * the function repeat every two units.
+ *
+ * Phase shift, or horizontal shift, describes how far the function is shifted
+ * horizontally, through the first phase of the function (before it repeats).
+ * Positive values for C, will shift the function to the right C units.
+ * Negative values for C, will shift the function to the left C units.
+ * If you use a phase shift that is equal to the period of the function, the
+ * function is not affected by the phase shift. Using the previous example:
+ * y = sin(pi * x)   which has a period of 2,
+ * if we modified this to add a phase shift of positive 2:
+ * y = sin(pi * (x - 2))
+ * the function will produce the same results as the original, ie:
+ * y = sin(pi * x) = sin(pi * (x - 2))
+ * this holds true for all positive and negative multiples of the period as
+ * well.
+ *
+ * Vertical shift, describes how far the function is shifted vertically.
+ * Positive values shift the function upwards D units.
+ * Negative values shift the function downwards D units.
+ *
+ * Since trigonometry can be a bit confusing, feel free to google terms like:
+ * "sine function formula" or "cosine function formula"
+ * Or you can use this link:
+ * [image]{@link https://www.onlinemathlearning.com/image-files/transformation-trig-graphs.png}
+ * You can also play with the graphs of sine functions on [graph.tk]{@link graph.tk}
+ * as well. In the upper right is a "?" button, click there if you need help, as that
+ * article explains how to type in the pi symbol.
+ *
+ * @typedef {undefined} Sinusoid
+ */
+
+/**
+ *
+ * @typedef {Object} KeyBindingInfo
+ * @property {Key} key
+ *     The name of the key being pressed, if this is a letter, or value that changes with
+ *     the shift key, the actual value here depends on whether or not the shift key is pressed.
+ * @property {KeyBindingCondition[]} conditions
+ *     An Array of {@link KeyBindingCondition} objects that describe conditionals required to
+ *     trigger the binding. Only one of the conditions needs to be met.
+ * @property {Function} handler
+ *     The event handler for the key binding.
+ */
+
+/**
+ * Conditions that must be met in order to run the key binding. All specified
+ * properties must have their respective keys set to the specified state.
+ * @typedef {Object} KeyBindingCondition
+ * @property {boolean} ctrl
+ *     Required state of the CTRL key.
+ * @property {boolean} alt
+ *     Required state of the ALT key.
+ * @property {boolean} meta
+ *     Required state of the META key.
+ * @property {boolean} shift
+ *     Required state of the SHIFT key.
+ */
+
+/**
+ * Represents the delegate that is called to invoke the "format" property.
+ * @callback StatusElementPropertiesFormatCallback
+ * @param {object} obj
+ *     The input object being formatted.
+ * @returns {string}
+ *     A formatted string containing the object.
+ */
+
+/**
+ * Represents the delegate that is called to invoke the "value" property.
+ * @callback StatusElementPropertiesValueCallback
+ * @returns {object|object[]}
+ *     The value of the StatusElement, or an array of such values if necessary.
+ */
+
+/**
+ *
+ * @typedef {object} StatusElementProperties
+ * @property {string} name
+ *     The text that is displayed on the HUD for this StatusElement. This property is required.
+ * @property {string} type
+ *     The type of StatusElement this is. The valid types are below:
+ *     + string
+ *         Indicates that the value is a textual value.
+ *     + range.*
+ *         Indicates that the value is a range between two values. The asterisk is another valid type
+ *         value.
+ *     + header
+ *         Indicates that the row is a header row that doesn't have a value. All properties aside from
+ *         {@link StatusElementProperties#show} and {@link StatusElementProperties#name} will be ignored.
+ *     + number.[integer|decimal|percentage]
+ *         Indicates that the value is a numeric value.
+ *         - The "integer" subtype indicates that only whole numbers are valid.
+ *         - The "decimal" subtype indicates that all numbers are valid.
+ *         - The "percentage" subtype indicates that the value will be displayed as a percentage.
+ *     + color.[rgb|rgba|hsl|hsla|red|blue|green|hue|sat|luma|alpha]
+ *         Indicates that the value is a color.
+ *         The subtypes are as follows:
+ *         - rgb / rgba
+ *             Specifies that color is an array of 3 to 4 numbers: [red, green, blue, alpha]
+ *         - hsl / hsla
+ *             Specifies that color is an array of 3 to 4 numbers: [hue, saturation, luminosity, alpha]
+ *         - red / green / blue / hue / sat / luma
+ *             Specifies that the color is a single number for the specified RGBA or HSLA component.
+ *     + flag
+ *         Indicates that the value is a boolean value that can be either true or false.
+ *     + custom
+ *         Indicates that the value is a custom value that has no set format. Generally, this will be
+ *         treated like "string", except the value is not necessarily a string value.
+ * @property {string|string[]} unit
+ *     Either a single string value or an array of string values that is displayed beside the value of
+ *     the StatusElement and acts as the units. Using an array of two strings and having the first string
+ *     be empty is a valid use case (eg: a range of pixels. Instead of ## pixels ## pixels, you can use
+ *     ["","pixels"] with the {@link StatusElementProperties#sep} property to get like ## x ## pixels).
+ * @property {StatusElementPropertiesFormatCallback} format
+ *     Used to format the {@link StatusElementProperties#value} property. Currently unused, I think.
+ *     I might end up removing it...
+ * @property {StatusElementPropertiesValueCallback} value
+ *     A callback function that is used to retrieve the value of the property.
+ * @property {boolean} show
+ *     Gets whether or not the property should be shown. This defaults to true, obviously.
+ *     As such, this property is generally omitted.
+ * @property {string} sep
+ *     A string value that is used to separate the values in a range. Defaults to an empty string.
+ * @see {@link StatusElement}
+ */
+
 
 /**
  * Represents an individual settings element and provides methods and properties
@@ -1115,8 +1089,8 @@ class Dot {
      * Creates a new {@link Dot}.
      */
     constructor() {
-        var vpb = Dot.rand(LUMINOSITY_OSCILLATION_PERIOD_MIN, LUMINOSITY_OSCILLATION_PERIOD_MAX);
-        var vbpb = Dot.rand(LINE_WIDTH_OSCILLATION_PERIOD_MIN, LINE_WIDTH_OSCILLATION_PERIOD_MAX);
+        var vpb = Dot.rand(Ani.opnLum, Ani.opxLum);
+        var vbpb = Dot.rand(Ani.opnwLine, Ani.opxwLine);
         //See the typedef of Dot for explanations of the following.
 
         /**
@@ -1142,7 +1116,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.s = Dot.rand(MIN_SPEED, MAX_SPEED);
+        this.s = Dot.rand(Ani.nSpeed, Ani.xSpeed);
         /**
          * The acceleration of this {@see Dot}.
          * 
@@ -1150,7 +1124,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.a = Dot.rand(MIN_ACCEL, MAX_ACCEL);
+        this.a = Dot.rand(Ani.nAccel, Ani.xAccel);
         /**
          * The hue of this {@see Dot}.
          * 
@@ -1158,7 +1132,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.c = Dot.rand(TRAIL_HSL_START, TRAIL_HSL_END);
+        this.c = Dot.rand(Ani.hsTrail, Ani.heTrail);
         /**
          * The luminosity of this {@see Dot}.
          * 
@@ -1166,7 +1140,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.l = Dot.rand(TRAIL_LUMINOSITY_MIN, TRAIL_LUMINOSITY_MAX);
+        this.l = Dot.rand(Ani.lnTrail, Ani.lxTrail);
         /**
          * The saturation of this {@see Dot}.
          * 
@@ -1174,7 +1148,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.sa = Dot.rand(TRAIL_SATURATION_MIN, TRAIL_SATURATION_MAX);
+        this.sa = Dot.rand(Ani.snTrail, Ani.sxTrail);
         /**
          * The frame this {@see Dot} was created on.
          * 
@@ -1190,7 +1164,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.pa = Dot.rand(LUMINOSITY_OSCILLATION_AMPLITUDE_MIN, LUMINOSITY_OSCILLATION_AMPLITUDE_MAX);
+        this.pa = Dot.rand(Ani.oanLum, Ani.oaxLum);
         /**
          * The frequency of the sine wave that oscillates the luminosity of this {@see Dot}.
          *
@@ -1222,7 +1196,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.pc = Ani.frameCount + LUMINOSITY_OSCILLATION_PHASE_SHIFT;
+        this.pc = Ani.frameCount + Ani.opsLum;
         /**
          * The amplitude of the sine wave that oscillates the line width of this {@see Dot}.
          *
@@ -1230,7 +1204,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.bpa = Dot.rand(LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN, LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX);
+        this.bpa = Dot.rand(Ani.oanwLine, Ani.oaxwLine);
         /**
          * The frequency of the sine wave that oscillates the line width of this {@see Dot}.
          *
@@ -1262,7 +1236,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.bpc = Ani.frameCount + LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
+        this.bpc = Ani.frameCount + Ani.opswLine;
         /**
          * The line width of this {@see Dot}.
          *
@@ -1270,7 +1244,7 @@ class Dot {
          * @type {number}
          * @public
          */
-        this.w = Dot.rand(LINE_WIDTH_MIN, LINE_WIDTH_MAX);
+        this.w = Dot.rand(Ani.wnLine, Ani.wxLine);
         /**
          * A helper value that helps keep track of the frame number for the purposes of oscillating the
          * luminosity of this {@see Dot}.
@@ -1453,7 +1427,7 @@ class Dot {
      * @returns {string} The color of this {@see Dot} as a valid CSS color tag.
      */
     get colorHSL() {
-        return `hsla(${this.c},${this.sa}%,${this.currentLuminosity}%,${TRAIL_OPACITY})`;
+        return `hsla(${this.c},${this.sa}%,${this.currentLuminosity}%,${Ani.oTrail})`;
     }
     /**
      * Gets whether or not this {@see Dot} is off-screen.
@@ -1509,26 +1483,8 @@ class Dot {
      * Drifts the trail color so that subsequent dots have a different and advancing range of colors they may be.
      */
     static UpdateTrailDrift() {
-        //Drift the Hue range, by HSL_DRIFT
-        TRAIL_HSL_START += HSL_DRIFT;
-        TRAIL_HSL_END += HSL_DRIFT;
-
-        //Bounds checking, make sure HSL_START/END are between 0 and 360.
-        //doing this prevents the application from randomly failing when either
-        //gets too large or too small.
-        //The application should only break when the precision of FRAME_COUNT becomes
-        //too small to keep track of each new frame, or when we overflow FRAME_COUNT into NaN
-        if (TRAIL_HSL_START < 0) {
-            TRAIL_HSL_START += 360;
-        }
-        if (TRAIL_HSL_END < 0) {
-            TRAIL_HSL_END += 360;
-        }
-        TRAIL_HSL_START %= 360;
-        TRAIL_HSL_END %= 360;
-        if (TRAIL_HSL_START > TRAIL_HSL_END) {
-            TRAIL_HSL_START -= 360;
-        }
+        Ani.heTrail += Ani.hDrift;
+        Ani.hsTrail += Ani.hDrift;
     }
 
     /**
@@ -1742,16 +1698,16 @@ class Ani {
             }, {
                 "name": "Auto Resize",
                 "type": "flag",
-                "value": () => RESIZE_CANVAS_ON_WINDOW_RESIZE
+                "value": () => Ani.resize
             }, {
                 "name": "Background",
                 "type": "color.rgb",
-                "value": () => BACKGROUND
+                "value": () => Ani.cBackground
             }, {
                 "name": "Dot Color",
                 "type": "color.rgba",
                 "show": false,
-                "value": () => DOT_COLOR
+                "value": () => Ani.cDot
             }, {
                 "name": "Frame Statistics",
                 "type": "header"
@@ -1759,7 +1715,7 @@ class Ani {
                 "name": "Target FPS",
                 "type": "string",
                 "unit": "frames/second",
-                "value": () => FPS.toFixed(2)
+                "value": () => Ani.fps.toFixed(2)
             }, {
                 "name": "Achieved FPS",
                 "type": "string",
@@ -1777,49 +1733,49 @@ class Ani {
                 "name": "Speed",
                 "type": "range.number.decimal",
                 "unit": ["", "pixels/second"],
-                "value": () => [MIN_SPEED, MAX_SPEED]
+                "value": () => [Ani.nSpeed, Ani.xSpeed]
             }, {
                 "name": "Acceleration",
                 "type": "range.number.decimal",
                 "unit": ["", "pixels/second"],
-                "value": () => [MIN_ACCEL, MAX_ACCEL]
+                "value": () => [Ani.nAccel, Ani.xAccel]
             }, {
                 "name": "Active Dots",
                 "type": "range.number.integer",
                 "unit": ["", "dots"],
                 "sep": " of ",
-                "value": () => [Ani.dots.length, MAX_DOTS]
+                "value": () => [Ani.dots.length, Ani.xDots]
             }, {
                 "name": "Dot Rate",
                 "type": "number.integer",
                 "unit": "dots/frame",
-                "value": () => DOT_RATE
+                "value": () => Ani.rDot
             }, {
                 "name": "Trail Opacity",
                 "type": "color.alpha",
-                "value": () => TRAIL_OPACITY
+                "value": () => Ani.oTrail
             }, {
                 "name": "Trail Color",
                 "type": "color.rgba",
                 "show": false,
-                "value": () => TRAIL_COLOR
+                "value": () => Ani.cTrail
             }, {
                 "name": "Trail Saturation",
                 "type": "range.color.sat",
-                "value": () => [TRAIL_SATURATION_MIN, TRAIL_SATURATION_MAX]
+                "value": () => [Ani.snTrail, Ani.sxTrail]
             }, {
                 "name": "Trail Luminosity",
                 "type": "range.color.luma",
-                "value": () => [TRAIL_LUMINOSITY_MIN, TRAIL_LUMINOSITY_MAX]
+                "value": () => [Ani.lnTrail, Ani.lxTrail]
             }, {
                 "name": "Fade Opacity",
                 "type": "number.percentage",
-                "value": () => FADE_OPACITY
+                "value": () => Ani.oFade
             }, {
                 "name": "Line Width",
                 "type": "range.number.decimal",
                 "unit": ["", "pixels"],
-                "value": () => [LINE_WIDTH_MIN, LINE_WIDTH_MAX]
+                "value": () => [Ani.wnLine, Ani.wxLine]
             }, {
                 "name": "Trail Hue Range",
                 "type": "header"
@@ -1827,11 +1783,11 @@ class Ani {
                 "name": "Hue Drift",
                 "type": "number.decimal",
                 "unit": "degrees",
-                "value": () => HSL_DRIFT
+                "value": () => Ani.hDrift
             }, {
                 "name": "Current",
                 "type": "range.color.hue",
-                "value": () => [TRAIL_HSL_START, TRAIL_HSL_END]
+                "value": () => [Ani.hsTrail, Ani.heTrail]
             }, {
                 "name": "Default",
                 "type": "range.color.hue",
@@ -1844,23 +1800,17 @@ class Ani {
                 "type": "range.string",
                 "unit": ["", "seconds"],
                 "format": (time) => { },
-                "value": () => [
-                    LUMINOSITY_OSCILLATION_PERIOD_MIN.toFixed(2),
-                    LUMINOSITY_OSCILLATION_PERIOD_MAX.toFixed(2)
-                ]
+                "value": () => [Ani.opnLum.toFixed(2), Ani.opxLum.toFixed(2)]
             }, {
                 "name": "Amplitude",
                 "type": "range.color.luma",
-                "value": () => [
-                    LUMINOSITY_OSCILLATION_AMPLITUDE_MIN,
-                    LUMINOSITY_OSCILLATION_PERIOD_MAX
-                ]
+                "value": () => [Ani.oanLum, Ani.oaxLum]
             }, {
                 "name": "Phase Shift",
                 "type": "string",
                 "unit": "seconds",
                 "format": (time) => { },
-                "value": () => LUMINOSITY_OSCILLATION_PHASE_SHIFT.toFixed(2)
+                "value": () => Ani.opsLum.toFixed(2)
             }, {
                 "name": "Line Width Oscillation",
                 "type": "header"
@@ -1869,24 +1819,18 @@ class Ani {
                 "type": "range.string",
                 "unit": ["", "seconds"],
                 "format": (time) => { },
-                "value": () => [
-                    LINE_WIDTH_OSCILLATION_PERIOD_MIN.toFixed(2),
-                    LINE_WIDTH_OSCILLATION_PERIOD_MAX.toFixed(2)
-                ]
+                "value": () => [Ani.opnwLine.toFixed(2), Ani.opxwLine.toFixed(2)]
             }, {
                 "name": "Amplitude",
                 "type": "range.number.decimal",
                 "unit": ["", "pixels"],
-                "value": () => [
-                    LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN,
-                    LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX
-                ]
+                "value": () => [Ani.oanwLine, Ani.oaxwLine]
             }, {
                 "name": "Phase Shift",
                 "type": "string",
                 "unit": "seconds",
                 "format": (time) => { },
-                "value": () => LINE_WIDTH_OSCILLATION_PHASE_SHIFT.toFixed(2)
+                "value": () => Ani.opswLine.toFixed(2)
             }
         ];
 
@@ -1918,6 +1862,17 @@ class Ani {
          * @public
          */
         this.statusEnabled = false;
+
+        /**
+         * @type {number}
+         * @private
+         */
+        this.__the = DEFAULT_TRAIL_HSL_END;
+        /**
+         * @type {number}
+         * @private
+         */
+        this.__ths = DEFAULT_TRAIL_HSL_START;
     }
 
     /**
@@ -1965,14 +1920,14 @@ class Ani {
         this.context.beginPath();
 
         //Set the fill and stroke styles to the background color at full opacity.
-        this.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
-        this.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        this.context.fillStyle = `rgba(${Ani.cBackground.join(",")},1)`;
+        this.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},1)`;
 
         //Fill the entire canvas with the current fill style.
         this.context.fillRect(0, 0, this.width, this.height);
 
         //Create a timer to start the animation.
-        window.setTimeout(Ani.animate, FRAME_INTERVAL);
+        window.setTimeout(Ani.animate, Ani.iFrame);
         this.status.update();
     }
 
@@ -2002,7 +1957,7 @@ class Ani {
         }
         //set a timer to run this same function, when we need to animate the next
         //frame.
-        window.setTimeout(Ani.animate, FRAME_INTERVAL);
+        window.setTimeout(Ani.animate, Ani.iFrame);
     }
 
     /**
@@ -2015,7 +1970,7 @@ class Ani {
         var osize = this.size;
 
         //verify that resize is actually enabled
-        if (RESIZE_CANVAS_ON_WINDOW_RESIZE) {
+        if (Ani.resize) {
             //Get the size of the canvas, which should be stretched to the full size
             //of the window.
             this.size = this.canvas.getBoundingClientRect();
@@ -2059,8 +2014,8 @@ class Ani {
 
         //Set the fill style and stroke style to the background color, at the
         //fade opacity
-        this.context.fillStyle = `rgba(${BACKGROUND.join(",")},${FADE_OPACITY})`;
-        this.context.strokeStyle = `rgba(${BACKGROUND.join(",")},${FADE_OPACITY})`;
+        this.context.fillStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
+        this.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
 
         //Move the path to the origin of the canvas, (0,0), or the upper left corner
         //of the canvas.
@@ -2102,8 +2057,8 @@ class Ani {
      */
     static addNewDots() {
         var i;
-        for (i = 0; i < DOT_RATE * this.audioPeakMultiplier; i += 1) {
-            if (this.dots.length >= MAX_DOTS) {
+        for (i = 0; i < Ani.rDot * this.audioPeakMultiplier; i += 1) {
+            if (this.dots.length >= Ani.xDots) {
                 //Can't add more dots.
                 break;
             }
@@ -2348,29 +2303,24 @@ class Ani {
      *     The new FPS.
      */
     static updateFPS(_fps) {
-        FPS = _fps;
-        FRAME_INTERVAL = FRAME_INTERVAL_();
-        LUMINOSITY_OSCILLATION_PERIOD_MAX = LUMINOSITY_OSCILLATION_PERIOD_MAX_();
-        LUMINOSITY_OSCILLATION_PERIOD_MIN = LUMINOSITY_OSCILLATION_PERIOD_MIN_();
-        LINE_WIDTH_OSCILLATION_PERIOD_MAX = LINE_WIDTH_OSCILLATION_PERIOD_MAX_();
-        LINE_WIDTH_OSCILLATION_PERIOD_MIN = LINE_WIDTH_OSCILLATION_PERIOD_MIN_();
+        Ani.fps = _fps;
     }
 
     /**
      * Steps the FPS up by 5 frames per second.
      */
     static upFPS() {
-        Ani.updateFPS(FPS + 5);
-        console.info(`Now targeting ${FPS} frames per second.`);
+        Ani.updateFPS(Ani.fps + 5);
+        console.info(`Now targeting ${Ani.fps} frames per second.`);
     }
     /**
      * Steps the FPS down by 5 frames per second.
      */
     static downFPS() {
-        var old_fps = FPS;
-        Ani.updateFPS(Math.max(FPS - 5, 5));
-        if (old_fps !== FPS) {
-            console.info(`Now targeting ${FPS} frames per second.`);
+        var old_fps = Ani.fps;
+        Ani.updateFPS(Math.max(Ani.fps - 5, 5));
+        if (old_fps !== Ani.fps) {
+            console.info(`Now targeting ${Ani.fps} frames per second.`);
         } else {
             console.info(`Cannot reduce the framerate any lower than five frames per second.`);
         }
@@ -2383,14 +2333,14 @@ class Ani {
         Ani.startTime = (new Date()).getTime();
         Ani.dots = [];
         Ani.frameCount = 0;
-        TRAIL_HSL_END = DEFAULT_TRAIL_HSL_END;
-        TRAIL_HSL_START = DEFAULT_TRAIL_HSL_START;
+        Ani.heTrail = DEFAULT_TRAIL_HSL_END;
+        Ani.hsTrail = DEFAULT_TRAIL_HSL_START;
         //Clear all prior paths.
         Ani.context.beginPath();
 
         //Set the fill and stroke styles to the background color at full opacity.
-        Ani.context.fillStyle = `rgba(${BACKGROUND.join(",")},1)`;
-        Ani.context.strokeStyle = `rgba(${BACKGROUND.join(",")},1)`;
+        Ani.context.fillStyle = `rgba(${Ani.cBackground.join(",")},1)`;
+        Ani.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},1)`;
 
         //Fill the entire canvas with the current fill style.
         Ani.context.fillRect(0, 0, Ani.width, Ani.height);
@@ -2453,6 +2403,12 @@ class Ani {
     }
 
 
+    static get heTrail() {
+        return this.__the;
+    }
+    static get hsTrail() {
+        return this.__ths;
+    }
     static get cBackground() {
         return this.sObj.cBackground;
     }
@@ -2477,8 +2433,8 @@ class Ani {
     static get lxTrail() {
         return this.sObj.lxTrail;
     }
-    static get driftHsl() {
-        return this.sObj.driftHsl;
+    static get hDrift() {
+        return this.sObj.hDrift;
     }
     static get nSpeed() {
         return this.sObj.nSpeed;
@@ -2505,7 +2461,7 @@ class Ani {
         return this.sObj.fps;
     }
     static get iFrame() {
-        return this.sObj.iFrame;
+        return 1000 / this.fps;
     } //NO SETTER
     static get wnLine() {
         return this.sObj.wnLine;
@@ -2514,11 +2470,11 @@ class Ani {
         return this.sObj.wxLine;
     }
     static get opnLum() {
-        return this.sObj.opnLum;
-    }
+        return Ani.fps * Ani.opnfLum;
+    } //NO SETTER
     static get opxLum() {
-        return this.sObj.opxLum;
-    }
+        return Ani.fps * Ani.opxfLum;
+    } //NO SETTER
     static get oanLum() {
         return this.sObj.oanLum;
     }
@@ -2529,11 +2485,11 @@ class Ani {
         return this.sObj.opsLum;
     }
     static get opnwLine() {
-        return this.sObj.opnwLine;
-    }
+        return Ani.fps * Ani.opnfwLine;
+    } //NO SETTER
     static get opxwLine() {
-        return this.sObj.opxwLine;
-    }
+        return Ani.fps * Ani.opxfwLine;
+    } //NO SETTER
     static get oanwLine() {
         return this.sObj.oanwLine;
     }
@@ -2546,7 +2502,18 @@ class Ani {
     static get resize() {
         return this.sObj.resize;
     }
-
+    static get opnfLum() {
+        return this.sObj.opnfLum;
+    }
+    static get opxfLum() {
+        return this.sObj.opxfLum;
+    }
+    static get opnfwLine() {
+        return this.sObj.opnfwLine;
+    }
+    static get opxfwLine() {
+        return this.sObj.opxfwLine;
+    }
 
     static set cBackground(value) {
         this.sObj.cBackground = value;
@@ -2572,8 +2539,8 @@ class Ani {
     static set lxTrail(value) {
         this.sObj.lxTrail = value;
     }
-    static set driftHsl(value) {
-        this.sObj.driftHsl = value;
+    static set hDrift(value) {
+        this.sObj.hDrift = value;
     }
     static set nSpeed(value) {
         this.sObj.nSpeed = value;
@@ -2605,12 +2572,6 @@ class Ani {
     static set wxLine(value) {
         this.sObj.wxLine = value;
     }
-    static set opnLum(value) {
-        this.sObj.opnLum = value;
-    }
-    static set opxLum(value) {
-        this.sObj.opxLum = value;
-    }
     static set oanLum(value) {
         this.sObj.oanLum = value;
     }
@@ -2619,12 +2580,6 @@ class Ani {
     }
     static set opsLum(value) {
         this.sObj.opsLum = value;
-    }
-    static set opnwLine(value) {
-        this.sObj.opnwLine = value;
-    }
-    static set opxwLine(value) {
-        this.sObj.opxwLine = value;
     }
     static set oanwLine(value) {
         this.sObj.oanwLine = value;
@@ -2638,6 +2593,44 @@ class Ani {
     static set resize(value) {
         this.sObj.resize = value;
     }
+    static set opnwfLine(value) {
+        this.sObj.opnwfLine = value;
+    }
+    static set opxwfLine(value) {
+        this.sObj.opxwfLine = value;
+    }
+    static set opnfLum(value) {
+        this.sObj.opnfLum = value;
+    }
+    static set opxfLum(value) {
+        this.sObj.opxfLum = value;
+    }
+    static set heTrail(value) {
+        while (value < 0) {
+            value += 360;
+        }
+        value %= 360;
+        Ani.__the = value;
+    }
+    static set hsTrail(value) {
+        while (value < 0) {
+            value += 360;
+        }
+        value %= 360;
+        Ani.__ths = value;
+        if (Ani.__ths > Ani.__the) {
+            Ani.__ths -= 360;
+        }
+    }
+
+    /* 
+     * The extra junk in heTrail/hsTrail is...
+     * Bounds checking, make sure HSL_START/END are between 0 and 360.
+     * doing this prevents the application from randomly failing when either
+     * gets too large or too small.
+     * The application should only break when the precision of FRAME_COUNT becomes
+     * too small to keep track of each new frame, or when we overflow FRAME_COUNT into NaN
+     */
 }
 
 /**
@@ -2990,7 +2983,7 @@ class Settings {
             ? this.__data.tlx
             : DEFAULT_TRAIL_LUMINOSITY_MAX;
     }
-    get driftHsl() {
+    get hDrift() {
         return this.__keys.includes("hd")
             ? this.__data.hd
             : DEFAULT_HSL_DRIFT;
@@ -3035,11 +3028,6 @@ class Settings {
             ? this.__data.f
             : DEFAULT_FPS;
     }
-    get iFrame() {
-        return this.__keys.includes("f")
-            ? 1000 / this.__data.f
-            : 1000 / DEFAULT_FPS;
-    } //NO SETTER
     get wnLine() {
         return this.__keys.includes("lwn")
             ? this.__data.lwn
@@ -3049,16 +3037,6 @@ class Settings {
         return this.__keys.includes("lwx")
             ? this.__data.lwx
             : DEFAULT_LINE_WIDTH_MAX;
-    }
-    get opnLum() {
-        return this.__keys.includes("lopn")
-            ? this.__data.lopn
-            : DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN;
-    }
-    get opxLum() {
-        return this.__keys.includes("lopx")
-            ? this.__data.lopx
-            : DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX;
     }
     get oanLum() {
         return this.__keys.includes("loan")
@@ -3074,16 +3052,6 @@ class Settings {
         return this.__keys.includes("lops")
             ? this.__data.lops
             : DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT;
-    }
-    get opnwLine() {
-        return this.__keys.includes("lwopn")
-            ? this.__data.lwopn
-            : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN;
-    }
-    get opxwLine() {
-        return this.__keys.includes("lwopx")
-            ? this.__data.lwopx
-            : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX;
     }
     get oanwLine() {
         return this.__keys.includes("lwoan")
@@ -3105,6 +3073,27 @@ class Settings {
             ? this.__data.r
             : DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE;
     }
+    get opnfLum() {
+        return this.__keys.includes("lopnf")
+            ? this.__data.lopnf
+            : DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR;
+    }
+    get opxfLum() {
+        return this.__keys.includes("lopxf")
+            ? this.__data.lopxf
+            : DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR;
+    }
+    get opnfwLine() {
+        return this.__keys.includes("lwopnf")
+            ? this.__data.lwopnf
+            : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR;
+    }
+    get opxfwLine() {
+        return this.__keys.includes("lwopxf")
+            ? this.__data.lwopxf
+            : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR;
+    }
+
 
     set cBackground(value) {
         this.__data.bg = value;
@@ -3146,7 +3135,7 @@ class Settings {
         this.__refreshKeys();
         this.save();
     }
-    set driftHsl(value) {
+    set hDrift(value) {
         this.__data.hd = value;
         this.__refreshKeys();
         this.save();
@@ -3201,16 +3190,6 @@ class Settings {
         this.__refreshKeys();
         this.save();
     }
-    set opnLum(value) {
-        this.__data.lopn = value;
-        this.__refreshKeys();
-        this.save();
-    }
-    set opxLum(value) {
-        this.__data.lopx = value;
-        this.__refreshKeys();
-        this.save();
-    }
     set oanLum(value) {
         this.__data.loan = value;
         this.__refreshKeys();
@@ -3223,16 +3202,6 @@ class Settings {
     }
     set opsLum(value) {
         this.__data.lops = value;
-        this.__refreshKeys();
-        this.save();
-    }
-    set opnwLine(value) {
-        this.__data.lwopn = value;
-        this.__refreshKeys();
-        this.save();
-    }
-    set opxwLine(value) {
-        this.__data.lwopx = value;
         this.__refreshKeys();
         this.save();
     }
@@ -3256,57 +3225,35 @@ class Settings {
         this.__refreshKeys();
         this.save();
     }
-    //bg,dc,dr,f,fo,hd,loan,loax.lopn,lops,lopx,lwn,lwoan,lwoax,lwopn,lwops,lwopx,lwx,na,ns,r,tc,to,tsm,tsx,tln,tlx,xa,xd,xs
-    //a = amplitude, c = color, h = height, i = interval, l = luminosity, o = opacity,
-    //p = period, ps = phase shift, r = rate, s = saturation, w = width
+    set opnwfLine(value) {
+        this.__data.lwopnf = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opxwfLine(value) {
+        this.__data.lwopxf = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opnfLum(value) {
+        this.__data.lopnf = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set opxfLum(value) {
+        this.__data.lopxf = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    //bg,dc,dr,f,fo,hd,loan,loax.lopn,lopnf,lops,lopx,lopxf,lwn,lwoan,lwoax,lwopn,lwopnf,lwops,lwopx,lwopxf,lwx,na,ns,r,tc,to,tsm,tsx,tln,tlx,xa,xd,xs
+    //a = amplitude, c = color, e = end, f = factor, h = height/hsl, i = interval, l = luminosity, o = opacity,
+    //p = period, ps = phase shift, r = rate, s = saturation/start, w = width
     //-n = min, -x = max
 
     //Ani.cBackground
-}
-/*
-var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
-*/
 
-/*
-var BACKGROUND = [0, 0, 0];
-var DOT_COLOR = [255, 255, 255, 1.0];
-var TRAIL_OPACITY = 1.0;
-var TRAIL_COLOR = [88, 0, 133, TRAIL_OPACITY];
-var TRAIL_SATURATION_MIN = 100.0;
-var TRAIL_SATURATION_MAX = 100.0;
-var TRAIL_LUMINOSITY_MIN = 25.0;
-var TRAIL_LUMINOSITY_MAX = 75.0;
-var HSL_DRIFT = 0.1;
-var MIN_SPEED = 0.1;
-var MAX_SPEED = 2.0;
-var MIN_ACCEL = 0.01;
-var MAX_ACCEL = 0.50;
-var MAX_DOTS = 250;
-var DOT_RATE = 2;
-var FADE_OPACITY = 0.2;
-var FPS = 30;
-var FRAME_INTERVAL = 1000 / FPS;
-var FRAME_INTERVAL_ = () => 1000 / FPS;
-var LINE_WIDTH_MIN = 0.5;
-var LINE_WIDTH_MAX = 3.0;
-var LUMINOSITY_OSCILLATION_PERIOD_MIN = FPS * 0.5;
-var LUMINOSITY_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
-var LUMINOSITY_OSCILLATION_PERIOD_MAX = FPS * 1;
-var LUMINOSITY_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
-var LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
-var LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
-var LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
-var LINE_WIDTH_OSCILLATION_PERIOD_MIN = FPS * 0.5;
-var LINE_WIDTH_OSCILLATION_PERIOD_MIN_ = () => FPS * 0.5;
-var LINE_WIDTH_OSCILLATION_PERIOD_MAX = FPS * 1;
-var LINE_WIDTH_OSCILLATION_PERIOD_MAX_ = () => FPS * 1;
-var LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
-var LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
-var LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
-var TRAIL_HSL_START = 180.0; //do not save
-var TRAIL_HSL_END = 240.0; //do not save
-var RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
-*/
+}
+
 if (document.readyState !== "complete") {
     window.addEventListener("load", Ani.start);
 } else {
@@ -3319,6 +3266,14 @@ if (document.readyState !== "complete") {
 /**
  * @todo Add settings rows for the audio peaks settings
  * @todo Add in keybinds to enable/disable audio peaks
- * @todo Actually implement Settings object.
+ * @todo Check "[at]todo"s above here
+ * @todo Add keybinds to reset default settings
  * @todo Complete documentation.
+ * @todo make sure lines don't exceed 80 chars (regex find "[^\n\r]{81,}")
+ * @todo Change "static this" to "Ani" (etc) (reduces liability to break things and parallels c#)
+ *       We might need to find a different way to document the static properties, if that is the case.
+ * @todo Change the dot addition thing to go from one-check-per-frame to a timer (ie: in parallel)
  */
+
+
+
