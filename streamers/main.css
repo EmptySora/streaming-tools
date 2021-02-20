@@ -70,7 +70,7 @@ th {
     vertical-align: top;
 }
 
-[x-widget-parameter] {
+.status-widget-parameter {
     color:black !important;
     font-weight:bold;
     font-family:monospace;
@@ -78,4 +78,12 @@ th {
 }
 #status-table td:first-child {
     font-weight:bold;
+}
+
+.status-hide, .status-hide * {
+    display: none !important;
+}
+
+.status-hide-verbose .status-info-row-verbose {
+    display: none !important;
 }

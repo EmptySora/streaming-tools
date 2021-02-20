@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.3.1
+ * @version 2.1.4.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.3.1";
+const VERSION = "2.1.4.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -755,6 +755,8 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * @property {boolean} show
  *     Gets whether or not the property should be shown. This defaults to true, obviously.
  *     As such, this property is generally omitted.
+ * @property {boolean} verbose
+ *     Gets whether or not the property is considered to provide verbose information. Defaults to false.
  * @property {string} sep
  *     A string value that is used to separate the values in a range. Defaults to an empty string.
  * @see {@link StatusElement}
@@ -789,6 +791,9 @@ class StatusElement {
         }
         var trow = tbody.insertRow(-1);
         trow.classList.add("status-info-row");
+        if (statrow.verbose) {
+            trow.classList.add("status-info-row-verbose");
+        }
         var c = trow.insertCell(-1);
         c.textContent = statrow.name;
         var type = statrow.type.split(/\./g).map((t) => {
@@ -993,6 +998,7 @@ class StatusElement {
             break;
         }
         this.owner.appendChild(widget);
+        widget.classList.add("status-widget-parameter");
         /**
          * The first of the two parameter value Elements that the value of this
          * {@see StatusElement} is displayed via.
@@ -1047,13 +1053,15 @@ class StatusElementCollection {
     /**
      * Creates a new {@link StatusElementCollection} from the HTML node containing it
      * and the settings configuration information it is based upon.
+     * @param {HTMLElement} container
+     *     The root container element that contains the entire status element HUD.
      * @param {HTMLElement} output
      *     The element that will contain this collection of status elements.
      * @param {StatusElementProperties[]} rows
      *     An array of object with properties that describe the various aspects of the
      *     status elements.
      */
-    constructor(output, rows) {
+    constructor(container, output, rows) {
         console.info("creating rows!");
         var nrows = [];
         rows.forEach((row) => {
@@ -1065,18 +1073,74 @@ class StatusElementCollection {
          * @public
          */
         this.rows = nrows;
+        /**
+         * @type {HTMLElement}
+         * @private
+         */
+        this.__container = container;
+        /**
+         * @type {number}
+         * @private
+         */
+        this.__interval = undefined;
+        this.displayed = false;
+        this.showVerbose = false;
     }
 
     /**
      * Updates the values of this {@see StatusElementCollection} and updates the HUD.
      */
     update() {
-        if (!Ani.statusEnabled) {
+        if (!this.displayed) {
             return; //don't update, save the frames; kill the animals.
         }
         this.rows.forEach((row) => {
             row.update();
         });
+    }
+
+    /**
+     * Gets whether or not the HUD for this {@see StatusElementCollection} is displayed.
+     */
+    get displayed() {
+        return !this.__container.classList.contains("status-hide");
+    }
+    /**
+     * Sets whether or not the HUD for this {@see StatusElementCollection} is displayed.
+     */
+    set displayed(value) {
+        if (this.displayed === value) {
+            return;
+        }
+        if (value) {
+            this.__container.classList.remove("status-hide");
+            this.__interval = window.setInterval(() => this.update(), 10);
+        } else {
+            this.__container.classList.add("status-hide");
+            if (this.__interval) {
+                window.clearInterval(this.__interval, 10);
+                this.__interval = undefined;
+            }
+        }
+    }
+    /**
+     * Gets whether or not the HUD for this {@see StatusElementCollection} shows verbose information.
+     */
+    get showVerbose() {
+        return !this.__container.classList.contains("status-hide-verbose");
+    }
+    /**
+     * Sets whether or not the HUD for this {@see StatusElementCollection} shows verbose information.
+     */
+    set showVerbose(value) {
+        if (this.showVerbose === value) {
+            return;
+        }
+        if (value) {
+            this.__container.classList.remove("status-hide-verbose");
+        } else {
+            this.__container.classList.add("status-hide-verbose");
+        }
     }
 }
 
@@ -1304,7 +1368,8 @@ class Dot {
          * @public
          */
         this.ppx = null;
-        Dot.UpdateTrailDrift();
+        Ani.heTrail += Ani.hDrift;
+        Ani.hsTrail += Ani.hDrift;
     }
     /**
      * Shifts the reference point coordinates for this {@see Dot}.
@@ -1480,14 +1545,6 @@ class Dot {
     }
 
     /**
-     * Drifts the trail color so that subsequent dots have a different and advancing range of colors they may be.
-     */
-    static UpdateTrailDrift() {
-        Ani.heTrail += Ani.hDrift;
-        Ani.hsTrail += Ani.hDrift;
-    }
-
-    /**
      * A helper function used to get the new phase shift when changing the
      * oscillation speed of the dots.
      * See the comments below for more
@@ -1587,7 +1644,6 @@ class Dot {
         //fuck this calculation...
     }
 
-
     /**
      * Calculates the value of a sinusoid equation given the four possible
      * transformations that can be applied to it. (see {@link Sinusoid} for more
@@ -1632,7 +1688,6 @@ class Dot {
     static sinusoidal2(a, b, c, d, x) {
         return a * Math.sin(b * (x - c)) + d;
     }
-
 
     /**
      * Generates a random floating-point number between "min" and "max".
@@ -1854,14 +1909,9 @@ class Ani {
          * @public
          */
         this.status = new StatusElementCollection(
+            document.getElementById("status-info"),
             document.getElementById("status-table-body"),
             status_rows);
-        /**
-         * A boolean value indicating whether or not the status HUD is being displayed.
-         * @type {boolean}
-         * @public
-         */
-        this.statusEnabled = false;
 
         /**
          * @type {number}
@@ -2295,22 +2345,11 @@ class Ani {
         connect();
     }
 
-
-    /**
-     * A function that updates the FPS of the animation and the variables that rely on the FPS
-     * of the animation.
-     * @param {number} _fps
-     *     The new FPS.
-     */
-    static updateFPS(_fps) {
-        Ani.fps = _fps;
-    }
-
     /**
      * Steps the FPS up by 5 frames per second.
      */
     static upFPS() {
-        Ani.updateFPS(Ani.fps + 5);
+        Ani.fps += 5;
         console.info(`Now targeting ${Ani.fps} frames per second.`);
     }
     /**
@@ -2318,11 +2357,11 @@ class Ani {
      */
     static downFPS() {
         var old_fps = Ani.fps;
-        Ani.updateFPS(Math.max(Ani.fps - 5, 5));
+        Ani.fps -= 5;
         if (old_fps !== Ani.fps) {
             console.info(`Now targeting ${Ani.fps} frames per second.`);
         } else {
-            console.info(`Cannot reduce the framerate any lower than five frames per second.`);
+            console.info(`Cannot reduce the framerate any lower than 5 FPS.`);
         }
     }
 
@@ -2350,41 +2389,15 @@ class Ani {
      * Toggles whether or not the status overlay is enabled and displayed.
      */
     static toggleStatus() {
-        Ani.statusEnabled = !Ani.statusEnabled;
-        if (Ani.statusEnabled) {
-            document.getElementById("status-info").style = "";
-            console.info("Turned on the status info overlay.");
-
-            /**
-             * The interval, as obtained from {@see Window.setInterval}, that the status
-             * overlay uses to refresh its information.
-             * @type {number}
-             */
-            Ani.statusInterval = window.setInterval(() => {
-                Ani.status.update();
-            }, 10);
-        } else {
-            document.getElementById("status-info").style.display = "none";
-            console.info("Turned off the status info overlay.");
-            if (Ani.statusInterval) {
-                window.clearInterval(Ani.statusInterval, 10);
-                window.statusInterval = undefined;
-            }
-        }
+        Ani.status.displayed = !Ani.status.displayed;
+        console.info(`Turned ${Ani.status.displayed ? "on" : "off"} the status info overlay.`);
     }
     /**
      * Toggles whether or not verbose information is displayed in the status overlay.
      */
     static toggleVerboseStatus() {
-
-        /**
-         * Whether or not verbose information is displayed in the status overlay.
-         * @property {boolean} verbose
-         * @static
-         */
-        Ani.verbose = !Ani.verbose;
-        console.info(`Now ${Ani.verbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
-
+        Ani.status.showVerbose = !Ani.status.showVerbose;
+        console.info(`Now ${Ani.status.showVerbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
     }
 
     /**
@@ -2564,7 +2577,7 @@ class Ani {
         this.sObj.oFade = value;
     }
     static set fps(value) {
-        this.sObj.fps = value;
+        this.sObj.fps = Math.max(value, 5);
     }
     static set wnLine(value) {
         this.sObj.wnLine = value;
@@ -3260,9 +3273,6 @@ if (document.readyState !== "complete") {
     Ani.start();
 }
 
-
-
-
 /**
  * @todo Add settings rows for the audio peaks settings
  * @todo Add in keybinds to enable/disable audio peaks
@@ -3274,6 +3284,3 @@ if (document.readyState !== "complete") {
  *       We might need to find a different way to document the static properties, if that is the case.
  * @todo Change the dot addition thing to go from one-check-per-frame to a timer (ie: in parallel)
  */
-
-
-
