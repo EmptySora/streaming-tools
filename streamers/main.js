@@ -3471,6 +3471,11 @@ if (document.readyState !== "complete") {
  * @todo Add "use strict" (to help detect issues)
  * @todo fix obsolete references in documentation.
  * @todo Move static this documentation outside of there somehow so this==>Ani
+ * @todo Add second overlay on right for help/keybinds (dynamic create it?)
+ *       Maybe add a "description" key to the keybind object so we can
+ *       dynamically create the help keys. (maybe "custom" type finally sees
+ *       use)
+ *       Add "group" key as well to dynamically group keybinds into categories
  *
  * 80-char max regex: [^\n\r]{81,}
  * space-only line regex: ^(\x20+)[\r\n]*$
