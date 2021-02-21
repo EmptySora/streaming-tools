@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.4.0
+ * @version 2.1.5.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.4.0";
+const VERSION = "2.1.5.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -43,14 +43,6 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR = 1;
 const DEFAULT_BACKGROUND = [0, 0, 0];
 
 /**
- * The color of the leading trail all dots leave.
- * This value is currently not used.
- * @constant {ColorRGBA}
- * @default [255,255,255,1.0]
- */
-const DEFAULT_DOT_COLOR = [255, 255, 255, 1.0];
-
-/**
  * A number ranging from 0.0 - 1.0 that represents the opacity of the trails
  * the dots leave.
  * @see {@link Opacity}
@@ -58,14 +50,6 @@ const DEFAULT_DOT_COLOR = [255, 255, 255, 1.0];
  * @default 1.0
  */
 const DEFAULT_TRAIL_OPACITY = 1.0;
-
-/**
- * The color of the secondary trail all dots leave.
- * This value is currently not used.
- * @constant {ColorRGBA}
- * @default [88,0,133,TRAIL_OPACITY]
- */
-const DEFAULT_TRAIL_COLOR = [88, 0, 133, DEFAULT_TRAIL_OPACITY];
 
 /**
  * The minimum saturation allowed for trail components.
@@ -427,14 +411,14 @@ const DEFAULT_TRAIL_HSL_END = 240.0;
  * @default 8069
  * @constant {number}
  */
-const PEAKS_APP_PORT = 8069;
+const DEFAULT_PEAKS_APP_PORT = 8069;
 /**
  * The domain of the server running WinAudioLevels.exe. If you are selfhosting,
  * set this to one of: "127.0.0.1", "localhost", or "::1"
  * @default "localhost"
  * @constant {string}
  */
-const PEAKS_APP_DOMAIN = "localhost";
+const DEFAULT_PEAKS_APP_DOMAIN = "localhost";
 /**
  * Whether or not the server running WinAudioLevels.exe only accepts secure connections.
  * If you are selfhosting, most likely, this will be set to false. Otherwise, this must
@@ -442,7 +426,7 @@ const PEAKS_APP_DOMAIN = "localhost";
  * @default false
  * @constant {boolean}
  */
-const PEAKS_APP_SECURE = false;
+const DEFAULT_PEAKS_APP_SECURE = false;
 
 /**
  * Whether or not to try connection to the audio peaks server at all. Set this to
@@ -450,7 +434,7 @@ const PEAKS_APP_SECURE = false;
  * @default true
  * @constant {boolean}
  */
-const PEAKS_APP_ENABLED = true;
+const DEFAULT_PEAKS_APP_ENABLED = true;
 
 /**
  * How long to wait, in milliseconds, before attempting to reconnect to the
@@ -458,7 +442,7 @@ const PEAKS_APP_ENABLED = true;
  * @default 30000
  * @constant {number}
  */
-const PEAKS_APP_ERROR_RECONNECT_WAIT = 30000;
+const DEFAULT_PEAKS_APP_ERROR_RECONNECT_WAIT = 30000;
 
 /**
  * How long to wait, in milliseconds, before attempting to reconnect to the
@@ -466,7 +450,7 @@ const PEAKS_APP_ERROR_RECONNECT_WAIT = 30000;
  * @default 5000
  * @constant {number}
  */
-const PEAKS_APP_RECONNECT_WAIT = 5000;
+const DEFAULT_PEAKS_APP_RECONNECT_WAIT = 5000;
 
 /**
  * The minimum multiplier the audio levels on the computer can affect the
@@ -493,7 +477,7 @@ const PEAKS_APP_RECONNECT_WAIT = 5000;
  * @constant {number}
  * @see {AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER}
  */
-const AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
+const DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
 
 /**
  * The maximum multiplier the audio levels on the computer can affect the
@@ -520,7 +504,7 @@ const AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
  * @constant {number}
  * @see {AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER}
  */
-const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
+const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
 
 /* *************************************************************************** *
  * ********************** END OF CONFIGURATION SETTINGS ********************** *
@@ -533,7 +517,6 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * of that color.
  * @typedef {number[]} ColorRGB
  */
-
 /**
  * Represents a color using Red, Green, Blue, and Alpha components in that
  * order.
@@ -545,13 +528,11 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * @typedef {number[]} ColorRGBA
  * @see {@link Opacity}
  */
-
 /**
  * Represents the opacity of a color ranging from 0.0 to 1.0.
  * 0.0 represents full transparancy, 1.0 represents full opacity.
  * @typedef {number} Opacity
  */
-
 /**
  * Represents the saturation of a color, or how "vibrant" the color appears,
  * ranging from 0.0 to 100.0.
@@ -562,7 +543,6 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * as a number ranging from 0 to 100.
  * @typedef {number} Saturation
  */
-
 /**
  * Represents the luminosity of a color, or how much light the color gives off,
  * ranging from 0.0 to 100.0.
@@ -582,7 +562,6 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * as a number ranging from 0 to 100.
  * @typedef {number} Luminosity
  */
-
 /**
  * Represents the Hue of a color, as a measure of degrees (not radians), around
  * the color wheel.
@@ -601,7 +580,6 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * and MAGENTA + CYAN = BLUE, CYAN + YELLOW = GREEN, YELLOW + MAGENTA = RED
  * @typedef {number} Hue
  */
-
 /**
  * This isn't an actual typedef. It's meant to be a pointer to common notes
  * regarding the calculation of sinusoidal functions, or functions that use
@@ -664,7 +642,6 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *
  * @typedef {undefined} Sinusoid
  */
-
 /**
  *
  * @typedef {Object} KeyBindingInfo
@@ -677,7 +654,6 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * @property {Function} handler
  *     The event handler for the key binding.
  */
-
 /**
  * Conditions that must be met in order to run the key binding. All specified
  * properties must have their respective keys set to the specified state.
@@ -691,23 +667,12 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * @property {boolean} shift
  *     Required state of the SHIFT key.
  */
-
-/**
- * Represents the delegate that is called to invoke the "format" property.
- * @callback StatusElementPropertiesFormatCallback
- * @param {object} obj
- *     The input object being formatted.
- * @returns {string}
- *     A formatted string containing the object.
- */
-
 /**
  * Represents the delegate that is called to invoke the "value" property.
  * @callback StatusElementPropertiesValueCallback
  * @returns {object|object[]}
  *     The value of the StatusElement, or an array of such values if necessary.
  */
-
 /**
  *
  * @typedef {object} StatusElementProperties
@@ -747,9 +712,6 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *     the StatusElement and acts as the units. Using an array of two strings and having the first string
  *     be empty is a valid use case (eg: a range of pixels. Instead of ## pixels ## pixels, you can use
  *     ["","pixels"] with the {@link StatusElementProperties#sep} property to get like ## x ## pixels).
- * @property {StatusElementPropertiesFormatCallback} format
- *     Used to format the {@link StatusElementProperties#value} property. Currently unused, I think.
- *     I might end up removing it...
  * @property {StatusElementPropertiesValueCallback} value
  *     A callback function that is used to retrieve the value of the property.
  * @property {boolean} show
@@ -761,8 +723,38 @@ const AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *     A string value that is used to separate the values in a range. Defaults to an empty string.
  * @see {@link StatusElement}
  */
-
-
+/**
+ * The audio peaks message data structure. This is the format the
+ * audio peaks server sends data.
+ * @typedef {Object} AudioPeakMessage
+ * @property {string} status -
+ *     Indicates the status of the message. See
+ *     {@link AudioPeakMessageStatus}, possible values of this
+ *     property.
+ * @property {AudioPeaks|Object} data -
+ *     The data of the message. This will either be a
+ *     {@link AudioPeaks} object if {@link AudioPeakMessage#status}
+ *     is "Success", or a C# Exception object if it is "Error".
+ */
+/**
+ * The audio peaks message data structure. This is the format the
+ * audio peaks server sends data. There are three defined statuses:
+ *   Success - THe message contains "valid" audio data.
+ *   Info - Currently unused.
+ *   Error - The server encountered an error.
+ * @typedef {string} AudioPeakMessageStatus
+ */
+/**
+ * The raw peak data from the WinAudioLevels.exe server.
+ * @typedef {Object} AudioPeaks
+ * @property {Number[]} peaks -
+ *     The collection of audio peaks detected. Each element is the
+ *     detected peak of a separate audio device.
+ * @property {Number} max - The largest audio peak detected.
+ * @property {Number} min - The smallest audio peak detected.
+ * @property {Number} avg -
+ *     The average of all the audio peaks detected.
+ */
 /**
  * Represents an individual settings element and provides methods and properties
  * for updating the HUD on such elements.
@@ -1405,19 +1397,11 @@ class Dot {
         //new period is the multiplier*original
     }
     /**
-     * Updates the speed of this {@see Dot} based on its acceleration and
-     * shifts the dot vertically based upon that speed.
-     */
-    updateSpeedAndPosition() {
-        //Move the dot upwards based on the dot's speed.
-        this.y -= this.s * Ani.audioPeakMultiplier;
-        //Increase the dot's speed based on its acceleration.
-        this.s += this.a;// * AUDIO_PEAK_MULTIPLIER;
-    }
-    /**
      * Draws the {@see Dot} to the canvas.
+     * @param {CanvasRenderingContext2D} context
+     *     The context in which to draw to.
      */
-    draw() {
+    draw(context) {
         //Skip the first and second frames of the animation to retrieve the
         //second and third of the three points necessary for the animation
         if (this.mustShift) {
@@ -1430,41 +1414,46 @@ class Dot {
         this.bpfx = (this.bpfx + 1) % this.bpp;
 
         //Set the line width
-        Ani.context.lineWidth = this.currentLineWidth;
+        context.lineWidth = this.currentLineWidth;
 
         //Clear all preivous paths
-        Ani.context.beginPath();
+        context.beginPath();
 
         //Set the stroke and fill styles to the color of the current dot.
-        Ani.context.strokeStyle =
-            Ani.context.fillStyle = this.colorHSL;
+        context.strokeStyle =
+            context.fillStyle = this.colorHSL;
 
         //Move to the oldest of the three reference points of the dot.
-        Ani.context.moveTo(this.rppx, this.rppy);
+        context.moveTo(this.rppx, this.rppy);
         //Make a line to the second oldest of the three reference points of the dot.
-        Ani.context.lineTo(this.rpx, this.rpy);
+        context.lineTo(this.rpx, this.rpy);
         //Draw the line.
-        Ani.context.stroke();
+        context.stroke();
 
         //Make a line to the first (newest) of the three reference points of the dot
-        Ani.context.lineTo(this.rx, this.ry);
+        context.lineTo(this.rx, this.ry);
         //Draw the line.
-        Ani.context.stroke();
+        context.stroke();
 
         //Shift the reference points and update the speed, position, and phase shifts.
         this.shiftRefPoints();
-        this.updateSpeedAndPosition();
+
+        //Move the dot upwards based on the dot's speed.
+        this.y -= this.s * Ani.audioPeakMultiplier;
+        //Increase the dot's speed based on its acceleration.
+        this.s += this.a;// * AUDIO_PEAK_MULTIPLIER;
         //this.updatePhaseShifts(); //BUGGED
 
         //Reset the line width
-        Ani.context.lineWidth = 1;
+        context.lineWidth = 1;
     }
 
     /**
      * Gets a value that indicates whether or not more reference points are needed
      * before this {@see Dot} can be animated properly.
-     * @returns {boolean} Whether or not more reference points are needed before this
-     * dot can be animated properly.
+     * @returns {boolean}
+     *     Whether or not more reference points are needed before this dot can
+     *     be animated properly.
      */
     get mustShift() {
         return (this.py === null) || (this.ppy === null);
@@ -1476,7 +1465,7 @@ class Dot {
     get currentLuminosity() {
         //Determine the current effective luminosity of the dot based on the
         //current frame count
-        return Dot.sinusoidal(this.pa, this.pb, this.pc, this.l);
+        return Dot.sinusoidal(this.pa, this.pb, this.pc, this.l, Ani.frameCount);
     }
     /**
      * Gets the current line width of this {@see Dot}.
@@ -1485,7 +1474,7 @@ class Dot {
     get currentLineWidth() {
         //Determine the current effective line width of the dot based on the
         //current frame count
-        return Dot.sinusoidal(this.bpa, this.bpb, this.bpc, this.w);
+        return Dot.sinusoidal(this.bpa, this.bpb, this.bpc, this.w, Ani.frameCount);
     }
     /**
      * Gets the color of this {@see Dot} as a valid CSS color tag.
@@ -1659,33 +1648,13 @@ class Dot {
      *     The phase-shift of the function.
      * @param {number} d 
      *     The vertical-shift of the function.
-     * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
-     * where x is equal to the the current [frame count]{@link FRAME_COUNT}
-     */
-    static sinusoidal(a, b, c, d) {
-        return Dot.sinusoidal2(a, b, c, d, Ani.frameCount);
-    }
-    /**
-     * Calculates the value of a sinusoid equation given the four possible
-     * transformations that can be applied to it. (see {@link Sinusoid} for more
-     * details about each parameter.)
-     * The function uses the current [frame count]{@link FRAME_COUNT} as the value
-     * of the "x" parameter.
-     * @see {@link Sinusoid}
-     * @param {number} a 
-     *     The amplitude of the function.
-     * @param {number} b 
-     *     The frequency of the function.
-     * @param {number} c 
-     *     The phase-shift of the function.
-     * @param {number} d 
-     *     The vertical-shift of the function.
      * @param {number} x 
      *     The x-value.
-     * @returns {number} The value of y in the equation y = A * sin(B * (x - C)) + D
-     * where x is equal to the the current [frame count]{@link FRAME_COUNT}
+     * @returns {number}
+     *     The value of y in the equation y = A * sin(B * (x - C)) + D where x is equal
+     *     to the the current [frame count]{@link FRAME_COUNT}
      */
-    static sinusoidal2(a, b, c, d, x) {
+    static sinusoidal(a, b, c, d, x) {
         return a * Math.sin(b * (x - c)) + d;
     }
 
@@ -1700,18 +1669,6 @@ class Dot {
      */
     static rand(min, max) {
         return (Math.random() * (max - min)) + min;
-    }
-
-    /**
-     * Generates a random integer number between "min" and "max".
-     * @param {number} min 
-     *     The inclusive lower bound of the random number.
-     * @param {number} max 
-     *     The exclusive upper bound of the random number.
-     * @returns {number} The pseudorandom number that was generated.
-     */
-    static randInt(min, max) {
-        return Math.floor((Math.random() * (max - min)) + min);
     }
 
     /**
@@ -1736,6 +1693,52 @@ class Ani {
      * @private
      */
     static __constructor() {
+        //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp, PageDown
+        //Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause, AudioVolumeMute,
+        //AudioVolumeDown, AudioVolumeUp, ContextMenu
+        var keybinds = [
+            {
+                "key": "e",
+                "conditions": [{ "ctrl": false }],
+                "handler": () => window.location.reload()
+            }, {
+                "key": "s",
+                "conditions": [{ "ctrl": false }],
+                "handler": Ani.toggleStatus
+            }, {
+                "key": "v",
+                "conditions": [{ "ctrl": false }],
+                "handler": Ani.toggleVerboseStatus
+            }, {
+                "key": "d",
+                "conditions": [{ "ctrl": false }],
+                "handler": () => console.info(`${Ani.dots.length} active dot(s).`)
+            }, {
+                "key": "r",
+                "conditions": [{ "ctrl": false }],
+                "handler": Ani.reset
+            }, {
+                "key": "h",
+                "conditions": [{ "ctrl": false }],
+                "handler": Ani.help
+            }, {
+                "key": "+",
+                "conditions": [{ "ctrl": false }],
+                "handler": Ani.upFPS
+            }, {
+                "key": "-",
+                "conditions": [{ "ctrl": false }],
+                "handler": Ani.downFPS
+            }, {
+                "key": "_",
+                "conditions": [{ "ctrl": false, "shift": true }],
+                "handler": Ani.downFPS
+            }, {
+                "key": "=",
+                "conditions": [{ "ctrl": false, "shift": false }],
+                "handler": Ani.upFPS
+            }
+        ];
         var status_rows = [
             {
                 "name": "General",
@@ -1745,7 +1748,7 @@ class Ani {
                 "type": "range.number.integer",
                 "unit": ["", "pixels"],
                 "sep": " x ",
-                "value": () => [Ani.size.width, Ani.size.height]
+                "value": () => [Ani.width, Ani.height]
             }, {
                 "name": "Version",
                 "type": "string",
@@ -1758,11 +1761,6 @@ class Ani {
                 "name": "Background",
                 "type": "color.rgb",
                 "value": () => Ani.cBackground
-            }, {
-                "name": "Dot Color",
-                "type": "color.rgba",
-                "show": false,
-                "value": () => Ani.cDot
             }, {
                 "name": "Frame Statistics",
                 "type": "header"
@@ -1810,11 +1808,6 @@ class Ani {
                 "type": "color.alpha",
                 "value": () => Ani.oTrail
             }, {
-                "name": "Trail Color",
-                "type": "color.rgba",
-                "show": false,
-                "value": () => Ani.cTrail
-            }, {
                 "name": "Trail Saturation",
                 "type": "range.color.sat",
                 "value": () => [Ani.snTrail, Ani.sxTrail]
@@ -1854,7 +1847,6 @@ class Ani {
                 "name": "Period",
                 "type": "range.string",
                 "unit": ["", "seconds"],
-                "format": (time) => { },
                 "value": () => [Ani.opnLum.toFixed(2), Ani.opxLum.toFixed(2)]
             }, {
                 "name": "Amplitude",
@@ -1864,7 +1856,6 @@ class Ani {
                 "name": "Phase Shift",
                 "type": "string",
                 "unit": "seconds",
-                "format": (time) => { },
                 "value": () => Ani.opsLum.toFixed(2)
             }, {
                 "name": "Line Width Oscillation",
@@ -1873,7 +1864,6 @@ class Ani {
                 "name": "Period",
                 "type": "range.string",
                 "unit": ["", "seconds"],
-                "format": (time) => { },
                 "value": () => [Ani.opnwLine.toFixed(2), Ani.opxwLine.toFixed(2)]
             }, {
                 "name": "Amplitude",
@@ -1884,11 +1874,24 @@ class Ani {
                 "name": "Phase Shift",
                 "type": "string",
                 "unit": "seconds",
-                "format": (time) => { },
                 "value": () => Ani.opswLine.toFixed(2)
             }
         ];
+        var timeout = null;
 
+        /**
+         * An object used to obtain application settings.
+         * @type {SettingsDB}
+         * @private
+         */
+        this.settingsFactory = null;
+
+        /**
+         * The current application settings.
+         * @type {Settings}
+         * @public
+         */
+        this.sObj = null;
         /**
          * An array of all of the dots in the animation.
          * @type {Dot[]}
@@ -1914,23 +1917,6 @@ class Ani {
             status_rows);
 
         /**
-         * @type {number}
-         * @private
-         */
-        this.__the = DEFAULT_TRAIL_HSL_END;
-        /**
-         * @type {number}
-         * @private
-         */
-        this.__ths = DEFAULT_TRAIL_HSL_START;
-    }
-
-    /**
-     * A static method of sorts that is used to start the animation.
-     * @private
-     */
-    static __start() {
-        /**
          * The number of frames that have been rendered for the animation.
          * @type {number}
          * @public
@@ -1942,7 +1928,7 @@ class Ani {
          * @type {HTMLCanvasElement}
          * @public
          */
-        this.canvas = document.querySelector("canvas");
+        this.canvas = undefined;
 
         //Get a 2D drawing context for the canvas
         /**
@@ -1950,228 +1936,35 @@ class Ani {
          * @type {CanvasRenderingContext2D}
          * @public
          */
-        this.context = this.canvas.getContext("2d");
-
-        //Get the size of the canvas, which should be stretched to the full size of
-        //the window.
+        this.context = undefined;
         /**
          * The bounding rectangle that the canvas is displaying in.
          * @type {DOMRect}
          * @public
          */
-        this.size = this.canvas.getBoundingClientRect();
+        this.size = undefined;
+        /**
+         * @type {number}
+         * @private
+         */
+        this.__the = DEFAULT_TRAIL_HSL_END;
+        /**
+         * @type {number}
+         * @private
+         */
+        this.__ths = DEFAULT_TRAIL_HSL_START;
+        /**
+         * The AudioPeaks client that retrieves the system audio peaks.
+         * @type {AudioPeaks}
+         * @public
+         */
+        this.peaks = undefined;
 
-        //Set the width and height of the canvas internally, so that the canvas has
-        //a 1 to 1 ratio between itself and the screen.
-        this.canvas.setAttribute("width", this.width);
-        this.canvas.setAttribute("height", this.height);
-
-        //Clear all prior paths.
-        this.context.beginPath();
-
-        //Set the fill and stroke styles to the background color at full opacity.
-        this.context.fillStyle = `rgba(${Ani.cBackground.join(",")},1)`;
-        this.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},1)`;
-
-        //Fill the entire canvas with the current fill style.
-        this.context.fillRect(0, 0, this.width, this.height);
-
-        //Create a timer to start the animation.
-        window.setTimeout(Ani.animate, Ani.iFrame);
-        this.status.update();
-    }
-
-    /**
-     * Gets the rounded width of the animation canvas.
-     * @returns {number} The rounded width of the animation canvas.
-     */
-    static get width() {
-        return Math.round(this.size.width);
-    }
-    /**
-     * Gets the rounded height of the animation canvas.
-     * @returns {number} The rounded height of the animation canvas.
-     */
-    static get height() {
-        return Math.round(this.size.height);
-    }
-
-    /**
-     * Renders the next animation frame.
-     */
-    static animate() {
-        try {
-            Ani.__animateInternal();
-        } catch (e) {
-            console.error(e);
-        }
-        //set a timer to run this same function, when we need to animate the next
-        //frame.
-        window.setTimeout(Ani.animate, Ani.iFrame);
-    }
-
-    /**
-     * Updates the size of the canvas the animation is rendering to.
-     * This would usually be called if the user resizes the window.
-     */
-    static updateSize() {
-        //Initialize variables.
-        var i;
-        var osize = this.size;
-
-        //verify that resize is actually enabled
-        if (Ani.resize) {
-            //Get the size of the canvas, which should be stretched to the full size
-            //of the window.
-            this.size = this.canvas.getBoundingClientRect();
-
-            //Set the width and height of the canvas internally, so that the canvas
-            //has a 1 to 1 ratio between itself and the screen.
-            this.canvas.setAttribute("width", this.width);
-            this.canvas.setAttribute("height", this.height);
-
-            //check to see if the canvas was made smaller, if not, don't check.
-            if (osize.width > this.size.width) {
-                //check all dots to see if they're still in bounds.
-                for (i = 0; i < this.dots.length; i += 1) {
-                    if (this.dots[i].x > this.size.width) {
-                        //dot is out of bounds, remove it.
-                        this.dots.splice(i--, 1);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * A function that represents the computation required to complete a single
-     * frame in the animation.
-     * @private
-     */
-    static __animateInternal() {
-        if (!this.startTime) {
-            /**
-             * The time in which the animation was first started.
-             * @returns {number} The milliseconds since 1970-01-01T00:00.
-             */
-            this.startTime = (new Date()).getTime();
-        }
-        //Increment the frame counter.
-        this.frameCount += 1;
-
-        //Erase all previously recorded paths.
-        this.context.beginPath();
-
-        //Set the fill style and stroke style to the background color, at the
-        //fade opacity
-        this.context.fillStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
-        this.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
-
-        //Move the path to the origin of the canvas, (0,0), or the upper left corner
-        //of the canvas.
-        this.context.moveTo(0, 0);
-
-        //Create a rectangle, offset by (0,0), the size of the entire canvas.
-        this.context.rect(0, 0, this.width, this.height);
-
-        //Fill the current path.
-        this.context.fill();
-
-        //Add new dots and then move all dots.
-        this.addNewDots();
-        this.moveAllDots();
-    }
-
-    /**
-     * A helper function used to move all the dots.
-     * @protected
-     */
-    static moveAllDots() {
-        var i;
-
-        //Iterate over every dot.
-        this.dots.forEach((d) => {
-            d.draw();
-        });
-        for (i = 0; i < this.dots.length; i += 1) {
-            //Remove the current dot if it's off-screen
-            if (this.dots[i].offScreen) {
-                this.dots.splice(i--, 1);
-            }
-        }
-    }
-
-    /**
-     * A helper function used to add new dots to the animation.
-     * @protected
-     */
-    static addNewDots() {
-        var i;
-        for (i = 0; i < Ani.rDot * this.audioPeakMultiplier; i += 1) {
-            if (this.dots.length >= Ani.xDots) {
-                //Can't add more dots.
-                break;
-            }
-            //Add another dot and add it to the list.
-            this.dots.push(new Dot(this));
-        }
-    }
-
-    /**
-     * A setup function, called when the page loads. It sets up the canvas and begins
-     * the animation.
-     */
-    static start() {
-
-        //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp, PageDown
-        //Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause, AudioVolumeMute,
-        //AudioVolumeDown, AudioVolumeUp, ContextMenu
-        var keybinds = [
-            {
-                "key": "e",
-                "conditions": [{ "ctrl": false }],
-                "handler": () => window.location.reload()
-            }, {
-                "key": "s",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.toggleStatus
-            }, {
-                "key": "v",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.toggleVerboseStatus
-            }, {
-                "key": "d",
-                "conditions": [{ "ctrl": false }],
-                "handler": () => console.info(`${Ani.dots.length} active dot(s).`)
-            }, {
-                "key": "r",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.reset
-            }, {
-                "key": "h",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.help
-            }, {
-                "key": "+",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.upFPS
-            }, {
-                "key": "-",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.downFPS
-            }, {
-                "key": "_",
-                "conditions": [{ "ctrl": false, "shift": true }],
-                "handler": Ani.downFPS
-            }, {
-                "key": "=",
-                "conditions": [{ "ctrl": false, "shift": false }],
-                "handler": Ani.upFPS
-            }
-        ];
-
-        var timeout = null;
-        Ani.__constructor();
+        /**
+         * The time in which the animation was first started.
+         * @returns {number} The milliseconds since 1970-01-01T00:00.
+         */
+        this.startTime = undefined;
 
         document.body.addEventListener("mousemove", () => {
             document.body.style.cursor = "default";
@@ -2204,147 +1997,177 @@ class Ani {
                 binding.handler(e);
             });
         });
-        window.addEventListener("resize", this.updateSize);
-        //check if peaks app is enabled for more dynamic animations.
-        if (PEAKS_APP_ENABLED) {
-            try {
-                Ani.loadPeaksApp();
-            } catch (e) {
-                console.log("Failed to load peaks app: ", e);
-            }
-        }
+        window.addEventListener("resize", Ani.updateSize);
         Ani.loadSettings();
     }
+    /**
+     * A static method of sorts that is used to start the animation.
+     * @private
+     */
+    static start() {
+        Ani.frameCount = 0;
+        //Retrieve the CANVAS element
+        Ani.canvas = document.querySelector("canvas");
 
+        //Get a 2D drawing context for the canvas
+        Ani.context = Ani.canvas.getContext("2d");
+
+        //Get the size of the canvas, which should be stretched to the full size of
+        //the window.
+        Ani.size = Ani.canvas.getBoundingClientRect();
+
+        //Set the width and height of the canvas internally, so that the canvas has
+        //a 1 to 1 ratio between itself and the screen.
+        Ani.canvas.setAttribute("width", Ani.width);
+        Ani.canvas.setAttribute("height", Ani.height);
+
+        //Clear all prior paths.
+        Ani.context.beginPath();
+
+        //Set the fill and stroke styles to the background color at full opacity.
+        Ani.context.fillStyle = `rgba(${Ani.cBackground.join(",")},1)`;
+        Ani.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},1)`;
+
+        //Fill the entire canvas with the current fill style.
+        Ani.context.fillRect(0, 0, Ani.width, Ani.height);
+
+        //Create a timer to start the animation.
+        window.setTimeout(Ani.animate, Ani.iFrame);
+        Ani.status.update();
+
+        try {
+            Ani.peaks = new AudioPeaks();
+        } catch (e) {
+            console.log("Failed to load peaks app: ", e);
+        }
+    }
+    /**
+     * Gets the rounded width of the animation canvas.
+     * @returns {number} The rounded width of the animation canvas.
+     */
+    static get width() {
+        return Math.round(Ani.size.width);
+    }
+    /**
+     * Gets the rounded height of the animation canvas.
+     * @returns {number} The rounded height of the animation canvas.
+     */
+    static get height() {
+        return Math.round(Ani.size.height);
+    }
+    /**
+     * Renders the next animation frame.
+     */
+    static animate() {
+        if (!Ani.startTime) {
+            Ani.startTime = (new Date()).getTime();
+        }
+        //Increment the frame counter.
+        Ani.frameCount += 1;
+        try {
+            Ani.__animateInternal(Ani.context);
+        } catch (e) {
+            console.error(e);
+        }
+        //set a timer to run this same function, when we need to animate the next
+        //frame.
+        window.setTimeout(Ani.animate, Ani.iFrame);
+    }
+    /**
+     * Updates the size of the canvas the animation is rendering to.
+     * This would usually be called if the user resizes the window.
+     */
+    static updateSize() {
+        //Initialize variables.
+        var i;
+        var osize = Ani.size;
+
+        //verify that resize is actually enabled
+        if (Ani.resize) {
+            //Get the size of the canvas, which should be stretched to the full size
+            //of the window.
+            this.size = Ani.canvas.getBoundingClientRect();
+
+            //Set the width and height of the canvas internally, so that the canvas
+            //has a 1 to 1 ratio between itself and the screen.
+            this.canvas.setAttribute("width", Ani.width);
+            this.canvas.setAttribute("height", Ani.height);
+
+            //check to see if the canvas was made smaller, if not, don't check.
+            if (osize.width > Ani.size.width) {
+                //check all dots to see if they're still in bounds.
+                for (i = 0; i < Ani.dots.length; i += 1) {
+                    if (Ani.dots[i].x > Ani.size.width) {
+                        //dot is out of bounds, remove it.
+                        Ani.dots.splice(i--, 1);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * A function that represents the computation required to complete a single
+     * frame in the animation.
+     * @private
+     * @param {CanvasRenderingContext2D} context
+     *     The context in which to render to.
+     */
+    static __animateInternal(context) {
+        var i;
+        //Erase all previously recorded paths.
+        context.beginPath();
+
+        //Set the fill and stroke style to the bg color at the fade opacity
+        context.fillStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
+        context.strokeStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
+
+        context.moveTo(0, 0);
+
+        //Create a rectangle, offset by (0,0), the size of the entire canvas.
+        context.rect(0, 0, Ani.width, Ani.height);
+
+        //Fill the current path.
+        context.fill();
+        //Add new dots and then move all dots.
+        for (i = 0; i < Ani.rDot * Ani.audioPeakMultiplier; i += 1) {
+            if (Ani.dots.length >= Ani.xDots) {
+                break; //Can't add more dots.
+            }
+            //Add another dot and add it to the list.
+            Ani.dots.push(new Dot());
+        }
+
+        Ani.dots.forEach((d) => d.draw(Ani.context));
+        for (i = 0; i < Ani.dots.length; i += 1) {
+            //Remove the current dot if it's off-screen
+            if (Ani.dots[i].offScreen) {
+                Ani.dots.splice(i--, 1);
+            }
+        }
+    }
     /**
      * Loads the saved application settings.
      */
     static loadSettings() {
-        /**
-         * An object used to obtain application settings.
-         * @type {SettingsDB}
-         * @private
-         */
-        this.settingsFactory = new SettingsDB();
-
-        /**
-         * The current application settings.
-         * @type {Settings}
-         * @public
-         */
-        this.sObj = null;
-
-        this.settingsFactory.addEventListener("open", function () {
-            Ani.settingsFactory.loadSettings("(default)").then(function (s) {
+        Ani.settingsFactory = new SettingsDB();
+        Ani.settingsFactory.addEventListener("open", () => {
+            Ani.settingsFactory.loadSettings("(default)").then((s) => {
                 Ani.sObj = s;
-                Ani.__start();
-            }).catch(function () {
+                Ani.start();
+            }).catch(() => {
                 console.error("Failed to load/parse IDB settings... :(");
-                Ani.sObj = new Settings(
-                    Ani.settingsFactory,
-                    "(default)",
-                    "{}");
+                Ani.sObj = new Settings(Ani.settingsFactory, "(default)", "{}");
                 Ani.sObj.save();
-                Ani.__start();
+                Ani.start();
             });
         });
-        this.settingsFactory.addEventListener("error", function () {
+        Ani.settingsFactory.addEventListener("error", () => {
             console.error("Failed to load IDB settings... :(");
             Ani.sObj = new Settings(null, "(default)", "{}");
-            Ani.__start();
+            Ani.start();
         });
-        this.settingsFactory.open();
+        Ani.settingsFactory.open();
     }
-
-    /**
-     * A function that loads the audio peaks subsystem to enable dynamic animations
-     * that respond to the audio levels on your computer.
-     */
-    static loadPeaksApp() {
-        //peaks socket
-        var socket;
-        function connect() {
-            var reconnect = false;
-            socket = new WebSocket(`ws${PEAKS_APP_SECURE ? "s" : ""}://` +
-                `${PEAKS_APP_DOMAIN}:${PEAKS_APP_PORT}/AudioPeaks`);
-            socket.addEventListener("open", function () {
-                console.info("Connected to the Audio peaks sever successfully.");
-            });
-            socket.addEventListener("error", function (e) {
-                console.error("Failed to connect to the audio peaks server: ", e);
-                if (!reconnect) {
-                    console.info(`Trying again in ${PEAKS_APP_ERROR_RECONNECT_WAIT / 1000} seconds.`);
-                    window.setTimeout(connect, PEAKS_APP_ERROR_RECONNECT_WAIT);
-                    reconnect = true;
-                }
-                Ani.audioPeakMultiplier = 1;
-            });
-            socket.addEventListener("close", function () {
-                console.info("Lost the connection to the audio peaks server.");
-                if (!reconnect) {
-                    console.info(`Trying again in ${PEAKS_APP_RECONNECT_WAIT / 1000} seconds.`);
-                    window.setTimeout(connect, PEAKS_APP_RECONNECT_WAIT);
-                    reconnect = true;
-                }
-                Ani.audioPeakMultiplier = 1;
-            });
-            socket.addEventListener("message", function (e) {
-                var message = JSON.parse(e.data);
-                switch (message.status) {
-                    case "Success":
-                        var peak = message.data.max;
-                        if (peak === 0.5) {
-                            Ani.audioPeakMultiplier = 1;
-                        } else if (peak < 0.5) {
-                            Ani.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 -
-                                AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER));
-                        } else { // > 0.5
-                            Ani.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (
-                                AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER - 1));
-                        }
-                        break;
-                    case "Error":
-                        console.error("Audio peaks server encountered an error: ", message.data);
-                        break;
-                }
-                /**
-                 * The audio peaks message data structure. This is the format the
-                 * audio peaks server sends data.
-                 * @typedef {Object} AudioPeakMessage
-                 * @property {string} status - 
-                 *     Indicates the status of the message. See
-                 *     {@link AudioPeakMessageStatus}, possible values of this
-                 *     property.
-                 * @property {AudioPeaks|Object} data -
-                 *     The data of the message. This will either be a
-                 *     {@link AudioPeaks} object if {@link AudioPeakMessage#status}
-                 *     is "Success", or a C# Exception object if it is "Error".
-                 */
-                /**
-                 * The audio peaks message data structure. This is the format the
-                 * audio peaks server sends data. There are three defined statuses:
-                 *   Success - THe message contains "valid" audio data.
-                 *   Info - Currently unused.
-                 *   Error - The server encountered an error.
-                 * @typedef {string} AudioPeakMessageStatus
-                 */
-                /**
-                 * The raw peak data from the WinAudioLevels.exe server.
-                 * @typedef {Object} AudioPeaks
-                 * @property {Number[]} peaks -
-                 *     The collection of audio peaks detected. Each element is the
-                 *     detected peak of a separate audio device.
-                 * @property {Number} max - The largest audio peak detected.
-                 * @property {Number} min - The smallest audio peak detected.
-                 * @property {Number} avg -
-                 *     The average of all the audio peaks detected.
-                 */
-            });
-        }
-        //connect
-        connect();
-    }
-
     /**
      * Steps the FPS up by 5 frames per second.
      */
@@ -2358,13 +2181,10 @@ class Ani {
     static downFPS() {
         var old_fps = Ani.fps;
         Ani.fps -= 5;
-        if (old_fps !== Ani.fps) {
-            console.info(`Now targeting ${Ani.fps} frames per second.`);
-        } else {
-            console.info(`Cannot reduce the framerate any lower than 5 FPS.`);
-        }
+        console.info((old_fps !== Ani.fps)
+            ? `Now targeting ${Ani.fps} frames per second.`
+            : "Cannot reduce the framerate any lower than 5 FPS.");
     }
-
     /**
      * Resets the animation.
      */
@@ -2384,7 +2204,6 @@ class Ani {
         //Fill the entire canvas with the current fill style.
         Ani.context.fillRect(0, 0, Ani.width, Ani.height);
     }
-
     /**
      * Toggles whether or not the status overlay is enabled and displayed.
      */
@@ -2399,7 +2218,6 @@ class Ani {
         Ani.status.showVerbose = !Ani.status.showVerbose;
         console.info(`Now ${Ani.status.showVerbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
     }
-
     /**
      * Outputs help information to the console.
      */
@@ -2425,14 +2243,8 @@ class Ani {
     static get cBackground() {
         return this.sObj.cBackground;
     }
-    static get cDot() {
-        return this.sObj.cDot;
-    }
     static get oTrail() {
         return this.sObj.oTrail;
-    }
-    static get cTrail() {
-        return this.sObj.cTrail;
     }
     static get snTrail() {
         return this.sObj.snTrail;
@@ -2527,18 +2339,36 @@ class Ani {
     static get opxfwLine() {
         return this.sObj.opxfwLine;
     }
+    static get pPeaks() {
+        return this.sObj.pPeaks;
+    }
+    static get dPeaks() {
+        return this.sObj.dPeaks;
+    }
+    static get sPeaks() {
+        return this.sObj.sPeaks;
+    }
+    static get ePeaks() {
+        return this.sObj.ePeaks;
+    }
+    static get ewPeaks() {
+        return this.sObj.ewPeaks;
+    }
+    static get wPeaks() {
+        return this.sObj.wPeaks;
+    }
+    static get vnPeaks() {
+        return this.sObj.vnPeaks;
+    }
+    static get vxPeaks() {
+        return this.sObj.vxPeaks;
+    }
 
     static set cBackground(value) {
         this.sObj.cBackground = value;
     }
-    static set cDot(value) {
-        this.sObj.cDot = value;
-    }
     static set oTrail(value) {
         this.sObj.oTrail = value;
-    }
-    static set cTrail(value) {
-        this.sObj.cTrail = value;
     }
     static set snTrail(value) {
         this.sObj.snTrail = value;
@@ -2635,7 +2465,30 @@ class Ani {
             Ani.__ths -= 360;
         }
     }
-
+    static set pPeaks(value) {
+        this.sObj.pPeaks = value;
+    }
+    static set dPeaks(value) {
+        this.sObj.dPeaks = value;
+    }
+    static set sPeaks(value) {
+        this.sObj.sPeaks = value;
+    }
+    static set ePeaks(value) {
+        this.sObj.ePeaks = value;
+    }
+    static set ewPeaks(value) {
+        this.sObj.ewPeaks = value;
+    }
+    static set wPeaks(value) {
+        this.sObj.wPeaks = value;
+    }
+    static set vnPeaks(value) {
+        this.sObj.vnPeaks = value;
+    }
+    static set vxPeaks(value) {
+        this.sObj.vxPeaks = value;
+    }
     /* 
      * The extra junk in heTrail/hsTrail is...
      * Bounds checking, make sure HSL_START/END are between 0 and 360.
@@ -2851,25 +2704,7 @@ class SettingsDB extends EventTarget {
     static get version() {
         return 2;
     }
-    /**
-     * Static "constructor" that ensures the {@see window#indexedDB} and
-     * {@see window#IDBTransaction} values are set properly--even when accounting
-     * for differences in browser.
-     */
-    static __constructor() {
-        try {
-            window.indexedDB = window.indexedDB || window.webkitIndexedDB
-                || window.mozIndexedDB || window.OIndexedDB
-                || window.msIndexedDB;
-            window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction
-                || window.OIDBTransaction || window.msIDBTransaction;
-        } catch (e) {
-            return false;
-        }
-        
-    }
 }
-SettingsDB.__constructor();
 
 /**
  * A class that represents the settings of the application.
@@ -2961,20 +2796,10 @@ class Settings {
             ? this.__data.bg
             : DEFAULT_BACKGROUND;
     }
-    get cDot() {
-        return this.__keys.includes("dc")
-            ? this.__data.dc
-            : DEFAULT_DOT_COLOR;
-    }
     get oTrail() {
         return this.__keys.includes("to")
             ? this.__data.to
             : DEFAULT_TRAIL_OPACITY;
-    }
-    get cTrail() {
-        return this.__keys.includes("tc")
-            ? this.__data.tc
-            : DEFAULT_TRAIL_COLOR;
     }
     get snTrail() {
         return this.__keys.includes("tsn")
@@ -3106,25 +2931,54 @@ class Settings {
             ? this.__data.lwopxf
             : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR;
     }
-
+    get pPeaks() {
+        return this.__keys.includes("pp")
+            ? this.__data.pp
+            : DEFAULT_PEAKS_APP_PORT;
+    }
+    get dPeaks() {
+        return this.__keys.includes("pd")
+            ? this.__data.pd
+            : DEFAULT_PEAKS_APP_DOMAIN;
+    }
+    get sPeaks() {
+        return this.__keys.includes("ps")
+            ? this.__data.ps
+            : DEFAULT_PEAKS_APP_SECURE;
+    }
+    get ePeaks() {
+        return this.__keys.includes("pe")
+            ? this.__data.pe
+            : DEFAULT_PEAKS_APP_ENABLED;
+    }
+    get ewPeaks() {
+        return this.__keys.includes("pew")
+            ? this.__data.pew
+            : DEFAULT_PEAKS_APP_ERROR_RECONNECT_WAIT;
+    }
+    get wPeaks() {
+        return this.__keys.includes("pw")
+            ? this.__data.pw
+            : DEFAULT_PEAKS_APP_RECONNECT_WAIT;
+    }
+    get vnPeaks() {
+        return this.__keys.includes("pvn")
+            ? this.__data.pvn
+            : DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER;
+    }
+    get vxPeaks() {
+        return this.__keys.includes("pvx")
+            ? this.__data.pvx
+            : DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER;
+    }
 
     set cBackground(value) {
         this.__data.bg = value;
         this.__refreshKeys();
         this.save();
     }
-    set cDot(value) {
-        this.__data.dc = value;
-        this.__refreshKeys();
-        this.save();
-    }
     set oTrail(value) {
         this.__data.to = value;
-        this.__refreshKeys();
-        this.save();
-    }
-    set cTrail(value) {
-        this.__data.tc = value;
         this.__refreshKeys();
         this.save();
     }
@@ -3258,21 +3112,236 @@ class Settings {
         this.__refreshKeys();
         this.save();
     }
-    //bg,dc,dr,f,fo,hd,loan,loax.lopn,lopnf,lops,lopx,lopxf,lwn,lwoan,lwoax,lwopn,lwopnf,lwops,lwopx,lwopxf,lwx,na,ns,r,tc,to,tsm,tsx,tln,tlx,xa,xd,xs
+    set pPeaks(value) {
+        this.__data.pp = value;
+        this.__refreshKeys();
+        this.save();
+        Ani.peaks.reconnect();
+    }
+    set dPeaks(value) {
+        this.__data.pd = value;
+        this.__refreshKeys();
+        this.save();
+        Ani.peaks.reconnect();
+    }
+    set sPeaks(value) {
+        this.__data.ps = value;
+        this.__refreshKeys();
+        this.save();
+        Ani.peaks.reconnect();
+    }
+    set ePeaks(value) {
+        this.__data.pe = value;
+        this.__refreshKeys();
+        this.save();
+        Ani.peaks.reconnect();
+    }
+    set ewPeaks(value) {
+        this.__data.pew = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set wPeaks(value) {
+        this.__data.pw = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set vnPeaks(value) {
+        this.__data.pvn = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    set vxPeaks(value) {
+        this.__data.pvx = value;
+        this.__refreshKeys();
+        this.save();
+    }
+    //bg,dr,f,fo,hd,loan,loax.lopn,lopnf,lops,lopx,lopxf,lwn,lwoan,lwoax,lwopn,lwopnf,lwops,lwopx,lwopxf,lwx,na,ns,r,to,tsm,tsx,tln,tlx,xa,xd,xs
     //a = amplitude, c = color, e = end, f = factor, h = height/hsl, i = interval, l = luminosity, o = opacity,
     //p = period, ps = phase shift, r = rate, s = saturation/start, w = width
     //-n = min, -x = max
+}
 
-    //Ani.cBackground
+/**
+ * A class that enables connection to an AudioPeaks server and dynamically alter aspects
+ * of the animation based on the volume.
+ */
+class AudioPeaks {
+    /**
+     * Creates a new {@see AudioPeaks} object.
+     */
+    constructor() {
+        /**
+         * @type {boolean}
+         * @private
+         */
+        this.__connecting = false;
+        /**
+         * @type {boolean}
+         * @private
+         */
+        this.__reconnect = false;
+        /**
+         * @type {WebSocket}
+         * @private
+         */
+        this.__socket = null;
 
+        if (this.enabled) {
+            this.connect();
+        }
+    }
+
+    /**
+     * @private
+     */
+    __open() {
+        console.info("Connected to the Audio peaks sever successfully.");
+    }
+    /**
+     * @private
+     * @param {Event} e
+     */
+    __error(e) {
+        console.error("Failed to connect to the audio peaks server: ", e);
+        if (!this.__reconnect) {
+            console.info(`Trying again in ${this.errorReconnectWait / 1000} seconds.`);
+            window.setTimeout(() => this.reconnect(), this.errorReconnectWait);
+            this.__reconnect = true;
+        }
+        Ani.audioPeakMultiplier = 1;
+    }
+    /**
+     * @private
+     */
+    __close() {
+        console.info("Lost the connection to the audio peaks server.");
+        if (!this.__reconnect) {
+            console.info(`Trying again in ${this.reconnectWait / 1000} seconds.`);
+            window.setTimeout(() => this.reconnect(), this.reconnectWait);
+            this.__reconnect = true;
+        }
+        Ani.audioPeakMultiplier = 1;
+    }
+    /**
+     * @private
+     * @param {Event} e
+     */
+    __message(e) {
+        var message = JSON.parse(e.data);
+        switch (message.status) {
+            case "Success":
+                var peak = message.data.max;
+                if (peak === 0.5) {
+                    Ani.audioPeakMultiplier = 1;
+                } else if (peak < 0.5) {
+                    Ani.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 - Ani.vnPeaks));
+                } else { // > 0.5
+                    Ani.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (Ani.vxPeaks - 1));
+                }
+                break;
+            case "Error":
+                console.error("Audio peaks server encountered an error: ", message.data);
+                break;
+        }
+    }
+
+    /**
+     * Gets the port of the AudioPeaks server.
+     * @type {number}
+     */
+    get port() {
+        return Ani.pPeaks;
+    }
+    /**
+     * Gets the domain of the AudioPeaks server.
+     * @type {string}
+     */
+    get domain() {
+        return Ani.dPeaks;
+    }
+    /**
+     * Gets whether or not to connect to the AudioPeaks server securely.
+     * @type {boolean}
+     */
+    get secure() {
+        return Ani.sPeaks;
+    }
+    /**
+     * Gets whether or not the AudioPeaks subsystem is enabled.
+     * @type {boolean}
+     */
+    get enabled() {
+        return Ani.ePeaks;
+    }
+    /**
+     * Gets the amount of time, in milliseconds, to wait before attempting
+     * to reconnect to the AudioPeaks server after an error.
+     * @type {number}
+     */
+    get errorReconnectWait() {
+        return Ani.ewPeaks;
+    }
+    /**
+     * Gets the amount of time, in milliseconds, to wait before attempting
+     * to reconnect to the AudioPeaks server after the server closes the
+     * connection.
+     * @type {number}
+     */
+    get reconnectWait() {
+        return Ani.wPeaks;
+    }
+    /**
+     * Gets the full URL being connected to.
+     * @type {string}
+     */
+    get url() {
+        return `ws${this.secure ? "s" : ""}://` +
+            `${this.domain}:${this.port}/AudioPeaks`;
+    }
+
+    /**
+     * Disconnects the current AudioPeaks connection and reconnects.
+     */
+    reconnect() {
+        this.__reconnect = true;
+        if (this.__socket) {
+            this.__socket.addEventListener("close", () => {
+                this.__connecting = false;
+                this.connect();
+                //required so we don't have two at once.
+            });
+            this.__socket.close();
+        } else {
+            this.__connecting = false;
+            this.connect();
+        }
+    }
+    /**
+     * Attempts to connect to the audio peaks server.
+     */
+    connect() {
+        if (this.__connecting) {
+            return;
+        }
+        if (!this.enabled) {
+            return;
+        }
+        this.__connecting = true;
+        this.__reconnect = false;
+        this.__socket = new WebSocket(this.url);
+        this.__socket.addEventListener("open", () => this.__open());
+        this.__socket.addEventListener("error", (e) => this.__error(e));
+        this.__socket.addEventListener("close", () => this.__close());
+        this.__socket.addEventListener("message", (e) => this.__message(e));
+    }
 }
 
 if (document.readyState !== "complete") {
-    window.addEventListener("load", Ani.start);
+    window.addEventListener("load", () => Ani.__constructor());
 } else {
-    Ani.start();
+    Ani.__constructor();
 }
-
 /**
  * @todo Add settings rows for the audio peaks settings
  * @todo Add in keybinds to enable/disable audio peaks
@@ -3281,6 +3350,9 @@ if (document.readyState !== "complete") {
  * @todo Complete documentation.
  * @todo make sure lines don't exceed 80 chars (regex find "[^\n\r]{81,}")
  * @todo Change "static this" to "Ani" (etc) (reduces liability to break things and parallels c#)
- *       We might need to find a different way to document the static properties, if that is the case.
+ *       We might need to find a different way to document the static properties if that is the case.
  * @todo Change the dot addition thing to go from one-check-per-frame to a timer (ie: in parallel)
+ * @todo Add "use strict" (to help detect issues)
+ * @todo fix obsolete references in documentation.
+ * @todo Move static this documentation outside of there somehow so this==>Ani
  */
