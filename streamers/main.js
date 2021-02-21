@@ -1,19 +1,19 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.5.0
+ * @version 2.1.5.1
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.5.0";
+const VERSION = "2.1.5.1";
 
 /*
  * Animation consists of white dots travelling up at varying
  * speeds and accelerations.
- * 
+ *
  * When we draw the dots, we draw B color over the previous
  * coordinates, and A color over the new coordinate,
  *
@@ -91,7 +91,8 @@ const DEFAULT_TRAIL_LUMINOSITY_MAX = 75.0;
  * The rate at which the average hue of the dots shifts around the color wheel.
  * This value has a period of 360, meaning that if this value is over 360, it
  * will effectively shift it by "HSL_DRIFT MOD 360".
- * Eg: Setting this to 475 is the same as setting this to 115. (since 475-360=115)
+ * Eg: Setting this to 475 is the same as setting this to 115.
+ * (since 475-360=115)
  * This value can also be negative.
  * @see {@link Hue}
  * @constant {number}
@@ -161,7 +162,7 @@ const DEFAULT_DOT_RATE = 2;
 /**
  * The opacity at which active trails are erased. A lower value here will make
  * longer trails, while a larger value produces shorter trails.
- * A small caveat of this method is that unless this is set to 1.0 (where 
+ * A small caveat of this method is that unless this is set to 1.0 (where
  * trails instantly vanish), the path the trails travel will never truly be set
  * to the background color ever again as the average of any numbers less than
  * 1.0 will always remain under 1.0. You might notice this effect as dots trail
@@ -221,7 +222,8 @@ const DEFAULT_LINE_WIDTH_MAX = 3.0;
 
 /**
  * The minimum amount of time before the luminosity of a dot, finishes an
- * oscillation. This value should be in the form "{@link FPS} * [number of seconds]"
+ * oscillation. This value should be in the form
+ * "{@link FPS} * [number of seconds]"
  * where "[number of seconds]" is how many seconds it should take to loop.
  * @see {@link Sinusoid}
  * @see {@link FPS}
@@ -235,7 +237,8 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS
 
 /**
  * The maximum amount of time before the luminosity of a dot, finishes an
- * oscillation. This value should be in the form "{@link FPS} * [number of seconds]"
+ * oscillation. This value should be in the form
+ * "{@link FPS} * [number of seconds]"
  * where "[number of seconds]" is how many seconds it should take to loop.
  * @see {@link Sinusoid}
  * @see {@link FPS}
@@ -284,7 +287,8 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
 
 /**
  * The minimum amount of time before the line width of a dot, finishes an
- * oscillation. This value should be in the form "{@link FPS} * [number of seconds]"
+ * oscillation. This value should be in the form
+ * "{@link FPS} * [number of seconds]"
  * where "[number of seconds]" is how many seconds it should take to loop.
  * @see {@link Sinusoid}
  * @see {@link FPS}
@@ -299,7 +303,8 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS
 
 /**
  * The maximum amount of time before the line width of a dot, finishes an
- * oscillation. This value should be in the form "{@link FPS} * [number of seconds]"
+ * oscillation. This value should be in the form
+ * "{@link FPS} * [number of seconds]"
  * where "[number of seconds]" is how many seconds it should take to loop.
  * @see {@link Sinusoid}
  * @see {@link FPS}
@@ -420,17 +425,18 @@ const DEFAULT_PEAKS_APP_PORT = 8069;
  */
 const DEFAULT_PEAKS_APP_DOMAIN = "localhost";
 /**
- * Whether or not the server running WinAudioLevels.exe only accepts secure connections.
- * If you are selfhosting, most likely, this will be set to false. Otherwise, this must
- * be set to true due to JS security restrictions.
+ * Whether or not the server running WinAudioLevels.exe only accepts secure
+ * connections.
+ * If you are selfhosting, most likely, this will be set to false. Otherwise,
+ * this must be set to true due to JS security restrictions.
  * @default false
  * @constant {boolean}
  */
 const DEFAULT_PEAKS_APP_SECURE = false;
 
 /**
- * Whether or not to try connection to the audio peaks server at all. Set this to
- * false if you are not running an audio peaks server.
+ * Whether or not to try connection to the audio peaks server at all. Set this
+ * to false if you are not running an audio peaks server.
  * @default true
  * @constant {boolean}
  */
@@ -485,7 +491,7 @@ const DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
  * A value of 1.0 would indicate that the audio levels would only be able
  * to slow down the animation, if anything, while a value of anything higher
  * than that would indicate that the audio levels would speed things up.
- * 
+ *
  * The peak is converted to a percentage between 0% and 100%. Values less than
  * 50% will slow down the animation, while values above that will speed up the
  * animation. The actual calculation is as follows:
@@ -506,9 +512,9 @@ const DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
  */
 const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
 
-/* *************************************************************************** *
- * ********************** END OF CONFIGURATION SETTINGS ********************** *
- * *************************************************************************** */
+/* ************************************************************************* *
+ * ********************* END OF CONFIGURATION SETTINGS ********************* *
+ * ************************************************************************* */
 
 /**
  * Represents a color using Red, Green, and Blue components in that order.
@@ -556,7 +562,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * Saturation would instead decrease.
  * Refer to conical models of the HSL and HSV color spaces. HSV looks like an
  * upside-down cone, while HSL looks like a di-cone.
- * [(Image)]{@link https://learnui.design/blog/img/hsb/hsb-cone-and-hsl-dicone.png}
+ * Img: {@link https://learnui.design/blog/img/hsb/hsb-cone-and-hsl-dicone.png}
 
  * Even though this value represents a percentage, you must express the value
  * as a number ranging from 0 to 100.
@@ -635,10 +641,11 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * Since trigonometry can be a bit confusing, feel free to google terms like:
  * "sine function formula" or "cosine function formula"
  * Or you can use this link:
- * [image]{@link https://www.onlinemathlearning.com/image-files/transformation-trig-graphs.png}
- * You can also play with the graphs of sine functions on [graph.tk]{@link graph.tk}
- * as well. In the upper right is a "?" button, click there if you need help, as that
- * article explains how to type in the pi symbol.
+ * {@link onlinemathlearning.com/image-files/transformation-trig-graphs.png}
+ * You can also play with the graphs of sine functions on
+ * [graph.tk]{@link graph.tk} as well. In the upper right is a "?" button,
+ * click there if you need help, as that article explains how to type in the pi
+ * symbol.
  *
  * @typedef {undefined} Sinusoid
  */
@@ -646,11 +653,13 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *
  * @typedef {Object} KeyBindingInfo
  * @property {Key} key
- *     The name of the key being pressed, if this is a letter, or value that changes with
- *     the shift key, the actual value here depends on whether or not the shift key is pressed.
+ *     The name of the key being pressed, if this is a letter, or value that
+ *     changes with the shift key, the actual value here depends on whether or
+ *     not the shift key is pressed.
  * @property {KeyBindingCondition[]} conditions
- *     An Array of {@link KeyBindingCondition} objects that describe conditionals required to
- *     trigger the binding. Only one of the conditions needs to be met.
+ *     An Array of {@link KeyBindingCondition} objects that describe
+ *     conditionals required to trigger the binding. Only one of the conditions
+ *     needs to be met.
  * @property {Function} handler
  *     The event handler for the key binding.
  */
@@ -677,50 +686,63 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *
  * @typedef {object} StatusElementProperties
  * @property {string} name
- *     The text that is displayed on the HUD for this StatusElement. This property is required.
+ *     The text that is displayed on the HUD for this StatusElement. This
+ *     property is required.
  * @property {string} type
  *     The type of StatusElement this is. The valid types are below:
  *     + string
  *         Indicates that the value is a textual value.
  *     + range.*
- *         Indicates that the value is a range between two values. The asterisk is another valid type
- *         value.
+ *         Indicates that the value is a range between two values. The asterisk
+ *         is another valid type value.
  *     + header
- *         Indicates that the row is a header row that doesn't have a value. All properties aside from
- *         {@link StatusElementProperties#show} and {@link StatusElementProperties#name} will be ignored.
+ *         Indicates that the row is a header row that doesn't have a value.
+ *         All properties aside from {@link StatusElementProperties#show} and
+ *         {@link StatusElementProperties#name} will be ignored.
  *     + number.[integer|decimal|percentage]
  *         Indicates that the value is a numeric value.
  *         - The "integer" subtype indicates that only whole numbers are valid.
  *         - The "decimal" subtype indicates that all numbers are valid.
- *         - The "percentage" subtype indicates that the value will be displayed as a percentage.
+ *         - The "percentage" subtype indicates that the value will be displayed
+ *           as a percentage.
  *     + color.[rgb|rgba|hsl|hsla|red|blue|green|hue|sat|luma|alpha]
  *         Indicates that the value is a color.
  *         The subtypes are as follows:
  *         - rgb / rgba
- *             Specifies that color is an array of 3 to 4 numbers: [red, green, blue, alpha]
+ *             Specifies that color is an array of 3 to 4 numbers:
+ *             [red, green, blue, alpha]
  *         - hsl / hsla
- *             Specifies that color is an array of 3 to 4 numbers: [hue, saturation, luminosity, alpha]
+ *             Specifies that color is an array of 3 to 4 numbers:
+ *             [hue, saturation, luminosity, alpha]
  *         - red / green / blue / hue / sat / luma
- *             Specifies that the color is a single number for the specified RGBA or HSLA component.
+ *             Specifies that the color is a single number for the specified
+ *             RGBA or HSLA component.
  *     + flag
- *         Indicates that the value is a boolean value that can be either true or false.
+ *         Indicates that the value is a boolean value that can be either true
+ *         or false.
  *     + custom
- *         Indicates that the value is a custom value that has no set format. Generally, this will be
- *         treated like "string", except the value is not necessarily a string value.
+ *         Indicates that the value is a custom value that has no set format.
+ *         Generally, this will be treated like "string", except the value is
+ *         not necessarily a string value.
  * @property {string|string[]} unit
- *     Either a single string value or an array of string values that is displayed beside the value of
- *     the StatusElement and acts as the units. Using an array of two strings and having the first string
- *     be empty is a valid use case (eg: a range of pixels. Instead of ## pixels ## pixels, you can use
- *     ["","pixels"] with the {@link StatusElementProperties#sep} property to get like ## x ## pixels).
+ *     Either a single string value or an array of string values that is
+ *     displayed beside the value of the StatusElement and acts as the units.
+ *     Using an array of two strings and having the first string be empty is a
+ *     valid use case (eg: a range of pixels. Instead of ## pixels ## pixels,
+ *     you can use ["","pixels"] with the {@link StatusElementProperties#sep}
+ *     property to get like ## x ## pixels).
  * @property {StatusElementPropertiesValueCallback} value
  *     A callback function that is used to retrieve the value of the property.
  * @property {boolean} show
- *     Gets whether or not the property should be shown. This defaults to true, obviously.
+ *     Gets whether or not the property should be shown. This defaults to true,
+ *     obviously.
  *     As such, this property is generally omitted.
  * @property {boolean} verbose
- *     Gets whether or not the property is considered to provide verbose information. Defaults to false.
+ *     Gets whether or not the property is considered to provide verbose
+ *     information. Defaults to false.
  * @property {string} sep
- *     A string value that is used to separate the values in a range. Defaults to an empty string.
+ *     A string value that is used to separate the values in a range. Defaults
+ *     to an empty string.
  * @see {@link StatusElement}
  */
 /**
@@ -772,8 +794,8 @@ class StatusElement {
      */
     constructor(tbody, statrow) {
         /**
-         * The original {@see StatusElementProperties} object from which this {@see StatusElement}
-         * is created from.
+         * The original {@see StatusElementProperties} object from which this
+         * {@see StatusElement} is created from.
          * @type {StatusElementProperties}
          * @private
          */
@@ -792,8 +814,8 @@ class StatusElement {
             return t.split(/,/g);
         });
         /**
-         * A double-array of string objects that represent the types and subtypes of this
-         * {@link StatusElement}.
+         * A double-array of string objects that represent the types and
+         * subtypes of this {@link StatusElement}.
          * @type {string[][]}
          * @private
          */
@@ -801,13 +823,15 @@ class StatusElement {
         if (statrow.type !== "header") {
             c = trow.insertCell(-1);
             /**
-             * The {@see HTMLElement} that this {@see StatusElement} is displayed via.
+             * The {@see HTMLElement} that this {@see StatusElement} is
+             * displayed via.
              * @type {HTMLElement}
              * @private
              */
             this.widget = c;
             /**
-             * The {@see HTMLElement} that this {@see StatusElement} is displayed via.
+             * The {@see HTMLElement} that this {@see StatusElement} is
+             * displayed via.
              * @type {HTMLElement}
              * @private
              */
@@ -878,20 +902,22 @@ class StatusElement {
     }
 
     /**
-     * An internal method that is called to update the value of this {@link StatusElement}.
+     * An internal method that is called to update the value of this
+     * {@link StatusElement}.
      * @param {string[][]} types
-     *     A double-array of string objects that represent the types and subtypes of this
-     *     {@link StatusElement}.
+     *     A double-array of string objects that represent the types and
+     *     subtypes of this {@link StatusElement}.
      * @param {number} parameter
-     *     A number that indicates which value (if there are multiple) is being updated.
+     *     A number that indicates which value (if there are multiple) is being
+     *     updated.
      *     If there are not multiple values, this should be set to 0.
      */
     __updateInternal(types, parameter) {
         var value = this.value[parameter];
         var widget = this[`param${parameter}`];
         var main_type = types[0][0];
-        var sub_types = types.slice(1);
-        var sub_param = ((sub_types[0] || [])[parameter] || (sub_types[0] || [])[0]);
+        var subs = types.slice(1);
+        var sub_param = (subs[0] || [])[parameter] || (subs[0] || [])[0];
         switch (main_type) {
         case "color":
             switch (sub_param) {
@@ -954,7 +980,7 @@ class StatusElement {
                 widget.textContent = value;
                 break;
             case "percentage":
-                widget.textContent = `${(Math.round(value * 100 * 100) / 100)}%`;
+                widget.textContent = `${(Math.round(value * 10000) / 100)}%`;
                 break;
             }
             break;
@@ -968,12 +994,14 @@ class StatusElement {
     }
 
     /**
-     * An internal method that is called to create the HTML necessary to render this
-     * {@link StatusElement} in the HUD.
+     * An internal method that is called to create the HTML necessary to render
+     * this {@link StatusElement} in the HUD.
      * @param {string} type
-     *     A string containing the types and subtypes of this {@link StatusElement}.
+     *     A string containing the types and subtypes of this
+     *     {@link StatusElement}.
      * @param {number} parameter
-     *     A number that indicates which value (if there are multiple) is being updated.
+     *     A number that indicates which value (if there are multiple) is being
+     *     updated.
      *     If there are not multiple values, this should be set to 0.
      */
     craftStatusElement(type, parameter) {
@@ -1038,20 +1066,22 @@ class StatusElement {
 }
 
 /**
- * Represents a collection of settings elements and provides methods and properties
- * for updating the HUD on such collections of elements.
+ * Represents a collection of settings elements and provides methods and
+ * properties for updating the HUD on such collections of elements.
  */
 class StatusElementCollection {
     /**
-     * Creates a new {@link StatusElementCollection} from the HTML node containing it
-     * and the settings configuration information it is based upon.
+     * Creates a new {@link StatusElementCollection} from the HTML node
+     * containing it and the settings configuration information it is based
+     * upon.
      * @param {HTMLElement} container
-     *     The root container element that contains the entire status element HUD.
+     *     The root container element that contains the entire status element
+     *     HUD.
      * @param {HTMLElement} output
      *     The element that will contain this collection of status elements.
      * @param {StatusElementProperties[]} rows
-     *     An array of object with properties that describe the various aspects of the
-     *     status elements.
+     *     An array of object with properties that describe the various aspects
+     *     of the status elements.
      */
     constructor(container, output, rows) {
         console.info("creating rows!");
@@ -1060,7 +1090,8 @@ class StatusElementCollection {
             nrows.push(new StatusElement(output, row));
         });
         /**
-         * The list of {@see StatusElement} objects in this {@see StatusElementCollection}.
+         * The list of {@see StatusElement} objects in this
+         * {@see StatusElementCollection}.
          * @type {StatusElement[]}
          * @public
          */
@@ -1080,7 +1111,8 @@ class StatusElementCollection {
     }
 
     /**
-     * Updates the values of this {@see StatusElementCollection} and updates the HUD.
+     * Updates the values of this {@see StatusElementCollection} and updates
+     * the HUD.
      */
     update() {
         if (!this.displayed) {
@@ -1092,13 +1124,15 @@ class StatusElementCollection {
     }
 
     /**
-     * Gets whether or not the HUD for this {@see StatusElementCollection} is displayed.
+     * Gets whether or not the HUD for this {@see StatusElementCollection} is
+     * displayed.
      */
     get displayed() {
         return !this.__container.classList.contains("status-hide");
     }
     /**
-     * Sets whether or not the HUD for this {@see StatusElementCollection} is displayed.
+     * Sets whether or not the HUD for this {@see StatusElementCollection} is
+     * displayed.
      */
     set displayed(value) {
         if (this.displayed === value) {
@@ -1116,13 +1150,15 @@ class StatusElementCollection {
         }
     }
     /**
-     * Gets whether or not the HUD for this {@see StatusElementCollection} shows verbose information.
+     * Gets whether or not the HUD for this {@see StatusElementCollection}
+     * shows verbose information.
      */
     get showVerbose() {
         return !this.__container.classList.contains("status-hide-verbose");
     }
     /**
-     * Sets whether or not the HUD for this {@see StatusElementCollection} shows verbose information.
+     * Sets whether or not the HUD for this {@see StatusElementCollection}
+     * shows verbose information.
      */
     set showVerbose(value) {
         if (this.showVerbose === value) {
@@ -1151,7 +1187,7 @@ class Dot {
 
         /**
          * The x-coordinate of this {@see Dot}.
-         * 
+         *
          * Default: A random value between 0 and the size of the canvas.
          * @type {number}
          * @public
@@ -1159,7 +1195,7 @@ class Dot {
         this.x = Dot.rand(0, Ani.size.width);
         /**
          * The y-coordinate of this {@see Dot}.
-         * 
+         *
          * Default: The very bottom of the canvas.
          * @type {number}
          * @public
@@ -1167,62 +1203,71 @@ class Dot {
         this.y = Ani.size.height;
         /**
          * The speed of this {@see Dot}.
-         * 
-         * Default: A random value between {@see MIN_SPEED} and {@see MAX_SPEED}.
+         *
+         * Default: A random value between {@see MIN_SPEED} and
+         * {@see MAX_SPEED}.
          * @type {number}
          * @public
          */
         this.s = Dot.rand(Ani.nSpeed, Ani.xSpeed);
         /**
          * The acceleration of this {@see Dot}.
-         * 
-         * Default: A random value between {@see MIN_ACCEL} and {@see MAX_ACCEL}.
+         *
+         * Default: A random value between {@see MIN_ACCEL} and
+         * {@see MAX_ACCEL}.
          * @type {number}
          * @public
          */
         this.a = Dot.rand(Ani.nAccel, Ani.xAccel);
         /**
          * The hue of this {@see Dot}.
-         * 
-         * Default: A random value between {@see TRAIL_HSL_START} and {@see TRAIL_HSL_END}.
+         *
+         * Default: A random value between {@see TRAIL_HSL_START} and
+         * {@see TRAIL_HSL_END}.
          * @type {number}
          * @public
          */
         this.c = Dot.rand(Ani.hsTrail, Ani.heTrail);
         /**
          * The luminosity of this {@see Dot}.
-         * 
-         * Default: A random value between {@see TRAIL_LUMINOSITY_MIN} and {@see TRAIL_LUMINOSITY_MAX}.
+         *
+         * Default: A random value between {@see TRAIL_LUMINOSITY_MIN} and
+         * {@see TRAIL_LUMINOSITY_MAX}.
          * @type {number}
          * @public
          */
         this.l = Dot.rand(Ani.lnTrail, Ani.lxTrail);
         /**
          * The saturation of this {@see Dot}.
-         * 
-         * Default: A random value between {@see TRAIL_SATURATION_MIN} and {@see TRAIL_SATURATION_MAX}.
+         *
+         * Default: A random value between {@see TRAIL_SATURATION_MIN} and
+         * {@see TRAIL_SATURATION_MAX}.
          * @type {number}
          * @public
          */
         this.sa = Dot.rand(Ani.snTrail, Ani.sxTrail);
         /**
          * The frame this {@see Dot} was created on.
-         * 
+         *
          * Default: The value of {@see Ani.frameCount} at the time of creation.
          * @type {number}
          * @public
          */
         this.f = Ani.frameCount;
         /**
-         * The amplitude of the sine wave that oscillates the luminosity of this {@see Dot}.
-         * 
-         * Default: A random value between {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MIN} and {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}.
+         * The amplitude of the sine wave that oscillates the luminosity of
+         * this {@see Dot}.
+         *
+         * Default: A random value between
+         * {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MIN} and
+         * {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}.
          * @type {number}
          * @public
          */
         this.pa = Dot.rand(Ani.oanLum, Ani.oaxLum);
         /**
-         * The frequency of the sine wave that oscillates the luminosity of this {@see Dot}.
+         * The frequency of the sine wave that oscillates the luminosity of
+         * this {@see Dot}.
          *
          * Default: The frequency, as calculated based on {@see Dot#pp}.
          * @type {number}
@@ -1230,39 +1275,51 @@ class Dot {
          */
         this.pb = Dot.getB(vpb);
         /**
-         * The period of the sine wave that oscillates the luminosity of this {@see Dot}.
+         * The period of the sine wave that oscillates the luminosity of this
+         * {@see Dot}.
          *
-         * Default: A random value between {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
+         * Default: A random value between
+         * {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and
+         * {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
          * @type {number}
          * @public
          */
         this.pp = vpb;
         /**
-         * The original period of the sine wave that oscillates the luminosity of this {@see Dot}.
+         * The original period of the sine wave that oscillates the luminosity
+         * of this {@see Dot}.
          *
-         * Default: A random value between {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
+         * Default: A random value between
+         * {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and
+         * {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
          * @type {number}
          * @public
          */
         this.opp = vpb;
         /**
-         * The phase shift of the sine wave that oscillates the luminosity of this {@see Dot}.
+         * The phase shift of the sine wave that oscillates the luminosity of
+         * this {@see Dot}.
          *
-         * Default: The sum of {@see Ani.frameCount} and {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
+         * Default: The sum of {@see Ani.frameCount} and
+         * {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
          * @type {number}
          * @public
          */
         this.pc = Ani.frameCount + Ani.opsLum;
         /**
-         * The amplitude of the sine wave that oscillates the line width of this {@see Dot}.
+         * The amplitude of the sine wave that oscillates the line width of
+         * this {@see Dot}.
          *
-         * Default: A random value between {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN} and {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}.
+         * Default: A random value between
+         * {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN} and
+         * {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}.
          * @type {number}
          * @public
          */
         this.bpa = Dot.rand(Ani.oanwLine, Ani.oaxwLine);
         /**
-         * The frequency of the sine wave that oscillates the line width of this {@see Dot}.
+         * The frequency of the sine wave that oscillates the line width of
+         * this {@see Dot}.
          *
          * Default: The frequency, as calculated based on {@see Dot#bpp}.
          * @type {number}
@@ -1270,25 +1327,33 @@ class Dot {
          */
         this.bpb = Dot.getB(vbpb);
         /**
-         * The period of the sine wave that oscillates the line width of this {@see Dot}.
+         * The period of the sine wave that oscillates the line width of this
+         * {@see Dot}.
          *
-         * Default: A random value between {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
+         * Default: A random value between
+         * {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
+         * {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
          * @type {number}
          * @public
          */
         this.bpp = vbpb;
         /**
-         * The original period of the sine wave that oscillates the line width of this {@see Dot}.
+         * The original period of the sine wave that oscillates the line width
+         * of this {@see Dot}.
          *
-         * Default: A random value between {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
+         * Default: A random value between
+         * {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
+         * {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
          * @type {number}
          * @public
          */
         this.obpp = vbpb;
         /**
-         * The phase shift of the sine wave that oscillates the line width of this {@see Dot}.
+         * The phase shift of the sine wave that oscillates the line width of
+         * this {@see Dot}.
          *
-         * Default: The sum of {@see Ani.frameCount} and {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
+         * Default: The sum of {@see Ani.frameCount} and
+         * {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
          * @type {number}
          * @public
          */
@@ -1296,14 +1361,15 @@ class Dot {
         /**
          * The line width of this {@see Dot}.
          *
-         * Default: A random value between {@see LINE_WIDTH_MIN} and {@see LINE_WIDTH_MAX}.
+         * Default: A random value between {@see LINE_WIDTH_MIN} and
+         * {@see LINE_WIDTH_MAX}.
          * @type {number}
          * @public
          */
         this.w = Dot.rand(Ani.wnLine, Ani.wxLine);
         /**
-         * A helper value that helps keep track of the frame number for the purposes of oscillating the
-         * luminosity of this {@see Dot}.
+         * A helper value that helps keep track of the frame number for the
+         * purposes of oscillating the luminosity of this {@see Dot}.
          *
          * Default: The value of {@see Ani.frameCount} at the time of creation.
          * @type {number}
@@ -1311,8 +1377,8 @@ class Dot {
          */
         this.pfx = Ani.frameCount;
         /**
-         * A helper value that helps keep track of the frame number for the purposes of oscillating the
-         * line width of this {@see Dot}.
+         * A helper value that helps keep track of the frame number for the
+         * purposes of oscillating the line width of this {@see Dot}.
          *
          * Default: The value of {@see Ani.frameCount} at the time of creation.
          * @type {number}
@@ -1320,8 +1386,9 @@ class Dot {
          */
         this.bpfx = Ani.frameCount;
         /**
-         * A helper value that helps keep track of the last AUDIO_PEAK_MULTIPLIER value fro the purposes
-         * of modifying the speed of the animation of this {@see Dot}.
+         * A helper value that helps keep track of the last
+         * AUDIO_PEAK_MULTIPLIER value fro the purposes of modifying the speed
+         * of the animation of this {@see Dot}.
          *
          * Default: 1
          * @type {number}
@@ -1329,7 +1396,8 @@ class Dot {
          */
         this.oapm = 1;
         /**
-         * The y-coordinate of the spot this {@see Dot} was on in the previous frame.
+         * The y-coordinate of the spot this {@see Dot} was on in the previous
+         * frame.
          *
          * Default: null
          * @type {number}
@@ -1337,7 +1405,8 @@ class Dot {
          */
         this.py = null;
         /**
-         * The y-coordinate of the spot this {@see Dot} was on in the frame before the previous frame.
+         * The y-coordinate of the spot this {@see Dot} was on in the frame
+         * before the previous frame.
          *
          * Default: null
          * @type {number}
@@ -1345,7 +1414,8 @@ class Dot {
          */
         this.ppy = null;
         /**
-         * The x-coordinate of the spot this {@see Dot} was on in the previous frame.
+         * The x-coordinate of the spot this {@see Dot} was on in the previous
+         * frame.
          *
          * Default: null
          * @type {number}
@@ -1353,7 +1423,8 @@ class Dot {
          */
         this.px = null;
         /**
-         * The x-coordinate of the spot this {@see Dot} was on in the frame before the previous frame.
+         * The x-coordinate of the spot this {@see Dot} was on in the frame
+         * before the previous frame.
          *
          * Default: null
          * @type {number}
@@ -1378,17 +1449,18 @@ class Dot {
         this.py = this.y;
     }
     /**
-     * Updates the phase shifts of this {@see Dot} object so that modulating the frequency
-     * of the sine waves does not cause jittering during the animation.
+     * Updates the phase shifts of this {@see Dot} object so that modulating
+     * the frequency of the sine waves does not cause jittering during the
+     * animation.
      */
     updatePhaseShifts() {
         if (Ani.audioPeakMultiplier !== this.oapm) {
             var np = (1 / Ani.audioPeakMultiplier) * this.opp;
             var nbp = (1 / Ani.audioPeakMultiplier) * this.obpp;
-            this.pc = Dot.getNewPhaseShift(this.opp, np, this.pc, this.pfx);
+            this.pc = Dot.getNewShift(this.opp, np, this.pc, this.pfx);
             this.pb = Dot.getB(np);
             this.pp = np;
-            this.bpc = Dot.getNewPhaseShift(this.obpp, nbp, this.bpc, this.bpfx);
+            this.bpc = Dot.getNewShift(this.obpp, nbp, this.bpc, this.bpfx);
             this.bpb = Dot.getB(nbp);
             this.bpp = nbp;
         }
@@ -1423,19 +1495,19 @@ class Dot {
         context.strokeStyle =
             context.fillStyle = this.colorHSL;
 
-        //Move to the oldest of the three reference points of the dot.
+        //Move to the oldest of the 3 reference points of the dot.
         context.moveTo(this.rppx, this.rppy);
-        //Make a line to the second oldest of the three reference points of the dot.
+        //Make a line to the second oldest of the 3 reference points of the dot.
         context.lineTo(this.rpx, this.rpy);
         //Draw the line.
         context.stroke();
 
-        //Make a line to the first (newest) of the three reference points of the dot
+        //Make a line to the first (newest) of the 3 reference points of the dot
         context.lineTo(this.rx, this.ry);
         //Draw the line.
         context.stroke();
 
-        //Shift the reference points and update the speed, position, and phase shifts.
+        //Shift the ref points and update the speed, position, and phase shifts.
         this.shiftRefPoints();
 
         //Move the dot upwards based on the dot's speed.
@@ -1449,8 +1521,8 @@ class Dot {
     }
 
     /**
-     * Gets a value that indicates whether or not more reference points are needed
-     * before this {@see Dot} can be animated properly.
+     * Gets a value that indicates whether or not more reference points are
+     * needed before this {@see Dot} can be animated properly.
      * @returns {boolean}
      *     Whether or not more reference points are needed before this dot can
      *     be animated properly.
@@ -1465,7 +1537,12 @@ class Dot {
     get currentLuminosity() {
         //Determine the current effective luminosity of the dot based on the
         //current frame count
-        return Dot.sinusoidal(this.pa, this.pb, this.pc, this.l, Ani.frameCount);
+        return Dot.sinusoidal(
+            this.pa,
+            this.pb,
+            this.pc,
+            this.l,
+            Ani.frameCount);
     }
     /**
      * Gets the current line width of this {@see Dot}.
@@ -1474,14 +1551,20 @@ class Dot {
     get currentLineWidth() {
         //Determine the current effective line width of the dot based on the
         //current frame count
-        return Dot.sinusoidal(this.bpa, this.bpb, this.bpc, this.w, Ani.frameCount);
+        return Dot.sinusoidal(
+            this.bpa,
+            this.bpb,
+            this.bpc,
+            this.w,
+            Ani.frameCount);
     }
     /**
      * Gets the color of this {@see Dot} as a valid CSS color tag.
      * @returns {string} The color of this {@see Dot} as a valid CSS color tag.
      */
     get colorHSL() {
-        return `hsla(${this.c},${this.sa}%,${this.currentLuminosity}%,${Ani.oTrail})`;
+        return `hsla(${this.c},${this.sa}%,`
+            + `${this.currentLuminosity}%,${Ani.oTrail})`;
     }
     /**
      * Gets whether or not this {@see Dot} is off-screen.
@@ -1492,28 +1575,36 @@ class Dot {
     }
     /**
      * Gets the rounded x-coordinate of this {@see Dot} on the previous frame.
-     * @returns {number} The rounded x-coordinate of this {@see Dot} on the previous frame.
+     * @returns {number}
+     *     The rounded x-coordinate of this {@see Dot} on the previous frame.
      */
     get rpx() {
         return Math.round(this.px);
     }
     /**
-     * Gets the rounded x-coordinate of this {@see Dot} on the frame before the previous frame.
-     * @returns {number} The rounded x-coordinate of this {@see Dot} on the frame before the previous frame.
+     * Gets the rounded x-coordinate of this {@see Dot} on the frame before the
+     * previous frame.
+     * @returns {number}
+     *     The rounded x-coordinate of this {@see Dot} on the frame before the
+     *     previous frame.
      */
     get rppx() {
         return Math.round(this.ppx);
     }
     /**
      * Gets the rounded y-coordinate of this {@see Dot} on the previous frame.
-     * @returns {number} The rounded y-coordinate of this {@see Dot} on the previous frame.
+     * @returns {number}
+     *     The rounded y-coordinate of this {@see Dot} on the previous frame.
      */
     get rpy() {
         return Math.round(this.py);
     }
     /**
-     * Gets the rounded y-coordinate of this {@see Dot} on the frame before the previous frame.
-     * @returns {number} The rounded y-coordinate of this {@see Dot} on the frame before the previous frame.
+     * Gets the rounded y-coordinate of this {@see Dot} on the frame before the
+     * previous frame.
+     * @returns {number}
+     *     The rounded y-coordinate of this {@see Dot} on the frame before the
+     *     previous frame.
      */
     get rppy() {
         return Math.round(this.ppy);
@@ -1537,7 +1628,7 @@ class Dot {
      * A helper function used to get the new phase shift when changing the
      * oscillation speed of the dots.
      * See the comments below for more
-     * 
+     *
      *
      * To modify the trajectory of a sine wave, the following must occur:
      *   - We must know the old period (eg: 1)
@@ -1607,11 +1698,11 @@ class Dot {
      *
      * so, from 20 ==> 15 (frame 10), it's 2.5 (frame 10 is 50% to looping
      *    so 5 * 50% = 2.5)
-     * from 20 ==> 15 ==> 20 (frame 17.5), it's -2.5 (that's at 0% to looping, so)
+     * from 20==>15==>20 (frame 17.5), it's -2.5 (that's at 0% to looping, so)
      *
-     *  +   2.5,   2.5  + -12.5, -12.5 (or -12.5) (because halfway) (frame 10 0.5) 20>15 = 5
-     *  + - 5.0, - 2.5  +  15.0,   2.5 (or +15) (frame 17.5 0.0/1.0) 15>20
-     *  +   7.5,   5.0  + - 7.5, - 5.0 (or -7.5) (frame 27.5 0.5) 20>15   17.5%15 =2.5
+     *  +   2.5,   2.5  + -12.5, -12.5 (or -12.5) (bc 1/2) (f 10 0.5) 20>15 = 5
+     *  + - 5.0, - 2.5  +  15.0,   2.5 (or +15) (f 17.5 0.0/1.0) 15>20
+     *  +   7.5,   5.0  + - 7.5, - 5.0 (or -7.5) (f 27.5 0.5) 20>15 17.5%15 =2.5
      *  + -10.0, -10.0           (or +10) (frame 35 0.0/1.0) 15>20
      *
      *  12.5 17.5 25.0 35
@@ -1626,7 +1717,7 @@ class Dot {
      * @param {number} x
      *     The current frame.
      */
-    static getNewPhaseShift(oldPeriod, newPeriod, oldPhaseShift, x) {
+    static getNewShift(oldPeriod, newPeriod, oldPhaseShift, x) {
         return ((oldPeriod - newPeriod) * (
             ((x - oldPhaseShift) % oldPeriod) / oldPeriod)
             + oldPhaseShift) % newPeriod;
@@ -1637,22 +1728,22 @@ class Dot {
      * Calculates the value of a sinusoid equation given the four possible
      * transformations that can be applied to it. (see {@link Sinusoid} for more
      * details about each parameter.)
-     * The function uses the current [frame count]{@link FRAME_COUNT} as the value
-     * of the "x" parameter.
+     * The function uses the current [frame count]{@link FRAME_COUNT} as the
+     * value of the "x" parameter.
      * @see {@link Sinusoid}
-     * @param {number} a 
+     * @param {number} a
      *     The amplitude of the function.
-     * @param {number} b 
+     * @param {number} b
      *     The frequency of the function.
-     * @param {number} c 
+     * @param {number} c
      *     The phase-shift of the function.
-     * @param {number} d 
+     * @param {number} d
      *     The vertical-shift of the function.
-     * @param {number} x 
+     * @param {number} x
      *     The x-value.
      * @returns {number}
-     *     The value of y in the equation y = A * sin(B * (x - C)) + D where x is equal
-     *     to the the current [frame count]{@link FRAME_COUNT}
+     *     The value of y in the equation y = A * sin(B * (x - C)) + D where x
+     *     is equal to the the current [frame count]{@link FRAME_COUNT}.
      */
     static sinusoidal(a, b, c, d, x) {
         return a * Math.sin(b * (x - c)) + d;
@@ -1661,9 +1752,9 @@ class Dot {
     /**
      * Generates a random floating-point number between "min" and "max".
      * If you need an integer instead, call the {@link randInt} function.
-     * @param {number} min 
+     * @param {number} min
      *     The inclusive lower bound of the random number.
-     * @param {number} max 
+     * @param {number} max
      *     The exclusive upper bound of the random number.
      * @returns {number} The pseudorandom number that was generated.
      */
@@ -1672,11 +1763,13 @@ class Dot {
     }
 
     /**
-     * Determines the frequency of a sinusoidal equation based on a given period.
+     * Determines the frequency of a sinusoidal equation based on a given
+     * period.
      * @see {@link Sinusoid}
-     * @param {number} period 
+     * @param {number} period
      *     The period of the sinusoidal function.
-     * @returns {number} The frequency of the sinusoidal function.
+     * @returns {number}
+     *     The frequency of the sinusoidal function.
      */
     static getB(period) {
         return (2 * Math.PI) / period;
@@ -1693,9 +1786,9 @@ class Ani {
      * @private
      */
     static __constructor() {
-        //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp, PageDown
-        //Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause, AudioVolumeMute,
-        //AudioVolumeDown, AudioVolumeUp, ContextMenu
+        //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp,
+        //PageDown, Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause,
+        //AudioVolumeMute, AudioVolumeDown, AudioVolumeUp, ContextMenu
         var keybinds = [
             {
                 "key": "e",
@@ -1712,7 +1805,8 @@ class Ani {
             }, {
                 "key": "d",
                 "conditions": [{ "ctrl": false }],
-                "handler": () => console.info(`${Ani.dots.length} active dot(s).`)
+                "handler": () =>
+                    console.info(`${Ani.dots.length} active dot(s).`)
             }, {
                 "key": "r",
                 "conditions": [{ "ctrl": false }],
@@ -1773,7 +1867,13 @@ class Ani {
                 "name": "Achieved FPS",
                 "type": "string",
                 "unit": "frames/second",
-                "value": () => (Math.round((Ani.frameCount / (((new Date()).getTime() - Ani.startTime) / 1000)) * 100) / 100).toFixed(2)
+                "value": () =>
+                    (Math.round(
+                        (
+                            Ani.frameCount
+                            / (((new Date()).getTime() - Ani.startTime) / 1000)
+                        ) * 100) / 100)
+                        .toFixed(2)
             }, {
                 "name": "Frame Count",
                 "type": "number.integer",
@@ -1864,7 +1964,10 @@ class Ani {
                 "name": "Period",
                 "type": "range.string",
                 "unit": ["", "seconds"],
-                "value": () => [Ani.opnwLine.toFixed(2), Ani.opxwLine.toFixed(2)]
+                "value": () => [
+                    Ani.opnwLine.toFixed(2),
+                    Ani.opxwLine.toFixed(2)
+                ]
             }, {
                 "name": "Amplitude",
                 "type": "range.number.decimal",
@@ -1899,8 +2002,8 @@ class Ani {
          */
         this.dots = [];
         /**
-         * A number that is used as a multiplier for modulating the animation based
-         * on system audio volume.
+         * A number that is used as a multiplier for modulating the animation
+         * based on system audio volume.
          * @type {number}
          * @public
          */
@@ -1987,7 +2090,8 @@ class Ani {
                     if (binding.conditions.some((cond) => {
                         keys = Object.keys(cond);
                         return !modifiers.some((mod) => {
-                            return (keys.indexOf(mod) !== -1) && (e[mod + "Key"] === cond[mod]);
+                            return (keys.indexOf(mod) !== -1)
+                                && (e[mod + "Key"] === cond[mod]);
                         });
                     })) {
                         return;
@@ -2012,19 +2116,19 @@ class Ani {
         //Get a 2D drawing context for the canvas
         Ani.context = Ani.canvas.getContext("2d");
 
-        //Get the size of the canvas, which should be stretched to the full size of
-        //the window.
+        //Get the size of the canvas, which should be stretched to the full
+        //size of the window.
         Ani.size = Ani.canvas.getBoundingClientRect();
 
-        //Set the width and height of the canvas internally, so that the canvas has
-        //a 1 to 1 ratio between itself and the screen.
+        //Set the width and height of the canvas internally, so that the
+        //canvas has a 1:1 ratio between itself and the screen.
         Ani.canvas.setAttribute("width", Ani.width);
         Ani.canvas.setAttribute("height", Ani.height);
 
         //Clear all prior paths.
         Ani.context.beginPath();
 
-        //Set the fill and stroke styles to the background color at full opacity.
+        //Set the fill and stroke styles to the bg color at full opacity.
         Ani.context.fillStyle = `rgba(${Ani.cBackground.join(",")},1)`;
         Ani.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},1)`;
 
@@ -2069,8 +2173,7 @@ class Ani {
         } catch (e) {
             console.error(e);
         }
-        //set a timer to run this same function, when we need to animate the next
-        //frame.
+        //set a timer to rerun this, when we need to animate the next frame.
         window.setTimeout(Ani.animate, Ani.iFrame);
     }
     /**
@@ -2084,11 +2187,11 @@ class Ani {
 
         //verify that resize is actually enabled
         if (Ani.resize) {
-            //Get the size of the canvas, which should be stretched to the full size
+            //Get size of the canvas, which should be stretched to the full size
             //of the window.
             this.size = Ani.canvas.getBoundingClientRect();
 
-            //Set the width and height of the canvas internally, so that the canvas
+            //Set width and height of the canvas internally, so that the canvas
             //has a 1 to 1 ratio between itself and the screen.
             this.canvas.setAttribute("width", Ani.width);
             this.canvas.setAttribute("height", Ani.height);
@@ -2197,7 +2300,7 @@ class Ani {
         //Clear all prior paths.
         Ani.context.beginPath();
 
-        //Set the fill and stroke styles to the background color at full opacity.
+        //Set the fill and stroke styles to the bg color at full opacity.
         Ani.context.fillStyle = `rgba(${Ani.cBackground.join(",")},1)`;
         Ani.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},1)`;
 
@@ -2209,14 +2312,18 @@ class Ani {
      */
     static toggleStatus() {
         Ani.status.displayed = !Ani.status.displayed;
-        console.info(`Turned ${Ani.status.displayed ? "on" : "off"} the status info overlay.`);
+        console.info(
+            `Turned ${Ani.status.displayed ? "on" : "off"} the overlay.`);
     }
     /**
-     * Toggles whether or not verbose information is displayed in the status overlay.
+     * Toggles whether or not verbose information is displayed in the status
+     * overlay.
      */
     static toggleVerboseStatus() {
         Ani.status.showVerbose = !Ani.status.showVerbose;
-        console.info(`Now ${Ani.status.showVerbose ? "displaying" : "hiding"} verbose information on the status info overlay.`);
+        console.info(
+            (Ani.status.showVerbose ? "Display" : "hid")
+            + "ing verbose info on the overlay.");
     }
     /**
      * Outputs help information to the console.
@@ -2226,11 +2333,11 @@ class Ani {
         console.info("KEYBINDINGS:");
         console.info("r(e)fresh -- Refreshes the page.");
         console.info("(h)elp    -- Displays this mesage.");
-        console.info("(s)tatus  -- Toggles the visibility of the status info overlay.");
-        console.info("(v)erbose -- Toggles the verbosity of the status info overlay.");
+        console.info("(s)tatus  -- Toggles the visibility of the overlay.");
+        console.info("(v)erbose -- Toggles the verbosity of the overlay.");
         console.info("(r)eset   -- Resets the animation.");
-        console.info("(+)       -- Increase the FPS by five frames per second.");
-        console.info("(-)       -- Decrease the FPS by five frames per second.");
+        console.info("(+)       -- Increase the FPS by five FPS.");
+        console.info("(-)       -- Decrease the FPS by five FPS.");
     }
 
 
@@ -2489,13 +2596,14 @@ class Ani {
     static set vxPeaks(value) {
         this.sObj.vxPeaks = value;
     }
-    /* 
+    /*
      * The extra junk in heTrail/hsTrail is...
      * Bounds checking, make sure HSL_START/END are between 0 and 360.
      * doing this prevents the application from randomly failing when either
      * gets too large or too small.
-     * The application should only break when the precision of FRAME_COUNT becomes
-     * too small to keep track of each new frame, or when we overflow FRAME_COUNT into NaN
+     * The application should only break when the precision of FRAME_COUNT
+     * becomes too small to keep track of each new frame, or when we overflow
+     * FRAME_COUNT into NaN
      */
 }
 
@@ -2613,14 +2721,14 @@ class SettingsDB extends EventTarget {
     }
     /**
      * Opens the specified settings store.
-     * 
+     *
      * @param {string} id
      *     The ID used to save the settings. This will be "(default)"
      *     for the default settings.
-     *     
+     *
      *     Passing any non-string value or an empty string will result in the
      *     application using "(default)" instead.
-     *     
+     *
      *     You can use this property to save multiple settings presets.
      * @returns {Promise<Settings>}
      *     The Settings object obtained, or "null" if the application was
@@ -2698,7 +2806,7 @@ class SettingsDB extends EventTarget {
     /**
      * Gets the current database version. Used to upgrade IDB objects in the
      * event the database structure is changed.
-     * 
+     *
      * This is currently: 2
      */
     static get version() {
@@ -2784,10 +2892,14 @@ class Settings {
         return new Promise(function (resolve, reject) {
             var id = self.__id;
             self.__id = newID;
-            self.__db.saveSettings(self.__id, JSON.stringify(self.__data)).then(function () {
-                return self.__db.saveSettings(id, "");
-                //ahhh, I love stringing promises together.
-            }).then(resolve).catch(reject);
+            self.__db
+                .saveSettings(self.__id, JSON.stringify(self.__data))
+                .then(() => {
+                    return self.__db.saveSettings(id, "");
+                    //ahhh, I love stringing promises together.
+                })
+                .then(resolve)
+                .catch(reject);
         });
     }
 
@@ -3156,15 +3268,15 @@ class Settings {
         this.__refreshKeys();
         this.save();
     }
-    //bg,dr,f,fo,hd,loan,loax.lopn,lopnf,lops,lopx,lopxf,lwn,lwoan,lwoax,lwopn,lwopnf,lwops,lwopx,lwopxf,lwx,na,ns,r,to,tsm,tsx,tln,tlx,xa,xd,xs
-    //a = amplitude, c = color, e = end, f = factor, h = height/hsl, i = interval, l = luminosity, o = opacity,
-    //p = period, ps = phase shift, r = rate, s = saturation/start, w = width
+    //a = amplitude, c = color, e = end, f = factor, h = height/hsl,
+    //i = interval, l = luminosity, o = opacity, p = period, ps = phase shift,
+    //r = rate, s = saturation / start, w = width
     //-n = min, -x = max
 }
 
 /**
- * A class that enables connection to an AudioPeaks server and dynamically alter aspects
- * of the animation based on the volume.
+ * A class that enables connection to an AudioPeaks server and dynamically
+ * alter aspects of the animation based on the volume.
  */
 class AudioPeaks {
     /**
@@ -3205,7 +3317,7 @@ class AudioPeaks {
     __error(e) {
         console.error("Failed to connect to the audio peaks server: ", e);
         if (!this.__reconnect) {
-            console.info(`Trying again in ${this.errorReconnectWait / 1000} seconds.`);
+            console.info(`Retrying in ${this.errorReconnectWait / 1000}s.`);
             window.setTimeout(() => this.reconnect(), this.errorReconnectWait);
             this.__reconnect = true;
         }
@@ -3217,7 +3329,7 @@ class AudioPeaks {
     __close() {
         console.info("Lost the connection to the audio peaks server.");
         if (!this.__reconnect) {
-            console.info(`Trying again in ${this.reconnectWait / 1000} seconds.`);
+            console.info(`Retrying in ${this.reconnectWait / 1000}s.`);
             window.setTimeout(() => this.reconnect(), this.reconnectWait);
             this.__reconnect = true;
         }
@@ -3235,13 +3347,15 @@ class AudioPeaks {
                 if (peak === 0.5) {
                     Ani.audioPeakMultiplier = 1;
                 } else if (peak < 0.5) {
-                    Ani.audioPeakMultiplier = 1 - ((0.5 - peak) * 2 * (1 - Ani.vnPeaks));
+                    Ani.audioPeakMultiplier =
+                        1 - ((0.5 - peak) * 2 * (1 - Ani.vnPeaks));
                 } else { // > 0.5
-                    Ani.audioPeakMultiplier = 1 + ((peak - 0.5) * 2 * (Ani.vxPeaks - 1));
+                    Ani.audioPeakMultiplier =
+                        1 + ((peak - 0.5) * 2 * (Ani.vxPeaks - 1));
                 }
                 break;
             case "Error":
-                console.error("Audio peaks server encountered an error: ", message.data);
+                console.error("AudioPeaks Error: ", message.data);
                 break;
         }
     }
@@ -3348,11 +3462,17 @@ if (document.readyState !== "complete") {
  * @todo Check "[at]todo"s above here
  * @todo Add keybinds to reset default settings
  * @todo Complete documentation.
- * @todo make sure lines don't exceed 80 chars (regex find "[^\n\r]{81,}")
- * @todo Change "static this" to "Ani" (etc) (reduces liability to break things and parallels c#)
- *       We might need to find a different way to document the static properties if that is the case.
- * @todo Change the dot addition thing to go from one-check-per-frame to a timer (ie: in parallel)
+ * @todo Change "static this" to "Ani" (etc) (reduces liability to break things
+ *       and parallels c#)
+ *       We might need to find a different way to document the static
+ *       properties if that is the case.
+ * @todo Change the dot addition thing to go from one-check-per-frame to a
+ *       timer (ie: in parallel)
  * @todo Add "use strict" (to help detect issues)
  * @todo fix obsolete references in documentation.
  * @todo Move static this documentation outside of there somehow so this==>Ani
+ *
+ * 80-char max regex: [^\n\r]{81,}
+ * space-only line regex: ^(\x20+)[\r\n]*$
+ * trailing space regex: (\x20+)[\r\n]*$
  */
