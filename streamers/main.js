@@ -1,14 +1,15 @@
+"use strict";
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.1
+ * @version 2.1.7.2
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.1";
+const VERSION = "2.1.7.2";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -26,13 +27,33 @@ const VERSION = "2.1.7.1";
  */
 
 
-
 /**
- * @todo DOCUMENT THESE
+ * The default min luminosity oscillation period factor that is used to
+ * determine the allowed oscillation period range based on the current FPS.
+ * @constant {number}
+ * @default 0.5
  */
 const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR = 0.5;
+/**
+ * The default max luminosity oscillation period factor that is used to
+ * determine the allowed oscillation period range based on the current FPS.
+ * @constant {number}
+ * @default 1
+ */
 const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR = 1;
+/**
+ * The default min line width oscillation period factor that is used to
+ * determine the allowed oscillation period range based on the current FPS.
+ * @constant {number}
+ * @default 0.5
+ */
 const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR = 0.5;
+/**
+ * The default max line width oscillation period factor that is used to
+ * determine the allowed oscillation period range based on the current FPS.
+ * @constant {number}
+ * @default 1
+ */
 const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR = 1;
 
 /**
@@ -417,6 +438,7 @@ const DEFAULT_TRAIL_HSL_END = 240.0;
  * @constant {number}
  */
 const DEFAULT_PEAKS_APP_PORT = 8069;
+
 /**
  * The domain of the server running WinAudioLevels.exe. If you are selfhosting,
  * set this to one of: "127.0.0.1", "localhost", or "::1"
@@ -424,6 +446,7 @@ const DEFAULT_PEAKS_APP_PORT = 8069;
  * @constant {string}
  */
 const DEFAULT_PEAKS_APP_DOMAIN = "localhost";
+
 /**
  * Whether or not the server running WinAudioLevels.exe only accepts secure
  * connections.
@@ -467,16 +490,7 @@ const DEFAULT_PEAKS_APP_RECONNECT_WAIT = 5000;
  *
  * The peak is converted to a percentage between 0% and 100%. Values less than
  * 50% will slow down the animation, while values above that will speed up the
- * animation. The actual calculation is as follows:
- *     speed_up_range = MAX_VARIANCE - 1;
- *     slow_down_range = 1 - MIN_VARIANCE;
- *     if (peak === 50%) {
- *         multiplier = 1;
- *     } else if (peak < 50%) {
- *         multiplier = 1 - (peak * 2 * slow_down_range);
- *     } else { // > 50%
- *         multiplier = 1 + ((peak - 50%) * 2 * speed_up_range);
- *     }
+ * animation.
  * So, the range between MIN and MAX is not evenly spread out. MIN to 1, and 1
  * to MAX are spread out evenly.
  * @default 0.5
@@ -494,16 +508,7 @@ const DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
  *
  * The peak is converted to a percentage between 0% and 100%. Values less than
  * 50% will slow down the animation, while values above that will speed up the
- * animation. The actual calculation is as follows:
- *     speed_up_range = MAX_VARIANCE - 1;
- *     slow_down_range = 1 - MIN_VARIANCE;
- *     if (peak === 50%) {
- *         multiplier = 1;
- *     } else if (peak < 50%) {
- *         multiplier = 1 - (peak * 2 * slow_down_range);
- *     } else { // > 50%
- *         multiplier = 1 + ((peak - 50%) * 2 * speed_up_range);
- *     }
+ * animation.
  * So, the range between MIN and MAX is not evenly spread out. MIN to 1, and 1
  * to MAX are spread out evenly.
  * @default 2.0
@@ -653,7 +658,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *
  * @typedef {Object} KeyBindingInfo
  * @property {Key} key
- *     The name of the key being pressed, if this is a letter, or value that
+ *     The name of the key being pressed, if this is a letter or value that
  *     changes with the shift key, the actual value here depends on whether or
  *     not the shift key is pressed.
  * @property {KeyBindingCondition[]} conditions
@@ -667,13 +672,13 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * Conditions that must be met in order to run the key binding. All specified
  * properties must have their respective keys set to the specified state.
  * @typedef {Object} KeyBindingCondition
- * @property {boolean} ctrl
+ * @property {boolean} [ctrl]
  *     Required state of the CTRL key.
- * @property {boolean} alt
+ * @property {boolean} [alt]
  *     Required state of the ALT key.
- * @property {boolean} meta
+ * @property {boolean} [meta]
  *     Required state of the META key.
- * @property {boolean} shift
+ * @property {boolean} [shift]
  *     Required state of the SHIFT key.
  */
 /**
@@ -724,23 +729,23 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *         Indicates that the value is a custom value that has no set format.
  *         Generally, this will be treated like "string", except the value is
  *         not necessarily a string value.
- * @property {string|string[]} unit
+ * @property {string|string[]} [unit]
  *     Either a single string value or an array of string values that is
  *     displayed beside the value of the StatusElement and acts as the units.
  *     Using an array of two strings and having the first string be empty is a
  *     valid use case (eg: a range of pixels. Instead of ## pixels ## pixels,
  *     you can use ["","pixels"] with the {@link StatusElementProperties#sep}
  *     property to get like ## x ## pixels).
- * @property {StatusElementPropertiesValueCallback} value
+ * @property {StatusElementPropertiesValueCallback} [value]
  *     A callback function that is used to retrieve the value of the property.
- * @property {boolean} show
+ * @property {boolean} [show]
  *     Gets whether or not the property should be shown. This defaults to true,
  *     obviously.
  *     As such, this property is generally omitted.
- * @property {boolean} verbose
+ * @property {boolean} [verbose]
  *     Gets whether or not the property is considered to provide verbose
  *     information. Defaults to false.
- * @property {string} sep
+ * @property {string} [sep]
  *     A string value that is used to separate the values in a range. Defaults
  *     to an empty string.
  * @see {@link StatusElement}
@@ -748,18 +753,18 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
 /**
  * Represents the settings for a particular {@see StatusElementCollection}.
  * @typedef {object} StatusCollectionSettings
- * @property {string} title
+ * @property {string} [title]
  *     The text that is displayed as the title for the collection. EG:
  *     "Status".
- * @property {string} itemText
+ * @property {string} [itemText]
  *     The custom text that is displayed for the header of the "Item" column.
  *     This defaults to "Item".
- * @property {string} valueText
+ * @property {string} [valueText]
  *     The custom text that is displayed for the header of the "Value" column.
  *     This defaults to "Value".
  * @property {StatusElementProperties[]} rows
  *     The StatusElementProperties that make up this collection.
- * @property {boolean} enableUpdate
+ * @property {boolean} [enableUpdate]
  *     Whether or not the application should periodically update the values of
  *     this collection. This defaults to "true".
  * @property {string} customCSS
@@ -775,15 +780,15 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * Represents the properties allowed to be passed to
  * {@see StatusElementCollection~createElement}.
  * @typedef {object} CreateElementProperties
- * @property {string[]} classes
+ * @property {string[]} [classes]
  *     The list of classes to apply to the element.
- * @property {object} attributes
+ * @property {object} [attributes]
  *     An object containing the named attributes to apply to the element.
- * @property {string} text
+ * @property {string} [text]
  *     The textual content to apply to the element.
- * @property {string} style
+ * @property {string} [style]
  *     A custom CSS string to apply to the element.
- * @property {Node[]} children
+ * @property {Node[]} [children]
  *     A list of nodes to append to the element.
  */
 /**
@@ -802,7 +807,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
 /**
  * The audio peaks message data structure. This is the format the
  * audio peaks server sends data. There are three defined statuses:
- *   Success - THe message contains "valid" audio data.
+ *   Success - The message contains "valid" audio data.
  *   Info - Currently unused.
  *   Error - The server encountered an error.
  * @typedef {string} AudioPeakMessageStatus
@@ -2031,155 +2036,162 @@ class Ani {
                 "handler": Ani.upFPS
             }
         ];
-        var status_rows = [
-            {
-                "name": "General",
-                "type": "header"
-            }, {
-                "name": "Canvas Size",
-                "type": "range.number.integer",
-                "unit": ["", "pixels"],
-                "sep": " x ",
-                "value": () => [Ani.width, Ani.height]
-            }, {
-                "name": "Version",
-                "type": "string",
-                "value": () => VERSION
-            }, {
-                "name": "Auto Resize",
-                "type": "flag",
-                "value": () => Ani.resize
-            }, {
-                "name": "Background",
-                "type": "color.rgb",
-                "value": () => Ani.cBackground
-            }, {
-                "name": "Frame Statistics",
-                "type": "header"
-            }, {
-                "name": "Target FPS",
-                "type": "string",
-                "unit": "frames/second",
-                "value": () => Ani.fps.toFixed(2)
-            }, {
-                "name": "Achieved FPS",
-                "type": "string",
-                "unit": "frames/second",
-                "value": () =>
-                    (Math.round(
-                        (
-                            Ani.frameCount
-                            / (((new Date()).getTime() - Ani.startTime) / 1000)
-                        ) * 100) / 100)
-                        .toFixed(2)
-            }, {
-                "name": "Frame Count",
-                "type": "number.integer",
-                "unit": "frames",
-                "value": () => Ani.frameCount
-            }, {
-                "name": "Dot Statistics",
-                "type": "header"
-            }, {
-                "name": "Speed",
-                "type": "range.number.decimal",
-                "unit": ["", "pixels/second"],
-                "value": () => [Ani.nSpeed, Ani.xSpeed]
-            }, {
-                "name": "Acceleration",
-                "type": "range.number.decimal",
-                "unit": ["", "pixels/second"],
-                "value": () => [Ani.nAccel, Ani.xAccel]
-            }, {
-                "name": "Active Dots",
-                "type": "range.number.integer",
-                "unit": ["", "dots"],
-                "sep": " of ",
-                "value": () => [Ani.dots.length, Ani.xDots]
-            }, {
-                "name": "Dot Rate",
-                "type": "number.integer",
-                "unit": "dots/frame",
-                "value": () => Ani.rDot
-            }, {
-                "name": "Trail Opacity",
-                "type": "color.alpha",
-                "value": () => Ani.oTrail
-            }, {
-                "name": "Trail Saturation",
-                "type": "range.color.sat",
-                "value": () => [Ani.snTrail, Ani.sxTrail]
-            }, {
-                "name": "Trail Luminosity",
-                "type": "range.color.luma",
-                "value": () => [Ani.lnTrail, Ani.lxTrail]
-            }, {
-                "name": "Fade Opacity",
-                "type": "number.percentage",
-                "value": () => Ani.oFade
-            }, {
-                "name": "Line Width",
-                "type": "range.number.decimal",
-                "unit": ["", "pixels"],
-                "value": () => [Ani.wnLine, Ani.wxLine]
-            }, {
-                "name": "Trail Hue Range",
-                "type": "header"
-            }, {
-                "name": "Hue Drift",
-                "type": "number.decimal",
-                "unit": "degrees",
-                "value": () => Ani.hDrift
-            }, {
-                "name": "Current",
-                "type": "range.color.hue",
-                "value": () => [Ani.hsTrail, Ani.heTrail]
-            }, {
-                "name": "Default",
-                "type": "range.color.hue",
-                "value": () => [DEFAULT_TRAIL_HSL_START, DEFAULT_TRAIL_HSL_END]
-            }, {
-                "name": "Luma Oscillation",
-                "type": "header"
-            }, {
-                "name": "Period",
-                "type": "range.string",
-                "unit": ["", "seconds"],
-                "value": () => [Ani.opnLum.toFixed(2), Ani.opxLum.toFixed(2)]
-            }, {
-                "name": "Amplitude",
-                "type": "range.color.luma",
-                "value": () => [Ani.oanLum, Ani.oaxLum]
-            }, {
-                "name": "Phase Shift",
-                "type": "string",
-                "unit": "seconds",
-                "value": () => Ani.opsLum.toFixed(2)
-            }, {
-                "name": "Line Width Oscillation",
-                "type": "header"
-            }, {
-                "name": "Period",
-                "type": "range.string",
-                "unit": ["", "seconds"],
-                "value": () => [
-                    Ani.opnwLine.toFixed(2),
-                    Ani.opxwLine.toFixed(2)
-                ]
-            }, {
-                "name": "Amplitude",
-                "type": "range.number.decimal",
-                "unit": ["", "pixels"],
-                "value": () => [Ani.oanwLine, Ani.oaxwLine]
-            }, {
-                "name": "Phase Shift",
-                "type": "string",
-                "unit": "seconds",
-                "value": () => Ani.opswLine.toFixed(2)
-            }
-        ];
         var status_settings = {
-            "rows": status_rows,
+            "rows": [
+                {
+                    "name": "General",
+                    "type": "header"
+                }, {
+                    "name": "Canvas Size",
+                    "type": "range.number.integer",
+                    "unit": ["", "pixels"],
+                    "sep": " x ",
+                    "value": () => [Ani.width, Ani.height]
+                }, {
+                    "name": "Version",
+                    "type": "string",
+                    "value": () => VERSION
+                }, {
+                    "name": "Auto Resize",
+                    "type": "flag",
+                    "value": () => Ani.resize
+                }, {
+                    "name": "Background",
+                    "type": "color.rgb",
+                    "value": () => Ani.cBackground
+                }, {
+                    "name": "Frame Statistics",
+                    "type": "header"
+                }, {
+                    "name": "Target FPS",
+                    "type": "string",
+                    "unit": "frames/second",
+                    "value": () => Ani.fps.toFixed(2)
+                }, {
+                    "name": "Achieved FPS",
+                    "type": "string",
+                    "unit": "frames/second",
+                    "value": () =>
+                        (Math.round(
+                            (
+                                Ani.frameCount
+                                / ((
+                                    (new Date()).getTime()
+                                    - Ani.startTime) / 1000)
+                            ) * 100) / 100)
+                            .toFixed(2)
+                }, {
+                    "name": "Frame Count",
+                    "type": "number.integer",
+                    "unit": "frames",
+                    "value": () => Ani.frameCount
+                }, {
+                    "name": "Dot Statistics",
+                    "type": "header"
+                }, {
+                    "name": "Speed",
+                    "type": "range.number.decimal",
+                    "unit": ["", "pixels/second"],
+                    "value": () => [Ani.nSpeed, Ani.xSpeed]
+                }, {
+                    "name": "Acceleration",
+                    "type": "range.number.decimal",
+                    "unit": ["", "pixels/second"],
+                    "value": () => [Ani.nAccel, Ani.xAccel]
+                }, {
+                    "name": "Active Dots",
+                    "type": "range.number.integer",
+                    "unit": ["", "dots"],
+                    "sep": " of ",
+                    "value": () => [Ani.dots.length, Ani.xDots]
+                }, {
+                    "name": "Dot Rate",
+                    "type": "number.integer",
+                    "unit": "dots/frame",
+                    "value": () => Ani.rDot
+                }, {
+                    "name": "Trail Opacity",
+                    "type": "color.alpha",
+                    "value": () => Ani.oTrail
+                }, {
+                    "name": "Trail Saturation",
+                    "type": "range.color.sat",
+                    "value": () => [Ani.snTrail, Ani.sxTrail]
+                }, {
+                    "name": "Trail Luminosity",
+                    "type": "range.color.luma",
+                    "value": () => [Ani.lnTrail, Ani.lxTrail]
+                }, {
+                    "name": "Fade Opacity",
+                    "type": "number.percentage",
+                    "value": () => Ani.oFade
+                }, {
+                    "name": "Line Width",
+                    "type": "range.number.decimal",
+                    "unit": ["", "pixels"],
+                    "value": () => [Ani.wnLine, Ani.wxLine]
+                }, {
+                    "name": "Trail Hue Range",
+                    "type": "header"
+                }, {
+                    "name": "Hue Drift",
+                    "type": "number.decimal",
+                    "unit": "degrees",
+                    "value": () => Ani.hDrift
+                }, {
+                    "name": "Current",
+                    "type": "range.color.hue",
+                    "value": () => [Ani.hsTrail, Ani.heTrail]
+                }, {
+                    "name": "Default",
+                    "type": "range.color.hue",
+                    "value": () => [
+                        DEFAULT_TRAIL_HSL_START,
+                        DEFAULT_TRAIL_HSL_END
+                    ]
+                }, {
+                    "name": "Luma Oscillation",
+                    "type": "header"
+                }, {
+                    "name": "Period",
+                    "type": "range.string",
+                    "unit": ["", "seconds"],
+                    "value": () => [
+                        Ani.opnLum.toFixed(2),
+                        Ani.opxLum.toFixed(2)
+                    ]
+                }, {
+                    "name": "Amplitude",
+                    "type": "range.color.luma",
+                    "value": () => [Ani.oanLum, Ani.oaxLum]
+                }, {
+                    "name": "Phase Shift",
+                    "type": "string",
+                    "unit": "seconds",
+                    "value": () => Ani.opsLum.toFixed(2)
+                }, {
+                    "name": "Line Width Oscillation",
+                    "type": "header"
+                }, {
+                    "name": "Period",
+                    "type": "range.string",
+                    "unit": ["", "seconds"],
+                    "value": () => [
+                        Ani.opnwLine.toFixed(2),
+                        Ani.opxwLine.toFixed(2)
+                    ]
+                }, {
+                    "name": "Amplitude",
+                    "type": "range.number.decimal",
+                    "unit": ["", "pixels"],
+                    "value": () => [Ani.oanwLine, Ani.oaxwLine]
+                }, {
+                    "name": "Phase Shift",
+                    "type": "string",
+                    "unit": "seconds",
+                    "value": () => Ani.opswLine.toFixed(2)
+                }
+            ],
             "customCSS": "top: 0; left: 0;"
         };
         var timeout = null;
@@ -3624,7 +3636,6 @@ if (document.readyState !== "complete") {
  * @todo Complete documentation.
  * @todo Change the dot addition thing to go from one-check-per-frame to a
  *       timer (ie: in parallel)
- * @todo Add "use strict" (to help detect issues)
  * @todo fix obsolete references in documentation.
  * @todo Maybe add a "description" key to the keybind object so we can
  *       dynamically create the help keys (see two todos down).
