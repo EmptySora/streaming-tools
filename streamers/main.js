@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.7
+ * @version 2.1.7.8
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.7";
+const VERSION = "2.1.7.8";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -829,6 +829,49 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  */
 class StatusElement {
     /**
+     * The original {@see StatusElementProperties} object from which this
+     * {@see StatusElement} is created from.
+     * @type {StatusElementProperties}
+     * @private
+     */
+    __original;
+    /**
+     * A double-array of string objects that represent the types and
+     * subtypes of this {@link StatusElement}.
+     * @type {string[][]}
+     * @private
+     */
+    pType;
+    /**
+     * The {@see HTMLElement} that this {@see StatusElement} is
+     * displayed via.
+     * @type {HTMLElement}
+     * @private
+     */
+    widget;
+    /**
+     * The {@see HTMLElement} that this {@see StatusElement} is
+     * displayed via.
+     * @type {HTMLElement}
+     * @private
+     */
+    owner;
+    /**
+     * The first of the two parameter value Elements that the value of this
+     * {@see StatusElement} is displayed via.
+     * @type {HTMLElement}
+     * @private
+     */
+    param0;
+    /**
+     * The second of the two parameter value Elements that the value of this
+     * {@see StatusElement} is displayed via.
+     * This property may not always be present
+     * @type {HTMLElement}
+     * @private
+     */
+    param1;
+    /**
      * Creates a new {@link StatusElement} from the HTML node containing it and
      * the settings configuration information it is based upon.
      * @param {HTMLElement} tbody
@@ -839,12 +882,6 @@ class StatusElement {
      *     status element.
      */
     constructor(tbody, statrow) {
-        /**
-         * The original {@see StatusElementProperties} object from which this
-         * {@see StatusElement} is created from.
-         * @type {StatusElementProperties}
-         * @private
-         */
         this.__original = statrow;
         if (statrow.show !== undefined && !statrow.show) {
             return;
@@ -856,38 +893,17 @@ class StatusElement {
         }
         var c = trow.insertCell(-1);
         c.textContent = statrow.name;
-        var type = statrow.type.split(/\./g).map((t) => {
-            return t.split(/,/g);
-        });
-        /**
-         * A double-array of string objects that represent the types and
-         * subtypes of this {@link StatusElement}.
-         * @type {string[][]}
-         * @private
-         */
+        var type = statrow.type.split(/\./g).map((t) => t.split(/,/g));
         this.pType = type;
         if (statrow.type !== "header") {
             c = trow.insertCell(-1);
-            /**
-             * The {@see HTMLElement} that this {@see StatusElement} is
-             * displayed via.
-             * @type {HTMLElement}
-             * @private
-             */
             this.widget = c;
-            /**
-             * The {@see HTMLElement} that this {@see StatusElement} is
-             * displayed via.
-             * @type {HTMLElement}
-             * @private
-             */
             this.owner = c;
             if (type[0][0] === "range") {
                 this.craftStatusElement(type.slice(1)[0][0], 0);
-                c = document.createElement("SPAN");
+                c = this.owner.appendChild(document.createElement("SPAN"));
                 c.classList.add("range-to");
                 c.appendChild(document.createTextNode(this.sep || ""));
-                this.owner.appendChild(c);
                 this.craftStatusElement(type.slice(1)[0][0], 1);
             } else {
                 this.craftStatusElement(type[0][0], 0);
@@ -1065,19 +1081,7 @@ class StatusElement {
         }
         this.owner.appendChild(widget);
         widget.classList.add("status-widget-parameter");
-        /**
-         * The first of the two parameter value Elements that the value of this
-         * {@see StatusElement} is displayed via.
-         * @property {HTMLElement} param0
-         * @private
-         */
-        /**
-         * The second of the two parameter value Elements that the value of this
-         * {@see StatusElement} is displayed via.
-         * This property may not always be present
-         * @property {HTMLElement} param1
-         * @private
-         */
+        
         this[`param${parameter}`] = widget;
         var units = (this.__original.unit instanceof Array)
             ? this.__original.unit[parameter]
@@ -1116,6 +1120,33 @@ class StatusElement {
  * properties for updating the HUD on such collections of elements.
  */
 class StatusElementCollection {
+    /**
+     * @type {boolean}
+     * @private
+     */
+    __disposed = false;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    __enabled;
+    /**
+     * @type {number}
+     * @private
+     */
+    __interval;
+    /**
+     * @type {HTMLElement}
+     * @private
+     */
+    __container;
+    /**
+     * The list of {@see StatusElement} objects in this
+     * {@see StatusElementCollection}.
+     * @type {StatusElement[]}
+     */
+    rows;
+
     /**
      * Creates a new {@link StatusElementCollection} from the specified
      * settings object provided.
@@ -1162,10 +1193,7 @@ class StatusElementCollection {
             }
             return element;
         }
-        //container is div.status-info-container
-        //output is tbody.status-table-body
         var body = document.body;
-        //StatusCollectionSettings
         var container = body.appendChild(createElement("DIV", {
             classes: ["status-info-container", "status-hide"],
             style: settings.customCSS || "",
@@ -1199,42 +1227,16 @@ class StatusElementCollection {
             .appendChild(document.createElement("TBODY"));
         output.classList.add("status-table-body");
 
-        /*
-         *     *******boolean enableUpdate = true (false disables the update tick)
-         */
         console.info("creating rows!");
         var nrows = [];
         settings.rows.forEach((row) => {
             nrows.push(new StatusElement(output, row));
         });
-        /**
-         * The list of {@see StatusElement} objects in this
-         * {@see StatusElementCollection}.
-         * @type {StatusElement[]}
-         * @public
-         */
+        
         this.rows = nrows;
-        /**
-         * @type {HTMLElement}
-         * @private
-         */
         this.__container = container;
-        /**
-         * @type {number}
-         * @private
-         */
-        this.__interval = undefined;
-        /**
-         * @type {boolean}
-         * @private
-         */
         this.__enabled = (!Object.keys(settings).includes("enableUpdate"))
             || settings.enableUpdate;
-        /**
-         * @type {boolean}
-         * @private
-         */
-        this.__disposed = false;
         this.displayed = false;
         this.showVerbose = false;
     }
@@ -1343,259 +1345,250 @@ class StatusElementCollection {
  */
 class Dot {
     /**
+     * The x-coordinate of this {@see Dot}.
+     *
+     * Default: A random value between 0 and the size of the canvas.
+     * @type {number}
+     */
+    x;
+    /**
+     * The y-coordinate of this {@see Dot}.
+     *
+     * Default: The very bottom of the canvas.
+     * @type {number}
+     */
+    y;
+    /**
+     * The speed of this {@see Dot}.
+     *
+     * Default: A random value between {@see MIN_SPEED} and
+     * {@see MAX_SPEED}.
+     * @type {number}
+     */
+    s;
+    /**
+     * The acceleration of this {@see Dot}.
+     *
+     * Default: A random value between {@see MIN_ACCEL} and
+     * {@see MAX_ACCEL}.
+     * @type {number}
+     */
+    a;
+    /**
+     * The hue of this {@see Dot}.
+     *
+     * Default: A random value between {@see TRAIL_HSL_START} and
+     * {@see TRAIL_HSL_END}.
+     * @type {number}
+     */
+    c;
+    /**
+     * The luminosity of this {@see Dot}.
+     *
+     * Default: A random value between {@see TRAIL_LUMINOSITY_MIN} and
+     * {@see TRAIL_LUMINOSITY_MAX}.
+     * @type {number}
+     */
+    l;
+    /**
+     * The saturation of this {@see Dot}.
+     *
+     * Default: A random value between {@see TRAIL_SATURATION_MIN} and
+     * {@see TRAIL_SATURATION_MAX}.
+     * @type {number}
+     */
+    sa;
+    /**
+     * The frame this {@see Dot} was created on.
+     *
+     * Default: The value of {@see Ani.frameCount} at the time of creation.
+     * @type {number}
+     */
+    f;
+    /**
+     * The amplitude of the sine wave that oscillates the luminosity of
+     * this {@see Dot}.
+     *
+     * Default: A random value between
+     * {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MIN} and
+     * {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}.
+     * @type {number}
+     */
+    pa;
+    /**
+     * The frequency of the sine wave that oscillates the luminosity of
+     * this {@see Dot}.
+     *
+     * Default: The frequency, as calculated based on {@see Dot#pp}.
+     * @type {number}
+     */
+    pb;
+    /**
+     * The period of the sine wave that oscillates the luminosity of this
+     * {@see Dot}.
+     *
+     * Default: A random value between
+     * {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and
+     * {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
+     * @type {number}
+     */
+    pp;
+    /**
+     * The original period of the sine wave that oscillates the luminosity
+     * of this {@see Dot}.
+     *
+     * Default: A random value between
+     * {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and
+     * {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
+     * @type {number}
+     */
+    opp;
+    /**
+     * The phase shift of the sine wave that oscillates the luminosity of
+     * this {@see Dot}.
+     *
+     * Default: The sum of {@see Ani.frameCount} and
+     * {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
+     * @type {number}
+     */
+    pc;
+    /**
+     * The amplitude of the sine wave that oscillates the line width of
+     * this {@see Dot}.
+     *
+     * Default: A random value between
+     * {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN} and
+     * {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}.
+     * @type {number}
+     */
+    bpa;
+    /**
+     * The frequency of the sine wave that oscillates the line width of
+     * this {@see Dot}.
+     *
+     * Default: The frequency, as calculated based on {@see Dot#bpp}.
+     * @type {number}
+     */
+    bpb;
+    /**
+     * The period of the sine wave that oscillates the line width of this
+     * {@see Dot}.
+     *
+     * Default: A random value between
+     * {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
+     * {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
+     * @type {number}
+     */
+    bpp;
+    /**
+     * The original period of the sine wave that oscillates the line width
+     * of this {@see Dot}.
+     *
+     * Default: A random value between
+     * {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
+     * {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
+     * @type {number}
+     */
+    obpp;
+    /**
+     * The phase shift of the sine wave that oscillates the line width of
+     * this {@see Dot}.
+     *
+     * Default: The sum of {@see Ani.frameCount} and
+     * {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
+     * @type {number}
+     */
+    bpc;
+    /**
+     * The line width of this {@see Dot}.
+     *
+     * Default: A random value between {@see LINE_WIDTH_MIN} and
+     * {@see LINE_WIDTH_MAX}.
+     * @type {number}
+     */
+    w;
+    /**
+     * A helper value that helps keep track of the frame number for the
+     * purposes of oscillating the luminosity of this {@see Dot}.
+     *
+     * Default: The value of {@see Ani.frameCount} at the time of creation.
+     * @type {number}
+     * @protected
+     */
+    pfx;
+    /**
+     * A helper value that helps keep track of the frame number for the
+     * purposes of oscillating the line width of this {@see Dot}.
+     *
+     * Default: The value of {@see Ani.frameCount} at the time of creation.
+     * @type {number}
+     * @protected
+     */
+    bpfx;
+    /**
+     * A helper value that helps keep track of the last
+     * AUDIO_PEAK_MULTIPLIER value fro the purposes of modifying the speed
+     * of the animation of this {@see Dot}.
+     *
+     * @default 1
+     * @type {number}
+     * @protected
+     */
+    oapm = 1;
+    /**
+     * The y-coordinate of the spot this {@see Dot} was on in the previous
+     * frame.
+     * @type {number}
+     */
+    py = null;
+    /**
+     * The y-coordinate of the spot this {@see Dot} was on in the frame
+     * before the previous frame.
+     * @type {number}
+     */
+    ppy = null;
+    /**
+     * The x-coordinate of the spot this {@see Dot} was on in the previous
+     * frame.
+     * @type {number}
+     */
+    px = null;
+    /**
+     * The x-coordinate of the spot this {@see Dot} was on in the frame
+     * before the previous frame.
+     * @type {number}
+     */
+    ppx = null;
+
+    /**
      * Creates a new {@link Dot}.
      */
     constructor() {
         var vpb = Dot.rand(Ani.opnLum, Ani.opxLum);
         var vbpb = Dot.rand(Ani.opnwLine, Ani.opxwLine);
-        //See the typedef of Dot for explanations of the following.
 
-        /**
-         * The x-coordinate of this {@see Dot}.
-         *
-         * Default: A random value between 0 and the size of the canvas.
-         * @type {number}
-         * @public
-         */
         this.x = Dot.rand(0, Ani.size.width);
-        /**
-         * The y-coordinate of this {@see Dot}.
-         *
-         * Default: The very bottom of the canvas.
-         * @type {number}
-         * @public
-         */
         this.y = Ani.size.height;
-        /**
-         * The speed of this {@see Dot}.
-         *
-         * Default: A random value between {@see MIN_SPEED} and
-         * {@see MAX_SPEED}.
-         * @type {number}
-         * @public
-         */
         this.s = Dot.rand(Ani.nSpeed, Ani.xSpeed);
-        /**
-         * The acceleration of this {@see Dot}.
-         *
-         * Default: A random value between {@see MIN_ACCEL} and
-         * {@see MAX_ACCEL}.
-         * @type {number}
-         * @public
-         */
         this.a = Dot.rand(Ani.nAccel, Ani.xAccel);
-        /**
-         * The hue of this {@see Dot}.
-         *
-         * Default: A random value between {@see TRAIL_HSL_START} and
-         * {@see TRAIL_HSL_END}.
-         * @type {number}
-         * @public
-         */
         this.c = Dot.rand(Ani.hsTrail, Ani.heTrail);
-        /**
-         * The luminosity of this {@see Dot}.
-         *
-         * Default: A random value between {@see TRAIL_LUMINOSITY_MIN} and
-         * {@see TRAIL_LUMINOSITY_MAX}.
-         * @type {number}
-         * @public
-         */
         this.l = Dot.rand(Ani.lnTrail, Ani.lxTrail);
-        /**
-         * The saturation of this {@see Dot}.
-         *
-         * Default: A random value between {@see TRAIL_SATURATION_MIN} and
-         * {@see TRAIL_SATURATION_MAX}.
-         * @type {number}
-         * @public
-         */
         this.sa = Dot.rand(Ani.snTrail, Ani.sxTrail);
-        /**
-         * The frame this {@see Dot} was created on.
-         *
-         * Default: The value of {@see Ani.frameCount} at the time of creation.
-         * @type {number}
-         * @public
-         */
         this.f = Ani.frameCount;
-        /**
-         * The amplitude of the sine wave that oscillates the luminosity of
-         * this {@see Dot}.
-         *
-         * Default: A random value between
-         * {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MIN} and
-         * {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}.
-         * @type {number}
-         * @public
-         */
         this.pa = Dot.rand(Ani.oanLum, Ani.oaxLum);
-        /**
-         * The frequency of the sine wave that oscillates the luminosity of
-         * this {@see Dot}.
-         *
-         * Default: The frequency, as calculated based on {@see Dot#pp}.
-         * @type {number}
-         * @public
-         */
         this.pb = Dot.getB(vpb);
-        /**
-         * The period of the sine wave that oscillates the luminosity of this
-         * {@see Dot}.
-         *
-         * Default: A random value between
-         * {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and
-         * {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
-         * @type {number}
-         * @public
-         */
         this.pp = vpb;
-        /**
-         * The original period of the sine wave that oscillates the luminosity
-         * of this {@see Dot}.
-         *
-         * Default: A random value between
-         * {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and
-         * {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
-         * @type {number}
-         * @public
-         */
         this.opp = vpb;
-        /**
-         * The phase shift of the sine wave that oscillates the luminosity of
-         * this {@see Dot}.
-         *
-         * Default: The sum of {@see Ani.frameCount} and
-         * {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
-         * @type {number}
-         * @public
-         */
         this.pc = Ani.frameCount + Ani.opsLum;
-        /**
-         * The amplitude of the sine wave that oscillates the line width of
-         * this {@see Dot}.
-         *
-         * Default: A random value between
-         * {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN} and
-         * {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}.
-         * @type {number}
-         * @public
-         */
         this.bpa = Dot.rand(Ani.oanwLine, Ani.oaxwLine);
-        /**
-         * The frequency of the sine wave that oscillates the line width of
-         * this {@see Dot}.
-         *
-         * Default: The frequency, as calculated based on {@see Dot#bpp}.
-         * @type {number}
-         * @public
-         */
         this.bpb = Dot.getB(vbpb);
-        /**
-         * The period of the sine wave that oscillates the line width of this
-         * {@see Dot}.
-         *
-         * Default: A random value between
-         * {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
-         * {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
-         * @type {number}
-         * @public
-         */
         this.bpp = vbpb;
-        /**
-         * The original period of the sine wave that oscillates the line width
-         * of this {@see Dot}.
-         *
-         * Default: A random value between
-         * {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
-         * {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
-         * @type {number}
-         * @public
-         */
         this.obpp = vbpb;
-        /**
-         * The phase shift of the sine wave that oscillates the line width of
-         * this {@see Dot}.
-         *
-         * Default: The sum of {@see Ani.frameCount} and
-         * {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
-         * @type {number}
-         * @public
-         */
         this.bpc = Ani.frameCount + Ani.opswLine;
-        /**
-         * The line width of this {@see Dot}.
-         *
-         * Default: A random value between {@see LINE_WIDTH_MIN} and
-         * {@see LINE_WIDTH_MAX}.
-         * @type {number}
-         * @public
-         */
         this.w = Dot.rand(Ani.wnLine, Ani.wxLine);
-        /**
-         * A helper value that helps keep track of the frame number for the
-         * purposes of oscillating the luminosity of this {@see Dot}.
-         *
-         * Default: The value of {@see Ani.frameCount} at the time of creation.
-         * @type {number}
-         * @protected
-         */
         this.pfx = Ani.frameCount;
-        /**
-         * A helper value that helps keep track of the frame number for the
-         * purposes of oscillating the line width of this {@see Dot}.
-         *
-         * Default: The value of {@see Ani.frameCount} at the time of creation.
-         * @type {number}
-         * @protected
-         */
         this.bpfx = Ani.frameCount;
-        /**
-         * A helper value that helps keep track of the last
-         * AUDIO_PEAK_MULTIPLIER value fro the purposes of modifying the speed
-         * of the animation of this {@see Dot}.
-         *
-         * Default: 1
-         * @type {number}
-         * @protected
-         */
-        this.oapm = 1;
-        /**
-         * The y-coordinate of the spot this {@see Dot} was on in the previous
-         * frame.
-         *
-         * Default: null
-         * @type {number}
-         * @public
-         */
-        this.py = null;
-        /**
-         * The y-coordinate of the spot this {@see Dot} was on in the frame
-         * before the previous frame.
-         *
-         * Default: null
-         * @type {number}
-         * @public
-         */
-        this.ppy = null;
-        /**
-         * The x-coordinate of the spot this {@see Dot} was on in the previous
-         * frame.
-         *
-         * Default: null
-         * @type {number}
-         * @public
-         */
-        this.px = null;
-        /**
-         * The x-coordinate of the spot this {@see Dot} was on in the frame
-         * before the previous frame.
-         *
-         * Default: null
-         * @type {number}
-         * @public
-         */
-        this.ppx = null;
+        
         Ani.heTrail += Ani.hDrift;
         Ani.hsTrail += Ani.hDrift;
     }
@@ -1954,12 +1947,12 @@ class Ani {
      * @type {SettingsDB}
      * @private
      */
-    static settingsFactory = null;
+    static settingsFactory;
     /**
      * The current application settings.
      * @type {Settings}
      */
-    static sObj = null;
+    static sObj;
     /**
      * An array of all of the dots in the animation.
      * @type {Dot[]}
@@ -1975,12 +1968,12 @@ class Ani {
      * An object that is used to update the status HUD screen.
      * @type {StatusElementCollection}
      */
-    static status = null;
+    static status;
     /**
      * An object that is used to display help/keybindings on the screen.
      * @type {StatusElementCollection}
      */
-    static statusHelp = null;
+    static statusHelp;
     /**
      * The number of frames that have been rendered for the animation.
      * @type {number}
@@ -1990,17 +1983,17 @@ class Ani {
      * The CANVAS element being rendered to.
      * @type {HTMLCanvasElement}
      */
-    static canvas = null;
+    static canvas;
     /**
      * The rendering context for the CANVAS element being rendered to.
      * @type {CanvasRenderingContext2D}
      */
-    static context = null;
+    static context;
     /**
      * The bounding rectangle that the canvas is displaying in.
      * @type {DOMRect}
      */
-    static size = null;
+    static size;
     /**
      * @type {number}
      * @private
@@ -2015,13 +2008,13 @@ class Ani {
      * The AudioPeaks client that retrieves the system audio peaks.
      * @type {AudioPeaks}
      */
-    static peaks = null;
+    static peaks;
     /**
      * The time in which the animation was first started.
      * Note: this is the number of milliseconds since 1970-01-01T00:00.
      * @type {number}
      */
-    static startTime = null;
+    static startTime;
 
     /**
      * A static constructor of sorts that is run when starting the animation.
@@ -2882,29 +2875,32 @@ class Ani {
  */
 class SettingsDB extends EventTarget {
     /**
+     * Fired when the settings database is successfully opened.
+     * @event SettingsDB#event:open
+     * @type {object}
+     */
+    /**
+     * Fired when an error occurs while trying to open the settings database.
+     * @event SettingsDB#event:error
+     * @type {object}
+     */
+    /**
+     * @type {string}
+     * @private
+     */
+    __state = "closed";
+    /**
+     * The opened settings database.
+     * @type {IDBDatabase}
+     * @private
+     */
+    __db;
+    /**
      * Creates a new {@see SettingsDB} object.
      */
     constructor() {
         super(); //Oh, so there is a way to do base() in JS. Kewl~.
-        /**
-         * @type {string}
-         * @private
-         */
-        this.__state = "closed";
-        /**
-         * The opened settings database.
-         * @type {IDBDatabase}
-         * @private
-         */
-        this.__db = null;
-        /*
-         * cancelled = dispatchEvent(new CustomEvent("name", {
-         *     "detail": object = null,
-         *     "bubbles": bool = false,
-         *     "cancelable": bool = false,
-         *     "composed": bool = false
-         * });
-         */
+        //uh, can I remove this now...?
     }
     /**
      * Indicates the state of the settings database. It's one of the
@@ -2916,18 +2912,6 @@ class SettingsDB extends EventTarget {
     get state() {
         return this.__state;
     }
-
-    /**
-     * Fired when the settings database is successfully opened.
-     * @event SettingsDB#event:open
-     * @type {object}
-     */
-
-    /**
-     * Fired when an error occurs while trying to open the settings database.
-     * @event SettingsDB#event:error
-     * @type {object}
-     */
 
     /**
      * Opens the settings database.
@@ -3089,6 +3073,27 @@ class SettingsDB extends EventTarget {
  */
 class Settings {
     /**
+     * @type {SettingsDB}
+     * @private
+     */
+    __db;
+    /**
+     * @type {string}
+     * @private
+     */
+    __id;
+    /**
+     * @type {object}
+     * @private
+     */
+    __data;
+    /**
+     * @type {string[]}
+     * @private
+     */
+    __keys;
+
+    /**
      * Creates a new {@see Settings} object from a {@see SettingsDB} object,
      * the id of the settings, and the JSON string containing the raw settings.
      * @protected
@@ -3100,25 +3105,9 @@ class Settings {
      *     A JSON string containing the unparsed settings data.
      */
     constructor(db, id, data) {
-        /**
-         * @type {SettingsDB}
-         * @private
-         */
         this.__db = db;
-        /**
-         * @type {string}
-         * @private
-         */
         this.__id = id;
-        /**
-         * @type {object}
-         * @private
-         */
         this.__data = JSON.parse(data);
-        /**
-         * @type {string[]}
-         * @private
-         */
         this.__keys = Object.keys(this.__data);
     }
     /**
@@ -3550,25 +3539,25 @@ class Settings {
  */
 class AudioPeaks {
     /**
+     * @type {boolean}
+     * @private
+     */
+    __connecting = false;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    __reconnect = false;
+    /**
+     * @type {WebSocket}
+     * @private
+     */
+    __socket;
+
+    /**
      * Creates a new {@see AudioPeaks} object.
      */
     constructor() {
-        /**
-         * @type {boolean}
-         * @private
-         */
-        this.__connecting = false;
-        /**
-         * @type {boolean}
-         * @private
-         */
-        this.__reconnect = false;
-        /**
-         * @type {WebSocket}
-         * @private
-         */
-        this.__socket = null;
-
         if (this.enabled) {
             this.connect();
         }
@@ -3743,8 +3732,6 @@ if (document.readyState !== "complete") {
  *       creation method as described in the todo two back.
  * @todo use "at borrows" to avoid double documenting the setting shorthands
  * @todo Fix the buggy phaseshift code.
- * @todo Move instance var declarations to the class body so that the
- *       documentation can be collapsed
  * @todo Get JSLINT and set it up so we can check this code for issues
  *       VisualStudio can't see.
  * @todo START DOCUMENTING WITH AT SINCE!!!!!!!
