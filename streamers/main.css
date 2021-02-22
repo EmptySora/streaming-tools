@@ -7,19 +7,19 @@ body {
     margin: 0;
 }
 
-div#status-info {
+.status-info-container {
     position: fixed;
-    top: 0;
-    left: 0;
+    /*top: 0;
+    left: 0;*/
     display: inline-block;
-    background-color: rgba(255,255,255,0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     border: 1px solid white;
     padding: 5px;
     color: white;
     max-height: 90%;
     overflow-y: auto;
 }
-div#status-info * {
+.status-info-container * {
     color: white;
 }
 hr {
@@ -30,8 +30,7 @@ hr {
     text-align: center;
     font-weight: bold;
 }
-.status-info-row.header td,
-th {
+.status-info-row.header td, th {
     border-top: 3px solid white;
     border-bottom: 1px solid white;
 }
@@ -39,31 +38,29 @@ th {
     display: inline-block;
     width: 50px;
     height: 20px;
-    border:1px inset;
+    border: 1px inset;
 }
 .status-widget.units {
     display: inline;
 }
-#status-table td:nth-child(2) {
-    border-left:1px solid white;
+.status-table td:nth-child(2) {
+    border-left: 1px solid white;
 }
-#status-table td,
-#status-table th {
-    border:1px solid white;
-    padding:5px;
+.status-table td, .status-table th {
+    border: 1px solid white;
+    padding: 5px;
 }
-#status-table th,
-.status-info-row.header td {
+.status-table th, .status-info-row.header td {
     color: black !important;
     background-color: white;
-    border-bottom:1px solid black !important;
+    border-bottom: 1px solid black !important;
 }
 .status-info-row.header td {
-    border-top:1px solid black !important;
+    border-top: 1px solid black !important;
 }
-#status-table {
-    border-collapse:collapse;
-    margin-bottom:5px;
+.status-table {
+    border-collapse: collapse;
+    margin-bottom: 5px;
 }
 
 .range-to {
@@ -71,19 +68,15 @@ th {
 }
 
 .status-widget-parameter {
-    color:black !important;
-    font-weight:bold;
-    font-family:monospace;
-    vertical-align:baseline;
+    color: black !important;
+    font-weight: bold;
+    font-family: monospace;
+    vertical-align: baseline;
 }
-#status-table td:first-child {
-    font-weight:bold;
-}
-
-.status-hide, .status-hide * {
-    display: none !important;
+.status-table td:first-child {
+    font-weight: bold;
 }
 
-.status-hide-verbose .status-info-row-verbose {
+.status-hide, .status-hide *, .status-hide-verbose .status-info-row-verbose {
     display: none !important;
 }

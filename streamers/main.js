@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.5.1
+ * @version 2.1.6.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.5.1";
+const VERSION = "2.1.6.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -683,7 +683,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *     The value of the StatusElement, or an array of such values if necessary.
  */
 /**
- *
+ * Represents the properties of a particular status element.
  * @typedef {object} StatusElementProperties
  * @property {string} name
  *     The text that is displayed on the HUD for this StatusElement. This
@@ -744,6 +744,46 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *     A string value that is used to separate the values in a range. Defaults
  *     to an empty string.
  * @see {@link StatusElement}
+ */
+/**
+ * Represents the settings for a particular {@see StatusElementCollection}.
+ * @typedef {object} StatusCollectionSettings
+ * @property {string} title
+ *     The text that is displayed as the title for the collection. EG:
+ *     "Status".
+ * @property {string} itemText
+ *     The custom text that is displayed for the header of the "Item" column.
+ *     This defaults to "Item".
+ * @property {string} valueText
+ *     The custom text that is displayed for the header of the "Value" column.
+ *     This defaults to "Value".
+ * @property {StatusElementProperties[]} rows
+ *     The StatusElementProperties that make up this collection.
+ * @property {boolean} enableUpdate
+ *     Whether or not the application should periodically update the values of
+ *     this collection. This defaults to "true".
+ * @property {string} customCSS
+ *     Custom CSS that is applied to the "status-info-container" element upon
+ *     creation. You should supply one out of each of the following pairs of
+ *     CSS properties:
+ *       - top / bottom
+ *       - left / right
+ * @see {@link StatusElement}
+ */
+/**
+ * Represents the properties allowed to be passed to
+ * {@see StatusElementCollection~createElement}.
+ * @typedef {object} CreateElementProperties
+ * @property {string[]} classes
+ *     The list of classes to apply to the element.
+ * @property {object} attributes
+ *     An object containing the named attributes to apply to the element.
+ * @property {string} text
+ *     The textual content to apply to the element.
+ * @property {string} style
+ *     A custom CSS string to apply to the element.
+ * @property {Node[]} children
+ *     A list of nodes to append to the element.
  */
 /**
  * The audio peaks message data structure. This is the format the
@@ -1071,22 +1111,94 @@ class StatusElement {
  */
 class StatusElementCollection {
     /**
-     * Creates a new {@link StatusElementCollection} from the HTML node
-     * containing it and the settings configuration information it is based
-     * upon.
-     * @param {HTMLElement} container
-     *     The root container element that contains the entire status element
-     *     HUD.
-     * @param {HTMLElement} output
-     *     The element that will contain this collection of status elements.
-     * @param {StatusElementProperties[]} rows
-     *     An array of object with properties that describe the various aspects
-     *     of the status elements.
+     * Creates a new {@link StatusElementCollection} from the specified
+     * settings object provided.
+     * @param {StatusCollectionSettings} settings
+     *     The settings used to initialize this collection.
      */
-    constructor(container, output, rows) {
+    constructor(settings) {
+        /**
+         * Creates an {@see HTMLElement} given its tag name, and the
+         * list of properties provided
+         * @param {string} name
+         *     The tag name of the element to create.
+         * @param {CreateElementProperties} obj
+         *     The property list to attribute to the element.
+         */
+        function createElement(name, obj) {
+            var element = document.createElement(name);
+            var oKeys = Object.keys(obj);
+            var keys;
+            var i;
+            if (oKeys.includes("classes")) {
+                obj.classes.forEach((className) => {
+                    element.classList.add(className);
+                });
+            }
+            if (oKeys.includes("attributes")) {
+                keys = Object.keys(obj.attributes);
+                for (i = 0; i < keys.length; i += 1) {
+                    element.setAttribute(
+                        keys[i],
+                        obj.attributes[keys[i]]);
+                }
+            }
+            if (oKeys.includes("text")) {
+                element.textContent = obj.text;
+            }
+            if (oKeys.includes("style")) {
+                element.style = obj.style;
+            }
+            if (oKeys.includes("children")) {
+                obj.children.forEach((child) => {
+                    element.appendChild(child);
+                });
+            }
+            return element;
+        }
+        //container is div.status-info-container
+        //output is tbody.status-table-body
+        var body = document.body;
+        //StatusCollectionSettings
+        var container = body.appendChild(createElement("DIV", {
+            classes: ["status-info-container", "status-hide"],
+            style: settings.customCSS || "",
+            children: [
+                createElement("CENTER", {
+                    text: settings.title || "Status"
+                }),
+                createElement("HR", {
+                    attributes: {
+                        size: "+0",
+                        color: "white"
+                    }
+                })
+            ]
+        }));
+        var element = container
+            .appendChild(document.createElement("TABLE"));
+        element.classList.add("status-table");
+        element
+            .appendChild(document.createElement("THEAD"))
+            .appendChild(document.createElement("TR"))
+            .append(
+                createElement("TH", {
+                    text: settings.itemText || "Item"
+                }),
+                createElement("TH", {
+                    text: settings.valueText || "Value"
+                })
+            );
+        var output = element
+            .appendChild(document.createElement("TBODY"));
+        output.classList.add("status-table-body");
+
+        /*
+         *     *******boolean enableUpdate = true (false disables the update tick)
+         */
         console.info("creating rows!");
         var nrows = [];
-        rows.forEach((row) => {
+        settings.rows.forEach((row) => {
             nrows.push(new StatusElement(output, row));
         });
         /**
@@ -1106,6 +1218,12 @@ class StatusElementCollection {
          * @private
          */
         this.__interval = undefined;
+        /**
+         * @type {boolean}
+         * @private
+         */
+        this.__enabled = (!Object.keys(settings).includes("enableUpdate"))
+            || settings.enableUpdate;
         this.displayed = false;
         this.showVerbose = false;
     }
@@ -1140,10 +1258,12 @@ class StatusElementCollection {
         }
         if (value) {
             this.__container.classList.remove("status-hide");
-            this.__interval = window.setInterval(() => this.update(), 10);
+            if (this.__enabled) {
+                this.__interval = window.setInterval(() => this.update(), 10);
+            }
         } else {
             this.__container.classList.add("status-hide");
-            if (this.__interval) {
+            if (this.__interval && this.__enabled) {
                 window.clearInterval(this.__interval, 10);
                 this.__interval = undefined;
             }
@@ -1980,6 +2100,10 @@ class Ani {
                 "value": () => Ani.opswLine.toFixed(2)
             }
         ];
+        var status_settings = {
+            "rows": status_rows,
+            "customCSS": "top: 0; left: 0;"
+        };
         var timeout = null;
 
         /**
@@ -2014,10 +2138,7 @@ class Ani {
          * @type {StatusElementCollection}
          * @public
          */
-        this.status = new StatusElementCollection(
-            document.getElementById("status-info"),
-            document.getElementById("status-table-body"),
-            status_rows);
+        this.status = new StatusElementCollection(status_settings);
 
         /**
          * The number of frames that have been rendered for the animation.
@@ -3456,6 +3577,7 @@ if (document.readyState !== "complete") {
 } else {
     Ani.__constructor();
 }
+
 /**
  * @todo Add settings rows for the audio peaks settings
  * @todo Add in keybinds to enable/disable audio peaks
