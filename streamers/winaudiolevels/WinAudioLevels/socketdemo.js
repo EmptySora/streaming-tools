@@ -14,7 +14,7 @@ function main() {
         console.info("MESSAGE:", e.data);
         var span = document.createElement("SPAN");
         span.textContent = `NEW MESSAGE: ${e.data}`;
-        if (document.body.children.length == 0) {
+        if (document.body.children.length === 0) {
             document.body.innerHTML = "";
             document.body.appendChild(document.createElement("BR"));
             document.body.appendChild(span);

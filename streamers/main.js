@@ -1,15 +1,97 @@
-"use strict";
+"use strict"; //For some reason, eslint is saying this is an error.
+/* eslint-env browser, es2021 */
+/*
+eslint eqeqeq: 2, for-direction: 2, getter-return: 2, no-compare-neg-zero: 2,
+no-debugger: 2, no-dupe-args: 2, no-dupe-else-if: 2, no-dupe-keys: 2,
+no-duplicate-case: 2, no-empty: 1, no-empty-character-class: 2,
+no-ex-assign: 2, no-extra-boolean-cast: 2, no-extra-parens: 2,
+no-extra-semi: 2, no-func-assign: 2, no-import-assign: 2,
+no-inner-declarations: 2, no-invalid-regexp: 2, no-irregular-whitespace: 2,
+no-misleading-character-class: 2, no-obj-calls: 2, no-prototype-builtins: 2,
+no-regex-spaces: 2, no-setter-return: 2, no-sparse-arrays: 2,
+no-template-curly-in-string: 2, no-unexpected-multiline: 2, no-unreachable: 1,
+no-unsafe-finally: 2, no-unsafe-negation: 2, require-atomic-updates: 2,
+use-isnan: 2, valid-typeof: 2, array-callback-return: 2, block-scoped-var: 2,
+class-methods-use-this: 1, complexity: [2, 20], consistent-return: 2, curly: 2,
+default-param-last: 2, dot-location: [2, "property"], dot-notation: 2,
+no-alert: 2, no-caller: 2, no-case-declarations: 2, no-constructor-return: 2,
+no-div-regex: 2, no-else-return: 1, no-empty-function: 2,
+no-empty-pattern: 2, no-eq-null: 2, no-eval: 2, no-extend-native: 1,
+no-extra-bind: 2, no-extra-label: 2, no-fallthrough: 2,
+no-floating-decimal: 2, no-global-assign: 2, no-implicit-coercion: 2,
+no-implied-eval: 2, no-invalid-this: 2, no-iterator: 2, no-labels: 2,
+no-lone-blocks: 2, no-loop-func: 2, no-multi-spaces: 2, no-multi-str: 2,
+no-new: 2, no-new-func: 2, no-new-wrappers: 2, no-octal: 2, no-octal-escape: 2,
+no-param-reassign: [1, { "props": false }], no-proto: 2, no-redeclare: 2,
+no-return-assign: 2, no-return-await: 2, no-script-url: 2, no-self-assign: 2,
+no-self-compare: 2, no-sequences: 2, no-throw-literal: 2,
+no-unmodified-loop-condition: 2, no-unused-expressions: 2, no-unused-labels: 2,
+no-useless-call: 2, no-useless-catch: 2, no-useless-concat: 2, no-void: 2,
+no-warning-comments: 1, no-with: 2, prefer-named-capture-group: 2,
+prefer-regex-literals: 2, radix: [2, "as-needed"], require-await: 2,
+vars-on-top: 1, wrap-iife: [2, "inside"], yoda: 2, strict: [2, "global"],
+no-delete-var: 2, no-label-var: 2, no-shadow: 2, no-undef: 2, no-undef-init: 2,
+no-undefined: 2, no-unused-vars: 1, no-use-before-define: 2,
+array-bracket-newline: [2, "consistent"], array-bracket-spacing: [2, "never"],
+array-element-newline: [2, "consistent"], block-spacing: 2, brace-style: 2,
+capitalized-comments: 1, comma-dangle: [2, "never"],
+comma-spacing: [2, { "before": false, "after": true }],
+comma-style: [2, "last"], computed-property-spacing: [2, "never"],
+consistent-this: [2, "self"], eol-last: [2, "never"],
+func-call-spacing: [2, "never"], func-name-matching: 2,
+func-style: [2, "declaration", { "allowArrowFunctions": true }],
+function-call-argument-newline: [2, "consistent"],
+function-paren-newline: [2, "consistent"],
+implicit-arrow-linebreak: [2, "beside"], indent: 2, key-spacing: 2,
+keyword-spacing: 2, max-len: [2, 80],
+max-statements-per-line: [2, { "max": 1 }]
+multiline-comment-style: [2, "starred-block"], new-cap: 2, new-parens: 2,
+no-array-constructor: 2, no-bitwise: 2, no-lonely-if: 2, no-mixed-operators: 2,
+no-mixed-spaces-and-tabs: 2, no-multi-assign: 1,
+no-multiple-empty-lines: 2, no-negated-condition: 2, no-nested-ternary: 1,
+no-new-object: 2, no-plusplus: 2, no-tabs: 2, no-trailing-spaces: 2,
+no-underscore-dangle: 2, no-unneeded-ternary: 2,
+no-whitespace-before-property: 2,
+object-curly-newline: [2, { "consistent": true }], object-curly-spacing: 2,
+object-property-newline: [2, { "allowAllPropertiesOnSameLine": true }],
+operator-assignment: 2, operator-linebreak: [2, "before"],
+padded-blocks: [2, "never"], prefer-exponentiation-operator: 1,
+quote-props: [2, "consistent"],
+quotes: [2, "double", { "allowTemplateLiterals": true }], semi: 2,
+semi-spacing: 2, semi-style: 2, space-before-blocks: 2,
+space-before-function-paren: [2, {"anonymous": "always", "named": "never",
+"asyncArrow": "always"}], space-in-parens: 2, space-infix-ops: 2,
+space-unary-ops: 2, switch-colon-spacing: 2, unicode-bom: 2, wrap-regex: 2,
+arrow-body-style: [2, "as-needed"], arrow-parens: 2, arrow-spacing: 2,
+constructor-super: 2, generator-star-spacing: 2, no-class-assign: 2,
+no-confusing-arrow: 1, no-const-assign: 2, no-dupe-class-members: 2,
+no-new-symbol: 2, no-this-before-super: 2, no-useless-computed-key: 2,
+no-useless-constructor: 2, no-var: 2, object-shorthand: 1,
+prefer-arrow-callback: 1, prefer-const: 1, prefer-destructuring: 1,
+prefer-rest-params: 1, prefer-spread: 1, prefer-template: 1, require-yield: 2,
+template-curly-spacing: 2, yield-star-spacing: 2
+*/
+/*
+ * FINALLY DONE WITH THIS... NOW TO ACTUALLY RESOLVE THE ERRORS AND STUFF.
+ * There are... 490 errors and 140 warnings...
+ */
+/*
+ * Unavailable in my version of VisualStudio right now
+ * no-loss-of-precision: 2, no-promise-executor-return: 2,
+ * no-unreachable-loop: 2, no-unsafe-optional-chaining: 2,
+ * no-useless-backreference: 2, no-nonoctal-decimal-escape: 2,
+ */
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.10
+ * @version 2.1.7.11
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.10";
+const VERSION = "2.1.7.11";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -253,8 +335,8 @@ const DEFAULT_LINE_WIDTH_MAX = 3.0;
  * @constant {number}
  * @default
  */
-const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS
-    * DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR;
+const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS *
+    DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR;
 
 /**
  * The maximum amount of time before the luminosity of a dot, finishes an
@@ -268,8 +350,8 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS
  * @constant {number}
  * @default
  */
-const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX = DEFAULT_FPS
-    * DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR;
+const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX = DEFAULT_FPS *
+    DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR;
 
 /**
  * The minimum variation in luminosity the dot should oscillate to/from.
@@ -319,8 +401,8 @@ const DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
  * @constant {number}
  * @default
  */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS
-    * DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS *
+    DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR;
 
 /**
  * The maximum amount of time before the line width of a dot, finishes an
@@ -335,8 +417,8 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS
  * @constant {number}
  * @default
  */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX = DEFAULT_FPS
-    * DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR;
+const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX = DEFAULT_FPS *
+    DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR;
 
 /**
  * The minimum variation in line width the dot should oscillate to/from.
@@ -933,11 +1015,10 @@ class StatusElement {
     get value() {
         var fn = this.__original.value;
         if (fn instanceof Function) {
-            return (this.pType[0][0] !== "range")
-                ? [fn()]
-                : fn();
+            return this.pType[0][0] !== "range" ? [fn()] : fn();
+        } else {
+            return null;
         }
-        return undefined;
     }
     /**
      * Gets the separators of the {@link StatusElement}.
@@ -1033,7 +1114,7 @@ class StatusElement {
                 widget.textContent = value;
                 break;
             case "percentage":
-                widget.textContent = `${(Math.round(value * 10000) / 100)}%`;
+                widget.textContent = `${Math.round(value * 10000) / 100}%`;
                 break;
             }
             break;
@@ -1074,9 +1155,9 @@ class StatusElement {
         widget.classList.add("status-widget-parameter");
 
         this[`param${parameter}`] = widget;
-        var units = (this.__original.unit instanceof Array)
-            ? this.__original.unit[parameter]
-            : this.__original.unit;
+        var units = this.__original.unit instanceof Array ?
+            this.__original.unit[parameter] :
+            this.__original.unit;
         if (units) {
             widget = document.createElement("DIV");
             this.owner.appendChild(widget);
@@ -1226,8 +1307,8 @@ class StatusElementCollection {
 
         this.rows = nrows;
         this.__container = container;
-        this.__enabled = (!Object.keys(settings).includes("enableUpdate"))
-            || settings.enableUpdate;
+        this.__enabled = !Object.keys(settings).includes("enableUpdate") ||
+            settings.enableUpdate;
         this.displayed = false;
         this.showVerbose = false;
     }
@@ -1609,8 +1690,8 @@ class Dot {
      */
     updatePhaseShifts() {
         if (Ani.audioPeakMultiplier !== this.oapm) {
-            var np = (1 / Ani.audioPeakMultiplier) * this.opp;
-            var nbp = (1 / Ani.audioPeakMultiplier) * this.obpp;
+            var np = this.opp / Ani.audioPeakMultiplier;
+            var nbp = this.obpp / Ani.audioPeakMultiplier;
             this.pc = Dot.getNewShift(this.opp, np, this.pc, this.pfx);
             this.pb = Dot.getB(np);
             this.pp = np;
@@ -1682,7 +1763,7 @@ class Dot {
      *     be animated properly.
      */
     get mustShift() {
-        return (this.py === null) || (this.ppy === null);
+        return this.py === null || this.ppy === null;
     }
     /**
      * Gets the current luminosity of this {@see Dot}.
@@ -1717,8 +1798,8 @@ class Dot {
      * @returns {string} The color of this {@see Dot} as a valid CSS color tag.
      */
     get colorHSL() {
-        return `hsla(${this.c},${this.sa}%,`
-            + `${this.currentLuminosity}%,${Ani.oTrail})`;
+        return `hsla(${this.c},${this.sa}%,` +
+            `${this.currentLuminosity}%,${Ani.oTrail})`;
     }
     /**
      * Gets whether or not this {@see Dot} is off-screen.
@@ -1862,19 +1943,17 @@ class Dot {
      *  12.5 17.5 25.0 35
      *
      *  if we mod by new period then subtract the phase shift
-     * @param {number} oldPeriod
+     * @param {number} oP
      *     The old period of the sine wave.
-     * @param {number} newPeriod
+     * @param {number} nP
      *     The new period of the sine wave.
-     * @param {number} oldPhaseShift
+     * @param {number} oPS
      *     The old phase shift of the sine wave.
      * @param {number} x
      *     The current frame.
      */
-    static getNewShift(oldPeriod, newPeriod, oldPhaseShift, x) {
-        return ((oldPeriod - newPeriod) * (
-            ((x - oldPhaseShift) % oldPeriod) / oldPeriod)
-            + oldPhaseShift) % newPeriod;
+    static getNewShift(oP, nP, oPS, x) {
+        return ((oP - nP) * ((x - oPS) % oP / oP) + oPS) % nP;
         //fuck this calculation...
     }
 
@@ -1913,7 +1992,7 @@ class Dot {
      * @returns {number} The pseudorandom number that was generated.
      */
     static rand(min, max) {
-        return (Math.random() * (max - min)) + min;
+        return Math.random() * (max - min) + min;
     }
 
     /**
@@ -1926,7 +2005,7 @@ class Dot {
      *     The frequency of the sinusoidal function.
      */
     static getB(period) {
-        return (2 * Math.PI) / period;
+        return 2 * Math.PI / period;
     }
 }
 
@@ -4018,8 +4097,6 @@ if (document.readyState !== "complete") {
  *       creation method as described in the todo two back.
  * @todo use "at borrows" to avoid double documenting the setting shorthands
  * @todo Fix the buggy phaseshift code.
- * @todo Get JSLINT and set it up so we can check this code for issues
- *       VisualStudio can't see.
  * @todo Implement the canvas resize code (and test it)
  * @todo add ability to modify keybindings (though I'm not sure why we would
  *       need this...)
