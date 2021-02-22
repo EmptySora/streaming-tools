@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.2
+ * @version 2.1.7.3
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.2";
+const VERSION = "2.1.7.3";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -1230,6 +1230,11 @@ class StatusElementCollection {
          */
         this.__enabled = (!Object.keys(settings).includes("enableUpdate"))
             || settings.enableUpdate;
+        /**
+         * @type {boolean}
+         * @private
+         */
+        this.__disposed = false;
         this.displayed = false;
         this.showVerbose = false;
     }
@@ -1237,8 +1242,12 @@ class StatusElementCollection {
     /**
      * Updates the values of this {@see StatusElementCollection} and updates
      * the HUD.
+     * @throws {Error} Object has been disposed already.
      */
     update() {
+        if (this.__disposed) {
+            throw new Error("Object disposed already!");
+        }
         if (!this.displayed) {
             return; //don't update, save the frames; kill the animals.
         }
@@ -1250,15 +1259,23 @@ class StatusElementCollection {
     /**
      * Gets whether or not the HUD for this {@see StatusElementCollection} is
      * displayed.
+     * @throws {Error} Object has been disposed already.
      */
     get displayed() {
+        if (this.__disposed) {
+            throw new Error("Object disposed already!");
+        }
         return !this.__container.classList.contains("status-hide");
     }
     /**
      * Sets whether or not the HUD for this {@see StatusElementCollection} is
      * displayed.
+     * @throws {Error} Object has been disposed already.
      */
     set displayed(value) {
+        if (this.__disposed) {
+            throw new Error("Object disposed already!");
+        }
         if (this.displayed === value) {
             return;
         }
@@ -1278,15 +1295,23 @@ class StatusElementCollection {
     /**
      * Gets whether or not the HUD for this {@see StatusElementCollection}
      * shows verbose information.
+     * @throws {Error} Object has been disposed already.
      */
     get showVerbose() {
+        if (this.__disposed) {
+            throw new Error("Object disposed already!");
+        }
         return !this.__container.classList.contains("status-hide-verbose");
     }
     /**
      * Sets whether or not the HUD for this {@see StatusElementCollection}
      * shows verbose information.
+     * @throws {Error} Object has been disposed already.
      */
     set showVerbose(value) {
+        if (this.__disposed) {
+            throw new Error("Object disposed already!");
+        }
         if (this.showVerbose === value) {
             return;
         }
@@ -1296,6 +1321,20 @@ class StatusElementCollection {
             this.__container.classList.add("status-hide-verbose");
         }
     }
+    /**
+     * Gets rid of this {@see StatusElementCollection} and disposes of any
+     * resources used.
+     * @since 2.1.7.3
+     */
+    dispose() {
+        if (this.__disposed) {
+            return;
+        }
+        this.displayed = false;
+        this.__container.parentElement.removeChild(this.__container);
+    }
+    //this is intended to be used such that we can remove an overlay
+    //and recreate it (namely so we can modify keybindings on the fly)
 }
 
 /**
@@ -3652,6 +3691,11 @@ if (document.readyState !== "complete") {
  *       Fix that, lol.
  * @todo use "at borrows" to avoid double documenting the setting shorthands
  * @todo Fix the buggy phaseshift code.
+ * @todo Move instance var declarations to the class body so that the
+ *       documentation can be collapsed
+ * @todo Get JSLINT and set it up so we can check this code for issues
+ *       VisualStudio can't see.
+ * @todo START DOCUMENTING WITH AT SINCE!!!!!!!
  *
  * 80-char max regex: [^\n\r]{81,}
  * space-only line regex: ^(\x20+)[\r\n]*$
