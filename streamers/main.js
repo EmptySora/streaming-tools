@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.6.0
+ * @version 2.1.7.0
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.6.0";
+const VERSION = "2.1.7.0";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -769,6 +769,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *       - top / bottom
  *       - left / right
  * @see {@link StatusElement}
+ * @see {@link StatusElementCollection}
  */
 /**
  * Represents the properties allowed to be passed to
@@ -2105,6 +2106,57 @@ class Ani {
             "customCSS": "top: 0; left: 0;"
         };
         var timeout = null;
+        var help_settings = {
+            "title": "Key Bindings",
+            "itemText": "Command",
+            "valueText": "Explanation",
+            "enableUpdate": false,
+            "customCSS": "top: 0; right: 0",
+            "rows": [
+                {
+                    "type": "header",
+                    "name": "Overlays"
+                }, {
+                    "type": "string",
+                    "name": "(s)tatus",
+                    "value": () => "",
+                    "unit": "Toggles the status overlay on/off."
+                }, {
+                    "type": "string",
+                    "name": "(v)erbose",
+                    "value": () => "",
+                    "unit": "Toggles verbose info in status overlay."
+                }, {
+                    "type": "string",
+                    "name": "(h)elp",
+                    "value": () => "",
+                    "unit": "Toggles the help overlay on/off."
+                }, {
+                    "type": "header",
+                    "name": "Animation"
+                }, {
+                    "type": "string",
+                    "name": "r(e)fresh",
+                    "value": () => "",
+                    "unit": "Reloads the page."
+                }, {
+                    "type": "string",
+                    "name": "(r)eset",
+                    "value": () => "",
+                    "unit": "Resets the animation."
+                }, {
+                    "type": "string",
+                    "name": "(+)",
+                    "value": () => "",
+                    "unit": "Ups the FPS by 5."
+                }, {
+                    "type": "string",
+                    "name": "(-)",
+                    "value": () => "",
+                    "unit": "Downs the FPS by 5."
+                }
+            ]
+        };
 
         /**
          * An object used to obtain application settings.
@@ -2139,6 +2191,13 @@ class Ani {
          * @public
          */
         this.status = new StatusElementCollection(status_settings);
+
+        /**
+         * An object that is used to display help/keybindings on the screen.
+         * @type {StatusElementCollection}
+         * @public
+         */
+        this.statusHelp = new StatusElementCollection(help_settings);
 
         /**
          * The number of frames that have been rendered for the animation.
@@ -2432,9 +2491,9 @@ class Ani {
      * Toggles whether or not the status overlay is enabled and displayed.
      */
     static toggleStatus() {
-        Ani.status.displayed = !Ani.status.displayed;
+        var d = (Ani.status.displayed = !Ani.status.displayed);
         console.info(
-            `Turned ${Ani.status.displayed ? "on" : "off"} the overlay.`);
+            `Turned ${d ? "on" : "off"} the status overlay.`);
     }
     /**
      * Toggles whether or not verbose information is displayed in the status
@@ -2450,15 +2509,9 @@ class Ani {
      * Outputs help information to the console.
      */
     static help() {
-        console.clear();
-        console.info("KEYBINDINGS:");
-        console.info("r(e)fresh -- Refreshes the page.");
-        console.info("(h)elp    -- Displays this mesage.");
-        console.info("(s)tatus  -- Toggles the visibility of the overlay.");
-        console.info("(v)erbose -- Toggles the verbosity of the overlay.");
-        console.info("(r)eset   -- Resets the animation.");
-        console.info("(+)       -- Increase the FPS by five FPS.");
-        console.info("(-)       -- Decrease the FPS by five FPS.");
+        var d = (Ani.statusHelp.displayed = !Ani.statusHelp.displayed);
+        console.info(
+            `Turned ${d ? "on" : "off"} the help overlay.`);
     }
 
 
@@ -3593,11 +3646,15 @@ if (document.readyState !== "complete") {
  * @todo Add "use strict" (to help detect issues)
  * @todo fix obsolete references in documentation.
  * @todo Move static this documentation outside of there somehow so this==>Ani
- * @todo Add second overlay on right for help/keybinds (dynamic create it?)
- *       Maybe add a "description" key to the keybind object so we can
- *       dynamically create the help keys. (maybe "custom" type finally sees
- *       use)
+ * @todo Maybe add a "description" key to the keybind object so we can
+ *       dynamically create the help keys (see two todos down).
  *       Add "group" key as well to dynamically group keybinds into categories
+ * @todo Move Keybindings to its own class (and document the object props)
+ * @todo Since Keybindings is going to be moved to its own class, we should
+ *       probably shift the generation of the help overlay to a dynamic
+ *       creation method as described in the todo two back.
+ * @todo Add some kind of splash to the start of the animation that fades out
+ *       It should say "press H to see the keybindings"
  *
  * 80-char max regex: [^\n\r]{81,}
  * space-only line regex: ^(\x20+)[\r\n]*$
