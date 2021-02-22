@@ -1,14 +1,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.0
+ * @version 2.1.7.1
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.0";
+const VERSION = "2.1.7.1";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -1902,6 +1902,83 @@ class Dot {
  * to manage the animation being run.
  */
 class Ani {
+    //... It took me two hours to realize how to document static properties
+    //like this. I feel dead inside...
+
+    /**
+     * An object used to obtain application settings.
+     * @type {SettingsDB}
+     * @private
+     */
+    static settingsFactory = null;
+    /**
+     * The current application settings.
+     * @type {Settings}
+     */
+    static sObj = null;
+    /**
+     * An array of all of the dots in the animation.
+     * @type {Dot[]}
+     */
+    static dots = [];
+    /**
+     * A number that is used as a multiplier for modulating the animation
+     * based on system audio volume.
+     * @type {number}
+     */
+    static audioPeakMultiplier = 1;
+    /**
+     * An object that is used to update the status HUD screen.
+     * @type {StatusElementCollection}
+     */
+    static status = null;
+    /**
+     * An object that is used to display help/keybindings on the screen.
+     * @type {StatusElementCollection}
+     */
+    static statusHelp = null;
+    /**
+     * The number of frames that have been rendered for the animation.
+     * @type {number}
+     */
+    static frameCount = 0;
+    /**
+     * The CANVAS element being rendered to.
+     * @type {HTMLCanvasElement}
+     */
+    static canvas = null;
+    /**
+     * The rendering context for the CANVAS element being rendered to.
+     * @type {CanvasRenderingContext2D}
+     */
+    static context = null;
+    /**
+     * The bounding rectangle that the canvas is displaying in.
+     * @type {DOMRect}
+     */
+    static size = null;
+    /**
+     * @type {number}
+     * @private
+     */
+    static __the = DEFAULT_TRAIL_HSL_END;
+    /**
+     * @type {number}
+     * @private
+     */
+    static __ths = DEFAULT_TRAIL_HSL_START;
+    /**
+     * The AudioPeaks client that retrieves the system audio peaks.
+     * @type {AudioPeaks}
+     */
+    static peaks = null;
+    /**
+     * The time in which the animation was first started.
+     * Note: this is the number of milliseconds since 1970-01-01T00:00.
+     * @type {number}
+     */
+    static startTime = null;
+
     /**
      * A static constructor of sorts that is run when starting the animation.
      * @private
@@ -2158,96 +2235,8 @@ class Ani {
             ]
         };
 
-        /**
-         * An object used to obtain application settings.
-         * @type {SettingsDB}
-         * @private
-         */
-        this.settingsFactory = null;
-
-        /**
-         * The current application settings.
-         * @type {Settings}
-         * @public
-         */
-        this.sObj = null;
-        /**
-         * An array of all of the dots in the animation.
-         * @type {Dot[]}
-         * @public
-         */
-        this.dots = [];
-        /**
-         * A number that is used as a multiplier for modulating the animation
-         * based on system audio volume.
-         * @type {number}
-         * @public
-         */
-        this.audioPeakMultiplier = 1;
-
-        /**
-         * An object that is used to update the status HUD screen.
-         * @type {StatusElementCollection}
-         * @public
-         */
-        this.status = new StatusElementCollection(status_settings);
-
-        /**
-         * An object that is used to display help/keybindings on the screen.
-         * @type {StatusElementCollection}
-         * @public
-         */
-        this.statusHelp = new StatusElementCollection(help_settings);
-
-        /**
-         * The number of frames that have been rendered for the animation.
-         * @type {number}
-         * @public
-         */
-        this.frameCount = 0;
-        //Retrieve the CANVAS element
-        /**
-         * The CANVAS element being rendered to.
-         * @type {HTMLCanvasElement}
-         * @public
-         */
-        this.canvas = undefined;
-
-        //Get a 2D drawing context for the canvas
-        /**
-         * The rendering context for the CANVAS element being rendered to.
-         * @type {CanvasRenderingContext2D}
-         * @public
-         */
-        this.context = undefined;
-        /**
-         * The bounding rectangle that the canvas is displaying in.
-         * @type {DOMRect}
-         * @public
-         */
-        this.size = undefined;
-        /**
-         * @type {number}
-         * @private
-         */
-        this.__the = DEFAULT_TRAIL_HSL_END;
-        /**
-         * @type {number}
-         * @private
-         */
-        this.__ths = DEFAULT_TRAIL_HSL_START;
-        /**
-         * The AudioPeaks client that retrieves the system audio peaks.
-         * @type {AudioPeaks}
-         * @public
-         */
-        this.peaks = undefined;
-
-        /**
-         * The time in which the animation was first started.
-         * @returns {number} The milliseconds since 1970-01-01T00:00.
-         */
-        this.startTime = undefined;
+        Ani.status = new StatusElementCollection(status_settings);
+        Ani.statusHelp = new StatusElementCollection(help_settings);
 
         document.body.addEventListener("mousemove", () => {
             document.body.style.cursor = "default";
@@ -2369,12 +2358,12 @@ class Ani {
         if (Ani.resize) {
             //Get size of the canvas, which should be stretched to the full size
             //of the window.
-            this.size = Ani.canvas.getBoundingClientRect();
+            Ani.size = Ani.canvas.getBoundingClientRect();
 
             //Set width and height of the canvas internally, so that the canvas
             //has a 1 to 1 ratio between itself and the screen.
-            this.canvas.setAttribute("width", Ani.width);
-            this.canvas.setAttribute("height", Ani.height);
+            Ani.canvas.setAttribute("width", Ani.width);
+            Ani.canvas.setAttribute("height", Ani.height);
 
             //check to see if the canvas was made smaller, if not, don't check.
             if (osize.width > Ani.size.width) {
@@ -2500,18 +2489,15 @@ class Ani {
      * overlay.
      */
     static toggleVerboseStatus() {
-        Ani.status.showVerbose = !Ani.status.showVerbose;
-        console.info(
-            (Ani.status.showVerbose ? "Display" : "hid")
-            + "ing verbose info on the overlay.");
+        var d = (Ani.status.showVerbose = !Ani.status.showVerbose);
+        console.info(`${d ? "Show" : "Hid"}ing verbose info on the overlay.`);
     }
     /**
      * Outputs help information to the console.
      */
     static help() {
         var d = (Ani.statusHelp.displayed = !Ani.statusHelp.displayed);
-        console.info(
-            `Turned ${d ? "on" : "off"} the help overlay.`);
+        console.info(`Turned ${d ? "on" : "off"} the help overlay.`);
     }
 
 
@@ -2780,7 +2766,6 @@ class Ani {
      * FRAME_COUNT into NaN
      */
 }
-
 /**
  * A class that uses IndexedDB to store and retrieve application settings.
  */
@@ -3637,15 +3622,10 @@ if (document.readyState !== "complete") {
  * @todo Check "[at]todo"s above here
  * @todo Add keybinds to reset default settings
  * @todo Complete documentation.
- * @todo Change "static this" to "Ani" (etc) (reduces liability to break things
- *       and parallels c#)
- *       We might need to find a different way to document the static
- *       properties if that is the case.
  * @todo Change the dot addition thing to go from one-check-per-frame to a
  *       timer (ie: in parallel)
  * @todo Add "use strict" (to help detect issues)
  * @todo fix obsolete references in documentation.
- * @todo Move static this documentation outside of there somehow so this==>Ani
  * @todo Maybe add a "description" key to the keybind object so we can
  *       dynamically create the help keys (see two todos down).
  *       Add "group" key as well to dynamically group keybinds into categories
@@ -3655,6 +3635,12 @@ if (document.readyState !== "complete") {
  *       creation method as described in the todo two back.
  * @todo Add some kind of splash to the start of the animation that fades out
  *       It should say "press H to see the keybindings"
+ * @todo Apparently, you can do optional properties with
+ *       "at property {type} [name]" (including all brackets)
+ *       There are a bunch of optionals not marked as such in the documentation
+ *       Fix that, lol.
+ * @todo use "at borrows" to avoid double documenting the setting shorthands
+ * @todo Fix the buggy phaseshift code.
  *
  * 80-char max regex: [^\n\r]{81,}
  * space-only line regex: ^(\x20+)[\r\n]*$
