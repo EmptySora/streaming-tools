@@ -1072,7 +1072,7 @@ class StatusElement {
         }
         this.owner.appendChild(widget);
         widget.classList.add("status-widget-parameter");
-        
+
         this[`param${parameter}`] = widget;
         var units = (this.__original.unit instanceof Array)
             ? this.__original.unit[parameter]
@@ -1223,7 +1223,7 @@ class StatusElementCollection {
         settings.rows.forEach((row) => {
             nrows.push(new StatusElement(output, row));
         });
-        
+
         this.rows = nrows;
         this.__container = container;
         this.__enabled = (!Object.keys(settings).includes("enableUpdate"))
@@ -1584,7 +1584,7 @@ class Dot {
         this.w = Dot.rand(Ani.wnLine, Ani.wxLine);
         this.pfx = Ani.frameCount;
         this.bpfx = Ani.frameCount;
-        
+
         Ani.heTrail += Ani.hDrift;
         Ani.hsTrail += Ani.hDrift;
     }
@@ -2779,7 +2779,7 @@ class Ani {
             Ani.status = null;
             Ani.statusHelp = null;
             Ani.started = false;
-            
+
             new Promise(function (innerResolve) {
                 var interval = window.setInterval(() => {
                     if (Ani.threadCount <= 0) {
@@ -2821,9 +2821,6 @@ class Ani {
                 resolve();
             });
         });
-        //everything from loadSettings must be undone...
-        //so... settingsFactory (might not be required)
-        
     }
     /**
      * Toggles the animation state.
@@ -4023,10 +4020,13 @@ if (document.readyState !== "complete") {
  * @todo Fix the buggy phaseshift code.
  * @todo Get JSLINT and set it up so we can check this code for issues
  *       VisualStudio can't see.
- * @todo START DOCUMENTING WITH AT SINCE!!!!!!!
  * @todo Implement the canvas resize code (and test it)
+ * @todo add ability to modify keybindings (though I'm not sure why we would
+ *       need this...)
  *
  * 80-char max regex: [^\n\r]{81,}
  * space-only line regex: ^(\x20+)[\r\n]*$
  * trailing space regex: (\x20+)[\r\n]*$
+ *
+ * REMEMBER: Document AT SINCE for all new properties and objects.
  */
