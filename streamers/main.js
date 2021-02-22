@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.9
+ * @version 2.1.7.10
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.9";
+const VERSION = "2.1.7.10";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -1245,7 +1245,12 @@ class StatusElementCollection {
             return; //don't update, save the frames; kill the animals.
         }
         this.rows.forEach((row) => {
-            row.update();
+            try {
+                row.update();
+            } catch (e) {
+                console.error("Error during update: ", e);
+                //this will be run if AudioPeaks is not enabled (most likely).
+            }
         });
     }
 
@@ -4020,8 +4025,6 @@ if (document.readyState !== "complete") {
  *       VisualStudio can't see.
  * @todo START DOCUMENTING WITH AT SINCE!!!!!!!
  * @todo Implement the canvas resize code (and test it)
- * @todo There's a bug. If AudioPeaks isn't initialized then the overlay will
- *       bug
  *
  * 80-char max regex: [^\n\r]{81,}
  * space-only line regex: ^(\x20+)[\r\n]*$
