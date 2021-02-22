@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.3
+ * @version 2.1.7.4
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.3";
+const VERSION = "2.1.7.4";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -2357,6 +2357,7 @@ class Ani {
 
         //Create a timer to start the animation.
         window.setTimeout(Ani.animate, Ani.iFrame);
+        window.setTimeout(Ani.addDots, Ani.iFrame);
         Ani.status.update();
 
         try {
@@ -2396,6 +2397,24 @@ class Ani {
         //set a timer to rerun this, when we need to animate the next frame.
         window.setTimeout(Ani.animate, Ani.iFrame);
     }
+    /**
+     * Adds new dots to the animation.
+     * @since 2.1.7.4
+     */
+    static addDots() {
+        var i;
+        for (i = 0; i < Ani.rDot; i += 1) { //orig peak mod was "rDot * mult"
+            if (Ani.dots.length >= Ani.xDots) {
+                break; //Can't add more dots.
+            }
+            //Add another dot and add it to the list.
+            Ani.dots.push(new Dot());
+        }
+        window.setTimeout(
+            Ani.addDots,
+            Math.round(Ani.iFrame * (1 / Ani.audioPeakMultiplier)));
+    }
+
     /**
      * Updates the size of the canvas the animation is rendering to.
      * This would usually be called if the user resizes the window.
@@ -2437,32 +2456,19 @@ class Ani {
      */
     static __animateInternal(context) {
         var i;
-        //Erase all previously recorded paths.
+        //Clear the canvas to make the dot trails appear to fade away.
         context.beginPath();
-
-        //Set the fill and stroke style to the bg color at the fade opacity
         context.fillStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
         context.strokeStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
-
         context.moveTo(0, 0);
-
-        //Create a rectangle, offset by (0,0), the size of the entire canvas.
         context.rect(0, 0, Ani.width, Ani.height);
-
-        //Fill the current path.
         context.fill();
-        //Add new dots and then move all dots.
-        for (i = 0; i < Ani.rDot * Ani.audioPeakMultiplier; i += 1) {
-            if (Ani.dots.length >= Ani.xDots) {
-                break; //Can't add more dots.
-            }
-            //Add another dot and add it to the list.
-            Ani.dots.push(new Dot());
-        }
 
+        //Draw and move all dots.
         Ani.dots.forEach((d) => d.draw(Ani.context));
+
+        //Remove dots if they're off-screen
         for (i = 0; i < Ani.dots.length; i += 1) {
-            //Remove the current dot if it's off-screen
             if (Ani.dots[i].offScreen) {
                 Ani.dots.splice(i--, 1);
             }
@@ -3673,22 +3679,17 @@ if (document.readyState !== "complete") {
  * @todo Check "[at]todo"s above here
  * @todo Add keybinds to reset default settings
  * @todo Complete documentation.
- * @todo Change the dot addition thing to go from one-check-per-frame to a
- *       timer (ie: in parallel)
  * @todo fix obsolete references in documentation.
  * @todo Maybe add a "description" key to the keybind object so we can
  *       dynamically create the help keys (see two todos down).
  *       Add "group" key as well to dynamically group keybinds into categories
+ *       We also need to add a "name" property as well.
  * @todo Move Keybindings to its own class (and document the object props)
  * @todo Since Keybindings is going to be moved to its own class, we should
  *       probably shift the generation of the help overlay to a dynamic
  *       creation method as described in the todo two back.
  * @todo Add some kind of splash to the start of the animation that fades out
  *       It should say "press H to see the keybindings"
- * @todo Apparently, you can do optional properties with
- *       "at property {type} [name]" (including all brackets)
- *       There are a bunch of optionals not marked as such in the documentation
- *       Fix that, lol.
  * @todo use "at borrows" to avoid double documenting the setting shorthands
  * @todo Fix the buggy phaseshift code.
  * @todo Move instance var declarations to the class body so that the
