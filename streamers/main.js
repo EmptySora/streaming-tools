@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.4
+ * @version 2.1.7.5
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.4";
+const VERSION = "2.1.7.5";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -2229,10 +2229,44 @@ class Ani {
                     "type": "string",
                     "unit": "seconds",
                     "value": () => Ani.opswLine.toFixed(2)
+                }, {
+                    "name": "Audio Peaks",
+                    "type": "header"
+                }, {
+                    "name": "Variance (Low)",
+                    "type": "number.decimal",
+                    "value": () => Ani.vnPeaks
+                }, {
+                    "name": "Variance (High)",
+                    "type": "number.decimal",
+                    "value": () => Ani.vxPeaks
+                }, {
+                    "name": "Reconnect Wait",
+                    "type": "number.decimal",
+                    "unit": "ms",
+                    "value": () => Ani.wPeaks
+                }, {
+                    "name": "Reconnect Wait (Err)",
+                    "type": "number.decimal",
+                    "unit": "ms",
+                    "value": () => Ani.ewPeaks
+                }, {
+                    "name": "Enabled",
+                    "type": "flag",
+                    "value": () => Ani.ePeaks
+                }, {
+                    "name": "Secure",
+                    "type": "flag",
+                    "value": () => Ani.sPeaks
+                }, {
+                    "name": "Endpoint",
+                    "type": "string",
+                    "value": () => Ani.peaks.url
                 }
             ],
             "customCSS": "top: 0; left: 0;"
         };
+
         var timeout = null;
         var help_settings = {
             "title": "Key Bindings",
@@ -3674,7 +3708,6 @@ if (document.readyState !== "complete") {
 }
 
 /**
- * @todo Add settings rows for the audio peaks settings
  * @todo Add in keybinds to enable/disable audio peaks
  * @todo Check "[at]todo"s above here
  * @todo Add keybinds to reset default settings
