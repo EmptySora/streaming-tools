@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.5
+ * @version 2.1.7.6
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.5";
+const VERSION = "2.1.7.6";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -2073,6 +2073,10 @@ class Ani {
                 "key": "=",
                 "conditions": [{ "ctrl": false, "shift": false }],
                 "handler": Ani.upFPS
+            }, {
+                "key": "a",
+                "conditions": [{ "ctrl": false, "shift": false }],
+                "handler": Ani.togglePeaks
             }
         ];
         var status_settings = {
@@ -2316,6 +2320,14 @@ class Ani {
                     "name": "(-)",
                     "value": () => "",
                     "unit": "Downs the FPS by 5."
+                }, {
+                    "type": "header",
+                    "name": "Audio Peaks"
+                }, {
+                    "type": "string",
+                    "name": "(a)",
+                    "value": () => "",
+                    "unit": "Toggles the AudioPeaks subsystem."
                 }
             ]
         };
@@ -2589,6 +2601,14 @@ class Ani {
     static help() {
         var d = (Ani.statusHelp.displayed = !Ani.statusHelp.displayed);
         console.info(`Turned ${d ? "on" : "off"} the help overlay.`);
+    }
+    /**
+     * Toggles whether or not the audioPeaks subsystem is enabled.
+     * @since 2.1.7.6
+     */
+    static togglePeaks() {
+        var d = (Ani.ePeaks = !Ani.ePeaks);
+        console.info(`${d ? "En" : "Dis"}abled the AudioPeaks subsystem.`);
     }
 
 
@@ -3673,6 +3693,7 @@ class AudioPeaks {
             this.__socket.addEventListener("close", () => {
                 this.__connecting = false;
                 this.connect();
+                this.__socket = null;
                 //required so we don't have two at once.
             });
             this.__socket.close();
@@ -3708,7 +3729,6 @@ if (document.readyState !== "complete") {
 }
 
 /**
- * @todo Add in keybinds to enable/disable audio peaks
  * @todo Check "[at]todo"s above here
  * @todo Add keybinds to reset default settings
  * @todo Complete documentation.
