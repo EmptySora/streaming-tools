@@ -391,12 +391,8 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
  * be stretched to the point that they blur really badly.
  * @constant {boolean}
  * @default false
- *
- * @todo Implement this
  */
 const DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
-//vertical shift (D) is the l parameter of the dot
-//2PI / LUM_OSC_PER = B
 
 /**
  * Represents the initial minimum hue of the dots that are created in degrees
@@ -425,11 +421,6 @@ const DEFAULT_TRAIL_HSL_START = 180.0;
  * @default 180.0
  */
 const DEFAULT_TRAIL_HSL_END = 240.0;
-
-
-
-
-
 
 /**
  * The port on the server running WinAudioLevels.exe that is listening
@@ -3718,7 +3709,6 @@ if (document.readyState !== "complete") {
 }
 
 /**
- * @todo Check "[at]todo"s above here
  * @todo Add keybinds to reset default settings
  * @todo Complete documentation.
  * @todo fix obsolete references in documentation.
@@ -3735,6 +3725,7 @@ if (document.readyState !== "complete") {
  * @todo Get JSLINT and set it up so we can check this code for issues
  *       VisualStudio can't see.
  * @todo START DOCUMENTING WITH AT SINCE!!!!!!!
+ * @todo Implement the canvas resize code (and test it)
  *
  * 80-char max regex: [^\n\r]{81,}
  * space-only line regex: ^(\x20+)[\r\n]*$
