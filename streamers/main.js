@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.8
+ * @version 2.1.7.9
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.8";
+const VERSION = "2.1.7.9";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -2006,351 +2006,438 @@ class Ani {
      * @type {number}
      */
     static startTime;
+    /**
+     * A value that determines whether or not the animation is currently
+     * running.
+     * @type {boolean}
+     * @since 2.1.7.9
+     * @private
+     */
+    static started = false;
+    /**
+     * The number of "threads" open (used to synchronize stopping the
+     * animation).
+     * @type {number}
+     * @since 2.1.7.9
+     * @private
+     */
+    static threadCount = 0;
+    /**
+     * Whether or not the animation is being stopped.
+     * @type {boolean}
+     * @since 2.1.7.9
+     * @private
+     */
+    static stopping = false;
+    /**
+     * The timeout number that handles hiding the mouse.
+     * @type {number}
+     * @since 2.1.7.9
+     * @private
+     */
+    static timeout = null;
+    /**
+     * The list of keybindings for the application.
+     * @type {object[]}
+     * @since 2.1.7.9
+     * @private
+     * @todo Document the keybind object type and update type above
+     */
+    static keybinds = [
+        {
+            "key": "e",
+            "conditions": [{ "ctrl": false }],
+            "handler": () => window.location.reload()
+        }, {
+            "key": "s",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.toggleStatus
+        }, {
+            "key": "v",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.toggleVerboseStatus
+        }, {
+            "key": "r",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.reset
+        }, {
+            "key": "h",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.toggleHelp
+        }, {
+            "key": "+",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.upFPS
+        }, {
+            "key": "-",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.downFPS
+        }, {
+            "key": "_",
+            "conditions": [{ "ctrl": false, "shift": true }],
+            "handler": Ani.downFPS
+        }, {
+            "key": "=",
+            "conditions": [{ "ctrl": false, "shift": false }],
+            "handler": Ani.upFPS
+        }, {
+            "key": "a",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.togglePeaks
+        }, {
+            "key": "q",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.toggleAnimation
+        }, {
+            "key": "t",
+            "conditions": [{ "ctrl": false }],
+            "handler": Ani.resetDefaultSettings
+        }
+        //a - toggle peaks
+        //e - reload
+        //h - toggle help
+        //q - toggle animation
+        //r - reset
+        //s - toggle status
+        //t - reset default settings
+        //v - toggle verbose
+        //+ - up fps
+        //- - down fps
+    ];
+    //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp,
+    //PageDown, Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause,
+    //AudioVolumeMute, AudioVolumeDown, AudioVolumeUp, ContextMenu
+    /**
+     * The status settings object.
+     * @type {StatusCollectionSettings}
+     * @since 2.1.7.9
+     * @private
+     */
+    static statusSettings = {
+        "rows": [
+            {
+                "name": "General",
+                "type": "header"
+            }, {
+                "name": "Canvas Size",
+                "type": "range.number.integer",
+                "unit": ["", "pixels"],
+                "sep": " x ",
+                "value": () => [Ani.width, Ani.height]
+            }, {
+                "name": "Version",
+                "type": "string",
+                "value": () => VERSION
+            }, {
+                "name": "Auto Resize",
+                "type": "flag",
+                "value": () => Ani.resize
+            }, {
+                "name": "Background",
+                "type": "color.rgb",
+                "value": () => Ani.cBackground
+            }, {
+                "name": "Frame Statistics",
+                "type": "header"
+            }, {
+                "name": "Target FPS",
+                "type": "string",
+                "unit": "frames/second",
+                "value": () => Ani.fps.toFixed(2)
+            }, {
+                "name": "Achieved FPS",
+                "type": "string",
+                "unit": "frames/second",
+                "value": () =>
+                    (Math.round(
+                        (
+                            Ani.frameCount
+                            / ((
+                                (new Date()).getTime()
+                                - Ani.startTime) / 1000)
+                        ) * 100) / 100)
+                        .toFixed(2)
+            }, {
+                "name": "Frame Count",
+                "type": "number.integer",
+                "unit": "frames",
+                "value": () => Ani.frameCount
+            }, {
+                "name": "Dot Statistics",
+                "type": "header"
+            }, {
+                "name": "Speed",
+                "type": "range.number.decimal",
+                "unit": ["", "pixels/second"],
+                "value": () => [Ani.nSpeed, Ani.xSpeed]
+            }, {
+                "name": "Acceleration",
+                "type": "range.number.decimal",
+                "unit": ["", "pixels/second"],
+                "value": () => [Ani.nAccel, Ani.xAccel]
+            }, {
+                "name": "Active Dots",
+                "type": "range.number.integer",
+                "unit": ["", "dots"],
+                "sep": " of ",
+                "value": () => [Ani.dots.length, Ani.xDots]
+            }, {
+                "name": "Dot Rate",
+                "type": "number.integer",
+                "unit": "dots/frame",
+                "value": () => Ani.rDot
+            }, {
+                "name": "Trail Opacity",
+                "type": "color.alpha",
+                "value": () => Ani.oTrail
+            }, {
+                "name": "Trail Saturation",
+                "type": "range.color.sat",
+                "value": () => [Ani.snTrail, Ani.sxTrail]
+            }, {
+                "name": "Trail Luminosity",
+                "type": "range.color.luma",
+                "value": () => [Ani.lnTrail, Ani.lxTrail]
+            }, {
+                "name": "Fade Opacity",
+                "type": "number.percentage",
+                "value": () => Ani.oFade
+            }, {
+                "name": "Line Width",
+                "type": "range.number.decimal",
+                "unit": ["", "pixels"],
+                "value": () => [Ani.wnLine, Ani.wxLine]
+            }, {
+                "name": "Trail Hue Range",
+                "type": "header"
+            }, {
+                "name": "Hue Drift",
+                "type": "number.decimal",
+                "unit": "degrees",
+                "value": () => Ani.hDrift
+            }, {
+                "name": "Current",
+                "type": "range.color.hue",
+                "value": () => [Ani.hsTrail, Ani.heTrail]
+            }, {
+                "name": "Default",
+                "type": "range.color.hue",
+                "value": () => [
+                    DEFAULT_TRAIL_HSL_START,
+                    DEFAULT_TRAIL_HSL_END
+                ]
+            }, {
+                "name": "Luma Oscillation",
+                "type": "header"
+            }, {
+                "name": "Period",
+                "type": "range.string",
+                "unit": ["", "seconds"],
+                "value": () => [
+                    Ani.opnLum.toFixed(2),
+                    Ani.opxLum.toFixed(2)
+                ]
+            }, {
+                "name": "Amplitude",
+                "type": "range.color.luma",
+                "value": () => [Ani.oanLum, Ani.oaxLum]
+            }, {
+                "name": "Phase Shift",
+                "type": "string",
+                "unit": "seconds",
+                "value": () => Ani.opsLum.toFixed(2)
+            }, {
+                "name": "Line Width Oscillation",
+                "type": "header"
+            }, {
+                "name": "Period",
+                "type": "range.string",
+                "unit": ["", "seconds"],
+                "value": () => [
+                    Ani.opnwLine.toFixed(2),
+                    Ani.opxwLine.toFixed(2)
+                ]
+            }, {
+                "name": "Amplitude",
+                "type": "range.number.decimal",
+                "unit": ["", "pixels"],
+                "value": () => [Ani.oanwLine, Ani.oaxwLine]
+            }, {
+                "name": "Phase Shift",
+                "type": "string",
+                "unit": "seconds",
+                "value": () => Ani.opswLine.toFixed(2)
+            }, {
+                "name": "Audio Peaks",
+                "type": "header"
+            }, {
+                "name": "Variance (Low)",
+                "type": "number.decimal",
+                "value": () => Ani.vnPeaks
+            }, {
+                "name": "Variance (High)",
+                "type": "number.decimal",
+                "value": () => Ani.vxPeaks
+            }, {
+                "name": "Reconnect Wait",
+                "type": "number.decimal",
+                "unit": "ms",
+                "value": () => Ani.wPeaks
+            }, {
+                "name": "Reconnect Wait (Err)",
+                "type": "number.decimal",
+                "unit": "ms",
+                "value": () => Ani.ewPeaks
+            }, {
+                "name": "Enabled",
+                "type": "flag",
+                "value": () => Ani.ePeaks
+            }, {
+                "name": "Secure",
+                "type": "flag",
+                "value": () => Ani.sPeaks
+            }, {
+                "name": "Endpoint",
+                "type": "string",
+                "value": () => Ani.peaks.url
+            }
+        ],
+        "customCSS": "top: 0; left: 0;"
+    };
+    /**
+     * The help settings object.
+     * @type {StatusCollectionSettings}
+     * @since 2.1.7.9
+     * @private
+     */
+    static helpSettings = {
+        "title": "Key Bindings",
+        "itemText": "Command",
+        "valueText": "Explanation",
+        "enableUpdate": false,
+        "customCSS": "top: 0; right: 0",
+        "rows": [
+            {
+                "type": "header",
+                "name": "Overlays"
+            }, {
+                "type": "string",
+                "name": "(s)",
+                "value": () => "",
+                "unit": "Toggles the status overlay on/off."
+            }, {
+                "type": "string",
+                "name": "(v)",
+                "value": () => "",
+                "unit": "Toggles verbose info in status overlay."
+            }, {
+                "type": "string",
+                "name": "(h)",
+                "value": () => "",
+                "unit": "Toggles the help overlay on/off."
+            }, {
+                "type": "header",
+                "name": "Animation"
+            }, {
+                "type": "string",
+                "name": "(e)",
+                "value": () => "",
+                "unit": "Reloads the page."
+            }, {
+                "type": "string",
+                "name": "(r)",
+                "value": () => "",
+                "unit": "Resets the animation."
+            }, {
+                "type": "string",
+                "name": "(q)",
+                "value": () => "",
+                "unit": "Toggles the animation on/off."
+            }, {
+                "type": "string",
+                "name": "(t)",
+                "value": () => "",
+                "unit": "Resets default settings."
+            }, {
+                "type": "string",
+                "name": "(+)",
+                "value": () => "",
+                "unit": "Ups the FPS by 5."
+            }, {
+                "type": "string",
+                "name": "(-)",
+                "value": () => "",
+                "unit": "Downs the FPS by 5."
+            }, {
+                "type": "header",
+                "name": "Audio Peaks"
+            }, {
+                "type": "string",
+                "name": "(a)",
+                "value": () => "",
+                "unit": "Toggles the AudioPeaks subsystem."
+            }
+        ]
+    };
+
+    /**
+     * A function that handles the processing for keystrokes.
+     * @param {Event} e
+     *     The event data for the KeyUp event.
+     * @since 2.1.7.9
+     * @private
+     */
+    static __keyhandle(e) {
+        if (Ani.stopping) {
+            return; //stopping animation, do not process keystrokes.
+        }
+        if (!Ani.started) {
+            return; //animation isn't loaded. do not process keystrokes.
+        }
+        var modifiers = ["ctrl", "alt", "shift", "meta"];
+        Ani.keybinds.forEach((binding) => {
+            if (binding.key !== e.key) {
+                return;
+            }
+            var keys = Object.keys(binding);
+            if (keys.indexOf("conditions") !== -1) {
+                if (binding.conditions.some((cond) => {
+                    keys = Object.keys(cond);
+                    return !modifiers.some((mod) => {
+                        return (keys.indexOf(mod) !== -1)
+                            && (e[mod + "Key"] === cond[mod]);
+                    });
+                })) {
+                    return;
+                }
+            }
+
+            binding.handler(e);
+        });
+    }
+    /**
+     * A function that handles the processing for hiding the mouse.
+     * @since 2.1.7.9
+     * @private
+     */
+    static __mousehandle() {
+        document.body.style.cursor = "default";
+        if (Ani.timeout !== null) {
+            window.clearTimeout(Ani.timeout);
+        }
+        Ani.timeout = window.setTimeout(() => {
+            Ani.timeout = null;
+            document.body.style.cursor = "none";
+        }, 1000);
+    }
 
     /**
      * A static constructor of sorts that is run when starting the animation.
      * @private
      */
     static __constructor() {
-        //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp,
-        //PageDown, Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause,
-        //AudioVolumeMute, AudioVolumeDown, AudioVolumeUp, ContextMenu
-        var keybinds = [
-            {
-                "key": "e",
-                "conditions": [{ "ctrl": false }],
-                "handler": () => window.location.reload()
-            }, {
-                "key": "s",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.toggleStatus
-            }, {
-                "key": "v",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.toggleVerboseStatus
-            }, {
-                "key": "d",
-                "conditions": [{ "ctrl": false }],
-                "handler": () =>
-                    console.info(`${Ani.dots.length} active dot(s).`)
-            }, {
-                "key": "r",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.reset
-            }, {
-                "key": "h",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.help
-            }, {
-                "key": "+",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.upFPS
-            }, {
-                "key": "-",
-                "conditions": [{ "ctrl": false }],
-                "handler": Ani.downFPS
-            }, {
-                "key": "_",
-                "conditions": [{ "ctrl": false, "shift": true }],
-                "handler": Ani.downFPS
-            }, {
-                "key": "=",
-                "conditions": [{ "ctrl": false, "shift": false }],
-                "handler": Ani.upFPS
-            }, {
-                "key": "a",
-                "conditions": [{ "ctrl": false, "shift": false }],
-                "handler": Ani.togglePeaks
-            }
-        ];
-        var status_settings = {
-            "rows": [
-                {
-                    "name": "General",
-                    "type": "header"
-                }, {
-                    "name": "Canvas Size",
-                    "type": "range.number.integer",
-                    "unit": ["", "pixels"],
-                    "sep": " x ",
-                    "value": () => [Ani.width, Ani.height]
-                }, {
-                    "name": "Version",
-                    "type": "string",
-                    "value": () => VERSION
-                }, {
-                    "name": "Auto Resize",
-                    "type": "flag",
-                    "value": () => Ani.resize
-                }, {
-                    "name": "Background",
-                    "type": "color.rgb",
-                    "value": () => Ani.cBackground
-                }, {
-                    "name": "Frame Statistics",
-                    "type": "header"
-                }, {
-                    "name": "Target FPS",
-                    "type": "string",
-                    "unit": "frames/second",
-                    "value": () => Ani.fps.toFixed(2)
-                }, {
-                    "name": "Achieved FPS",
-                    "type": "string",
-                    "unit": "frames/second",
-                    "value": () =>
-                        (Math.round(
-                            (
-                                Ani.frameCount
-                                / ((
-                                    (new Date()).getTime()
-                                    - Ani.startTime) / 1000)
-                            ) * 100) / 100)
-                            .toFixed(2)
-                }, {
-                    "name": "Frame Count",
-                    "type": "number.integer",
-                    "unit": "frames",
-                    "value": () => Ani.frameCount
-                }, {
-                    "name": "Dot Statistics",
-                    "type": "header"
-                }, {
-                    "name": "Speed",
-                    "type": "range.number.decimal",
-                    "unit": ["", "pixels/second"],
-                    "value": () => [Ani.nSpeed, Ani.xSpeed]
-                }, {
-                    "name": "Acceleration",
-                    "type": "range.number.decimal",
-                    "unit": ["", "pixels/second"],
-                    "value": () => [Ani.nAccel, Ani.xAccel]
-                }, {
-                    "name": "Active Dots",
-                    "type": "range.number.integer",
-                    "unit": ["", "dots"],
-                    "sep": " of ",
-                    "value": () => [Ani.dots.length, Ani.xDots]
-                }, {
-                    "name": "Dot Rate",
-                    "type": "number.integer",
-                    "unit": "dots/frame",
-                    "value": () => Ani.rDot
-                }, {
-                    "name": "Trail Opacity",
-                    "type": "color.alpha",
-                    "value": () => Ani.oTrail
-                }, {
-                    "name": "Trail Saturation",
-                    "type": "range.color.sat",
-                    "value": () => [Ani.snTrail, Ani.sxTrail]
-                }, {
-                    "name": "Trail Luminosity",
-                    "type": "range.color.luma",
-                    "value": () => [Ani.lnTrail, Ani.lxTrail]
-                }, {
-                    "name": "Fade Opacity",
-                    "type": "number.percentage",
-                    "value": () => Ani.oFade
-                }, {
-                    "name": "Line Width",
-                    "type": "range.number.decimal",
-                    "unit": ["", "pixels"],
-                    "value": () => [Ani.wnLine, Ani.wxLine]
-                }, {
-                    "name": "Trail Hue Range",
-                    "type": "header"
-                }, {
-                    "name": "Hue Drift",
-                    "type": "number.decimal",
-                    "unit": "degrees",
-                    "value": () => Ani.hDrift
-                }, {
-                    "name": "Current",
-                    "type": "range.color.hue",
-                    "value": () => [Ani.hsTrail, Ani.heTrail]
-                }, {
-                    "name": "Default",
-                    "type": "range.color.hue",
-                    "value": () => [
-                        DEFAULT_TRAIL_HSL_START,
-                        DEFAULT_TRAIL_HSL_END
-                    ]
-                }, {
-                    "name": "Luma Oscillation",
-                    "type": "header"
-                }, {
-                    "name": "Period",
-                    "type": "range.string",
-                    "unit": ["", "seconds"],
-                    "value": () => [
-                        Ani.opnLum.toFixed(2),
-                        Ani.opxLum.toFixed(2)
-                    ]
-                }, {
-                    "name": "Amplitude",
-                    "type": "range.color.luma",
-                    "value": () => [Ani.oanLum, Ani.oaxLum]
-                }, {
-                    "name": "Phase Shift",
-                    "type": "string",
-                    "unit": "seconds",
-                    "value": () => Ani.opsLum.toFixed(2)
-                }, {
-                    "name": "Line Width Oscillation",
-                    "type": "header"
-                }, {
-                    "name": "Period",
-                    "type": "range.string",
-                    "unit": ["", "seconds"],
-                    "value": () => [
-                        Ani.opnwLine.toFixed(2),
-                        Ani.opxwLine.toFixed(2)
-                    ]
-                }, {
-                    "name": "Amplitude",
-                    "type": "range.number.decimal",
-                    "unit": ["", "pixels"],
-                    "value": () => [Ani.oanwLine, Ani.oaxwLine]
-                }, {
-                    "name": "Phase Shift",
-                    "type": "string",
-                    "unit": "seconds",
-                    "value": () => Ani.opswLine.toFixed(2)
-                }, {
-                    "name": "Audio Peaks",
-                    "type": "header"
-                }, {
-                    "name": "Variance (Low)",
-                    "type": "number.decimal",
-                    "value": () => Ani.vnPeaks
-                }, {
-                    "name": "Variance (High)",
-                    "type": "number.decimal",
-                    "value": () => Ani.vxPeaks
-                }, {
-                    "name": "Reconnect Wait",
-                    "type": "number.decimal",
-                    "unit": "ms",
-                    "value": () => Ani.wPeaks
-                }, {
-                    "name": "Reconnect Wait (Err)",
-                    "type": "number.decimal",
-                    "unit": "ms",
-                    "value": () => Ani.ewPeaks
-                }, {
-                    "name": "Enabled",
-                    "type": "flag",
-                    "value": () => Ani.ePeaks
-                }, {
-                    "name": "Secure",
-                    "type": "flag",
-                    "value": () => Ani.sPeaks
-                }, {
-                    "name": "Endpoint",
-                    "type": "string",
-                    "value": () => Ani.peaks.url
-                }
-            ],
-            "customCSS": "top: 0; left: 0;"
-        };
-
-        var timeout = null;
-        var help_settings = {
-            "title": "Key Bindings",
-            "itemText": "Command",
-            "valueText": "Explanation",
-            "enableUpdate": false,
-            "customCSS": "top: 0; right: 0",
-            "rows": [
-                {
-                    "type": "header",
-                    "name": "Overlays"
-                }, {
-                    "type": "string",
-                    "name": "(s)tatus",
-                    "value": () => "",
-                    "unit": "Toggles the status overlay on/off."
-                }, {
-                    "type": "string",
-                    "name": "(v)erbose",
-                    "value": () => "",
-                    "unit": "Toggles verbose info in status overlay."
-                }, {
-                    "type": "string",
-                    "name": "(h)elp",
-                    "value": () => "",
-                    "unit": "Toggles the help overlay on/off."
-                }, {
-                    "type": "header",
-                    "name": "Animation"
-                }, {
-                    "type": "string",
-                    "name": "r(e)fresh",
-                    "value": () => "",
-                    "unit": "Reloads the page."
-                }, {
-                    "type": "string",
-                    "name": "(r)eset",
-                    "value": () => "",
-                    "unit": "Resets the animation."
-                }, {
-                    "type": "string",
-                    "name": "(+)",
-                    "value": () => "",
-                    "unit": "Ups the FPS by 5."
-                }, {
-                    "type": "string",
-                    "name": "(-)",
-                    "value": () => "",
-                    "unit": "Downs the FPS by 5."
-                }, {
-                    "type": "header",
-                    "name": "Audio Peaks"
-                }, {
-                    "type": "string",
-                    "name": "(a)",
-                    "value": () => "",
-                    "unit": "Toggles the AudioPeaks subsystem."
-                }
-            ]
-        };
-
-        Ani.status = new StatusElementCollection(status_settings);
-        Ani.statusHelp = new StatusElementCollection(help_settings);
-
-        document.body.addEventListener("mousemove", () => {
-            document.body.style.cursor = "default";
-            if (timeout !== null) {
-                window.clearTimeout(timeout);
-            }
-            timeout = window.setTimeout(() => {
-                timeout = null;
-                document.body.style.cursor = "none";
-            }, 1000);
-        });
-        window.addEventListener("keyup", (e) => {
-            var modifiers = ["ctrl", "alt", "shift", "meta"];
-            keybinds.forEach((binding) => {
-                if (binding.key !== e.key) {
-                    return;
-                }
-                var keys = Object.keys(binding);
-                if (keys.indexOf("conditions") !== -1) {
-                    if (binding.conditions.some((cond) => {
-                        keys = Object.keys(cond);
-                        return !modifiers.some((mod) => {
-                            return (keys.indexOf(mod) !== -1)
-                                && (e[mod + "Key"] === cond[mod]);
-                        });
-                    })) {
-                        return;
-                    }
-                }
-
-                binding.handler(e);
-            });
-        });
+        document.body.addEventListener("mousemove", Ani.__mousehandle);
+        window.addEventListener("keyup", Ani.__keyhandle);
         window.addEventListener("resize", Ani.updateSize);
         Ani.loadSettings();
     }
@@ -2359,6 +2446,14 @@ class Ani {
      * @private
      */
     static start() {
+        if (Ani.started) {
+            return; //duplicate call.
+        }
+        Ani.started = true;
+        //load overlays.
+        Ani.status = new StatusElementCollection(Ani.statusSettings);
+        Ani.statusHelp = new StatusElementCollection(Ani.helpSettings);
+
         Ani.frameCount = 0;
         //Retrieve the CANVAS element
         Ani.canvas = document.querySelector("canvas");
@@ -2386,6 +2481,7 @@ class Ani {
         Ani.context.fillRect(0, 0, Ani.width, Ani.height);
 
         //Create a timer to start the animation.
+        Ani.threadCount = 2;
         window.setTimeout(Ani.animate, Ani.iFrame);
         window.setTimeout(Ani.addDots, Ani.iFrame);
         Ani.status.update();
@@ -2414,6 +2510,10 @@ class Ani {
      * Renders the next animation frame.
      */
     static animate() {
+        if (!Ani.started) {
+            Ani.threadCount--; //decrement "thread" count
+            return; //terminate animation if stopping
+        }
         if (!Ani.startTime) {
             Ani.startTime = (new Date()).getTime();
         }
@@ -2432,6 +2532,10 @@ class Ani {
      * @since 2.1.7.4
      */
     static addDots() {
+        if (!Ani.started) {
+            Ani.threadCount--; //decrement "thread" count
+            return; //terminate animation if stopping
+        }
         var i;
         for (i = 0; i < Ani.rDot; i += 1) { //orig peak mod was "rDot * mult"
             if (Ani.dots.length >= Ani.xDots) {
@@ -2450,6 +2554,9 @@ class Ani {
      * This would usually be called if the user resizes the window.
      */
     static updateSize() {
+        if (Ani.stopping) {
+            return;
+        }
         //Initialize variables.
         var i;
         var osize = Ani.size;
@@ -2531,6 +2638,9 @@ class Ani {
      * Steps the FPS up by 5 frames per second.
      */
     static upFPS() {
+        if (Ani.stopping) {
+            return;
+        }
         Ani.fps += 5;
         console.info(`Now targeting ${Ani.fps} frames per second.`);
     }
@@ -2538,6 +2648,9 @@ class Ani {
      * Steps the FPS down by 5 frames per second.
      */
     static downFPS() {
+        if (Ani.stopping) {
+            return;
+        }
         var old_fps = Ani.fps;
         Ani.fps -= 5;
         console.info((old_fps !== Ani.fps)
@@ -2548,6 +2661,9 @@ class Ani {
      * Resets the animation.
      */
     static reset() {
+        if (Ani.stopping) {
+            return;
+        }
         Ani.startTime = (new Date()).getTime();
         Ani.dots = [];
         Ani.frameCount = 0;
@@ -2567,6 +2683,9 @@ class Ani {
      * Toggles whether or not the status overlay is enabled and displayed.
      */
     static toggleStatus() {
+        if (Ani.stopping) {
+            return;
+        }
         var d = (Ani.status.displayed = !Ani.status.displayed);
         console.info(
             `Turned ${d ? "on" : "off"} the status overlay.`);
@@ -2576,13 +2695,19 @@ class Ani {
      * overlay.
      */
     static toggleVerboseStatus() {
+        if (Ani.stopping) {
+            return;
+        }
         var d = (Ani.status.showVerbose = !Ani.status.showVerbose);
         console.info(`${d ? "Show" : "Hid"}ing verbose info on the overlay.`);
     }
     /**
      * Outputs help information to the console.
      */
-    static help() {
+    static toggleHelp() {
+        if (Ani.stopping) {
+            return;
+        }
         var d = (Ani.statusHelp.displayed = !Ani.statusHelp.displayed);
         console.info(`Turned ${d ? "on" : "off"} the help overlay.`);
     }
@@ -2591,10 +2716,121 @@ class Ani {
      * @since 2.1.7.6
      */
     static togglePeaks() {
+        if (Ani.stopping) {
+            return;
+        }
         var d = (Ani.ePeaks = !Ani.ePeaks);
         console.info(`${d ? "En" : "Dis"}abled the AudioPeaks subsystem.`);
     }
-
+    /**
+     * Resets the default settings to their values as defined in this script
+     * file (the DEFAULT_* constants)
+     * @since 2.1.7.9
+     */
+    static resetDefaultSettings() {
+        if (Ani.stopping) {
+            return;
+        }
+        return new Promise(function (resolve, reject) {
+            Ani.stop(true)
+                .then(() => Ani.sObj.deleteSettings())
+                .then(() => {
+                    Ani.sObj = null;
+                    Ani.settingsFactory = null;
+                    Ani.__constructor(); //RELOAD
+                });
+        });
+    }
+    /**
+     * Stops the animation.
+     * @since 2.1.7.9
+     * @param {boolean} leaveSettings
+     *     A value that indicates whether or not the Settings objects should
+     *     also be disposed of.
+     * @returns {?Promise<void>}
+     *     A promise that returns when the application has been stopped or null
+     *     if the application cannot be stopped right now.
+     */
+    static stop(leaveSettings) {
+        //ugh, this was an ass to implement.
+        if (Ani.stopping) {
+            return;
+        }
+        if (!Ani.started) {
+            return;
+        }
+         //this will prevent bugs if the user hits a keybind while stopping
+        Ani.stopping = true;
+        return new Promise(function (resolve) {
+            if (Ani.status.displayed) {
+                Ani.toggleStatus(); //hide status overlay
+            }
+            if (Ani.statusHelp.displayed) {
+                Ani.toggleHelp(); //hide help overlay.
+            }
+            //remove overlays from doc.
+            Ani.status.dispose();
+            Ani.statusHelp.dispose();
+            Ani.status = null;
+            Ani.statusHelp = null;
+            Ani.started = false;
+            
+            new Promise(function (innerResolve) {
+                var interval = window.setInterval(() => {
+                    if (Ani.threadCount <= 0) {
+                        window.clearInterval(interval);
+                        innerResolve();
+                        //wait until both ticks die.
+                    }
+                }, 10);
+            }).then(() => {
+                //disconnect peaks server
+                return new Promise(function (innerResolve) {
+                    if (Ani.peaks && Ani.peaks.connected) {
+                        Ani.peaks.disconnect();
+                        var interval = window.setInterval(() => {
+                            if (!Ani.peaks.connected) {
+                                window.clearInterval(interval);
+                                innerResolve();
+                                //wait until disconnect
+                            }
+                        }, 10);
+                    } else {
+                        innerResolve();
+                    }
+                });
+            }).then(() => {
+                //do something
+                //animation ticks are dead.
+                //overlays are also dead.
+                if (!leaveSettings) {
+                    Ani.sObj = null;
+                    Ani.settingsFactory = null;
+                }
+                document.body
+                    .removeEventListener("mousemove", Ani.__mousehandle);
+                window.removeEventListener("keyup", Ani.__keyhandle);
+                window.removeEventListener("resize", Ani.updateSize);
+                Ani.stopping = false;
+                Ani.started = false;
+                resolve();
+            });
+        });
+        //everything from loadSettings must be undone...
+        //so... settingsFactory (might not be required)
+        
+    }
+    /**
+     * Toggles the animation state.
+     * @since 2.1.7.9
+     */
+    static toggleAnimation() {
+        if (Ani.started) {
+            Ani.stop();
+        } else {
+            Ani.__constructor();
+        }
+    }
 
     static get heTrail() {
         return this.__the;
@@ -3104,7 +3340,8 @@ class Settings {
     /**
      * Saves these settings to the {@see SettingsDB}.
      * @returns {Promise<void>}
-     *     A promise object that determines if the data was saved successfully.
+     *     A promise object that determines if the data was saved successfully
+     *     or null, if the data cannot be saved.
      */
     save() {
         if (this.__db === null) {
@@ -3125,8 +3362,9 @@ class Settings {
      * Renames this settings store and overwrites the database settings.
      * @param {string} newID
      *     The new ID to save the settings under;
-     * @returns {Promise<void>}
-     *     A promise that resolves once the settings have been renamed.
+     * @returns {?Promise<void>}
+     *     A promise that resolves once the settings have been renamed or null
+     *     if there's not anything to be renamed.
      */
     rename(newID) {
         if (!(newID instanceof String)) {
@@ -3151,6 +3389,27 @@ class Settings {
                 .then(resolve)
                 .catch(reject);
         });
+    }
+
+    /**
+     * Deletes this settings store from the storage database. This
+     * {@see Settings} object will be unusable after calling this method.
+     * @since 2.1.7.9
+     * @returns {?Promise<void>}
+     *     A promise that returns when the settings have been deleted or null
+     *     if there is nothing to delete.
+     */
+    deleteSettings() {
+        if (this.__db === null) {
+            return null;
+        }
+        var id = this.__id;
+        this.__id = null;
+        this.__data = {};
+        this.__refreshKeys();
+        var promise = this.__db.saveSettings(id, "");
+        this.__db = null;
+        return promise;
     }
 
     get cBackground() {
@@ -3538,6 +3797,11 @@ class AudioPeaks {
      * @type {boolean}
      * @private
      */
+    __connected = false;
+    /**
+     * @type {boolean}
+     * @private
+     */
     __reconnect = false;
     /**
      * @type {WebSocket}
@@ -3559,6 +3823,7 @@ class AudioPeaks {
      */
     __open() {
         console.info("Connected to the Audio peaks sever successfully.");
+        this.__connected = true;
     }
     /**
      * @private
@@ -3584,6 +3849,7 @@ class AudioPeaks {
             this.__reconnect = true;
         }
         Ani.audioPeakMultiplier = 1;
+        this.__connected = false;
     }
     /**
      * @private
@@ -3665,6 +3931,14 @@ class AudioPeaks {
     }
 
     /**
+     * Gets whether or not the AudioPeaks system is connected.
+     * @since 2.1.7.9
+     */
+    get connected() {
+        return this.__connected;
+    }
+
+    /**
      * Disconnects the current AudioPeaks connection and reconnects.
      */
     reconnect() {
@@ -3700,6 +3974,27 @@ class AudioPeaks {
         this.__socket.addEventListener("close", () => this.__close());
         this.__socket.addEventListener("message", (e) => this.__message(e));
     }
+
+    /**
+     * Attempts to disconnect from the audio peaks server.
+     * @since 2.1.7.9
+     */
+    disconnect() {
+        if (!this.__connected) {
+            return;
+        }
+        this.__reconnect = true;
+        if (this.__socket) {
+            this.__socket.addEventListener("close", () => {
+                this.__connecting = false;
+                this.__socket = null;
+                //required so we don't have two at once.
+            });
+            this.__socket.close();
+        } else {
+            this.__connecting = false;
+        }
+    }
 }
 
 if (document.readyState !== "complete") {
@@ -3709,7 +4004,6 @@ if (document.readyState !== "complete") {
 }
 
 /**
- * @todo Add keybinds to reset default settings
  * @todo Complete documentation.
  * @todo fix obsolete references in documentation.
  * @todo Maybe add a "description" key to the keybind object so we can
@@ -3726,6 +4020,8 @@ if (document.readyState !== "complete") {
  *       VisualStudio can't see.
  * @todo START DOCUMENTING WITH AT SINCE!!!!!!!
  * @todo Implement the canvas resize code (and test it)
+ * @todo There's a bug. If AudioPeaks isn't initialized then the overlay will
+ *       bug
  *
  * 80-char max regex: [^\n\r]{81,}
  * space-only line regex: ^(\x20+)[\r\n]*$
