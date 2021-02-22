@@ -78,3 +78,26 @@ hr {
 .status-hide, .status-hide *, .status-hide-verbose .status-info-row-verbose {
     display: none !important;
 }
+
+#splash {
+    display: table;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* duration timing-func delay fill-mode name*/
+    animation: 5s ease-out 3s forwards splash-ani;
+}
+#splash div {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    color: white;
+    font-size: 18pt;
+}
+
+@keyframes splash-ani {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}

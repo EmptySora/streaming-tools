@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.6
+ * @version 2.1.7.7
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.6";
+const VERSION = "2.1.7.7";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -3741,8 +3741,6 @@ if (document.readyState !== "complete") {
  * @todo Since Keybindings is going to be moved to its own class, we should
  *       probably shift the generation of the help overlay to a dynamic
  *       creation method as described in the todo two back.
- * @todo Add some kind of splash to the start of the animation that fades out
- *       It should say "press H to see the keybindings"
  * @todo use "at borrows" to avoid double documenting the setting shorthands
  * @todo Fix the buggy phaseshift code.
  * @todo Move instance var declarations to the class body so that the
