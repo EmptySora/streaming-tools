@@ -85,14 +85,14 @@ template-curly-spacing: 2, yield-star-spacing: 2
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.14
+ * @version 2.1.7.15
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.14";
+const VERSION = "2.1.7.15";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -714,7 +714,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * @see {@link StatusElement}
  */
 /**
- * Represents the settings for a particular {@see StatusElementCollection}.
+ * Represents the settings for a particular {@link StatusElementCollection}.
  * @typedef {object} StatusCollectionSettings
  * @property {string} [title]
  *     The text that is displayed as the title for the collection. EG:
@@ -741,7 +741,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  */
 /**
  * Represents the properties allowed to be passed to
- * {@see StatusElementCollection~createElement}.
+ * {@link StatusElementCollection~createElement}.
  * @typedef {object} CreateElementProperties
  * @property {string[]} [classes]
  *     The list of classes to apply to the element.
@@ -792,8 +792,8 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  */
 class StatusElement {
     /**
-     * The original {@see StatusElementProperties} object from which this
-     * {@see StatusElement} is created from.
+     * The original {@link StatusElementProperties} object from which this
+     * {@link StatusElement} is created from.
      * @type {StatusElementProperties}
      * @private
      */
@@ -806,14 +806,14 @@ class StatusElement {
      */
     pType;
     /**
-     * The {@see HTMLElement} that this {@see StatusElement} is
+     * The {@link HTMLElement} that this {@link StatusElement} is
      * displayed via.
      * @type {HTMLElement}
      * @private
      */
     widget;
     /**
-     * The {@see HTMLElement} that this {@see StatusElement} is
+     * The {@link HTMLElement} that this {@link StatusElement} is
      * displayed via.
      * @type {HTMLElement}
      * @private
@@ -821,14 +821,14 @@ class StatusElement {
     owner;
     /**
      * The first of the two parameter value Elements that the value of this
-     * {@see StatusElement} is displayed via.
+     * {@link StatusElement} is displayed via.
      * @type {HTMLElement}
      * @private
      */
     param0;
     /**
      * The second of the two parameter value Elements that the value of this
-     * {@see StatusElement} is displayed via.
+     * {@link StatusElement} is displayed via.
      * This property may not always be present
      * @type {HTMLElement}
      * @private
@@ -1061,7 +1061,7 @@ class StatusElement {
     }
 
     /**
-     * Updates the value of this {@see StatusElement} and updates the HUD.
+     * Updates the value of this {@link StatusElement} and updates the HUD.
      */
     update() {
         if (!this.visible) {
@@ -1108,8 +1108,8 @@ class StatusElementCollection {
      */
     __container;
     /**
-     * The list of {@see StatusElement} objects in this
-     * {@see StatusElementCollection}.
+     * The list of {@link StatusElement} objects in this
+     * {@link StatusElementCollection}.
      * @type {StatusElement[]}
      */
     rows;
@@ -1122,7 +1122,7 @@ class StatusElementCollection {
      */
     constructor(settings) {
         /**
-         * Creates an {@see HTMLElement} given its tag name, and the
+         * Creates an {@link HTMLElement} given its tag name, and the
          * list of properties provided
          * @param {string} name
          *     The tag name of the element to create.
@@ -1210,7 +1210,7 @@ class StatusElementCollection {
     }
 
     /**
-     * Updates the values of this {@see StatusElementCollection} and updates
+     * Updates the values of this {@link StatusElementCollection} and updates
      * the HUD.
      * @throws {Error} Object has been disposed already.
      */
@@ -1232,7 +1232,7 @@ class StatusElementCollection {
     }
 
     /**
-     * Gets whether or not the HUD for this {@see StatusElementCollection} is
+     * Gets whether or not the HUD for this {@link StatusElementCollection} is
      * displayed.
      * @throws {Error} Object has been disposed already.
      */
@@ -1243,7 +1243,7 @@ class StatusElementCollection {
         return !this.__container.classList.contains("status-hide");
     }
     /**
-     * Sets whether or not the HUD for this {@see StatusElementCollection} is
+     * Sets whether or not the HUD for this {@link StatusElementCollection} is
      * displayed.
      * @throws {Error} Object has been disposed already.
      */
@@ -1268,7 +1268,7 @@ class StatusElementCollection {
         }
     }
     /**
-     * Gets whether or not the HUD for this {@see StatusElementCollection}
+     * Gets whether or not the HUD for this {@link StatusElementCollection}
      * shows verbose information.
      * @throws {Error} Object has been disposed already.
      */
@@ -1279,7 +1279,7 @@ class StatusElementCollection {
         return !this.__container.classList.contains("status-hide-verbose");
     }
     /**
-     * Sets whether or not the HUD for this {@see StatusElementCollection}
+     * Sets whether or not the HUD for this {@link StatusElementCollection}
      * shows verbose information.
      * @throws {Error} Object has been disposed already.
      */
@@ -1297,7 +1297,7 @@ class StatusElementCollection {
         }
     }
     /**
-     * Gets rid of this {@see StatusElementCollection} and disposes of any
+     * Gets rid of this {@link StatusElementCollection} and disposes of any
      * resources used.
      * @since 2.1.7.3
      */
@@ -1320,182 +1320,182 @@ class StatusElementCollection {
  */
 class Dot {
     /**
-     * The x-coordinate of this {@see Dot}.
+     * The x-coordinate of this {@link Dot}.
      *
      * Default: A random value between 0 and the size of the canvas.
      * @type {number}
      */
     x;
     /**
-     * The y-coordinate of this {@see Dot}.
+     * The y-coordinate of this {@link Dot}.
      *
      * Default: The very bottom of the canvas.
      * @type {number}
      */
     y;
     /**
-     * The speed of this {@see Dot}.
+     * The speed of this {@link Dot}.
      *
-     * Default: A random value between {@see MIN_SPEED} and
-     * {@see MAX_SPEED}.
+     * Default: A random value between {@link MIN_SPEED} and
+     * {@link MAX_SPEED}.
      * @type {number}
      */
     s;
     /**
-     * The acceleration of this {@see Dot}.
+     * The acceleration of this {@link Dot}.
      *
-     * Default: A random value between {@see MIN_ACCEL} and
-     * {@see MAX_ACCEL}.
+     * Default: A random value between {@link MIN_ACCEL} and
+     * {@link MAX_ACCEL}.
      * @type {number}
      */
     a;
     /**
-     * The hue of this {@see Dot}.
+     * The hue of this {@link Dot}.
      *
-     * Default: A random value between {@see TRAIL_HSL_START} and
-     * {@see TRAIL_HSL_END}.
+     * Default: A random value between {@link TRAIL_HSL_START} and
+     * {@link TRAIL_HSL_END}.
      * @type {number}
      */
     c;
     /**
-     * The luminosity of this {@see Dot}.
+     * The luminosity of this {@link Dot}.
      *
-     * Default: A random value between {@see TRAIL_LUMINOSITY_MIN} and
-     * {@see TRAIL_LUMINOSITY_MAX}.
+     * Default: A random value between {@link TRAIL_LUMINOSITY_MIN} and
+     * {@link TRAIL_LUMINOSITY_MAX}.
      * @type {number}
      */
     l;
     /**
-     * The saturation of this {@see Dot}.
+     * The saturation of this {@link Dot}.
      *
-     * Default: A random value between {@see TRAIL_SATURATION_MIN} and
-     * {@see TRAIL_SATURATION_MAX}.
+     * Default: A random value between {@link TRAIL_SATURATION_MIN} and
+     * {@link TRAIL_SATURATION_MAX}.
      * @type {number}
      */
     sa;
     /**
-     * The frame this {@see Dot} was created on.
+     * The frame this {@link Dot} was created on.
      *
-     * Default: The value of {@see Ani.frameCount} at the time of creation.
+     * Default: The value of {@link Ani.frameCount} at the time of creation.
      * @type {number}
      */
     f;
     /**
      * The amplitude of the sine wave that oscillates the luminosity of
-     * this {@see Dot}.
+     * this {@link Dot}.
      *
      * Default: A random value between
-     * {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MIN} and
-     * {@see LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}.
+     * {@link LUMINOSITY_OSCILLATION_AMPLITUDE_MIN} and
+     * {@link LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}.
      * @type {number}
      */
     pa;
     /**
      * The frequency of the sine wave that oscillates the luminosity of
-     * this {@see Dot}.
+     * this {@link Dot}.
      *
-     * Default: The frequency, as calculated based on {@see Dot#pp}.
+     * Default: The frequency, as calculated based on {@link Dot#pp}.
      * @type {number}
      */
     pb;
     /**
      * The period of the sine wave that oscillates the luminosity of this
-     * {@see Dot}.
+     * {@link Dot}.
      *
      * Default: A random value between
-     * {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and
-     * {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
+     * {@link LUMINOSITY_OSCILLATION_PERIOD_MIN} and
+     * {@link LUMINOSITY_OSCILLATION_PERIOD_MAX}.
      * @type {number}
      */
     pp;
     /**
      * The original period of the sine wave that oscillates the luminosity
-     * of this {@see Dot}.
+     * of this {@link Dot}.
      *
      * Default: A random value between
-     * {@see LUMINOSITY_OSCILLATION_PERIOD_MIN} and
-     * {@see LUMINOSITY_OSCILLATION_PERIOD_MAX}.
+     * {@link LUMINOSITY_OSCILLATION_PERIOD_MIN} and
+     * {@link LUMINOSITY_OSCILLATION_PERIOD_MAX}.
      * @type {number}
      */
     opp;
     /**
      * The phase shift of the sine wave that oscillates the luminosity of
-     * this {@see Dot}.
+     * this {@link Dot}.
      *
-     * Default: The sum of {@see Ani.frameCount} and
-     * {@see LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
+     * Default: The sum of {@link Ani.frameCount} and
+     * {@link LUMINOSITY_OSCILLATION_PHASE_SHIFT}.
      * @type {number}
      */
     pc;
     /**
      * The amplitude of the sine wave that oscillates the line width of
-     * this {@see Dot}.
+     * this {@link Dot}.
      *
      * Default: A random value between
-     * {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN} and
-     * {@see LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}.
+     * {@link LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN} and
+     * {@link LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}.
      * @type {number}
      */
     bpa;
     /**
      * The frequency of the sine wave that oscillates the line width of
-     * this {@see Dot}.
+     * this {@link Dot}.
      *
-     * Default: The frequency, as calculated based on {@see Dot#bpp}.
+     * Default: The frequency, as calculated based on {@link Dot#bpp}.
      * @type {number}
      */
     bpb;
     /**
      * The period of the sine wave that oscillates the line width of this
-     * {@see Dot}.
+     * {@link Dot}.
      *
      * Default: A random value between
-     * {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
-     * {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
+     * {@link LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
+     * {@link LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
      * @type {number}
      */
     bpp;
     /**
      * The original period of the sine wave that oscillates the line width
-     * of this {@see Dot}.
+     * of this {@link Dot}.
      *
      * Default: A random value between
-     * {@see LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
-     * {@see LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
+     * {@link LINE_WIDTH_OSCILLATION_PERIOD_MIN} and
+     * {@link LINE_WIDTH_OSCILLATION_PERIOD_MAX}.
      * @type {number}
      */
     obpp;
     /**
      * The phase shift of the sine wave that oscillates the line width of
-     * this {@see Dot}.
+     * this {@link Dot}.
      *
-     * Default: The sum of {@see Ani.frameCount} and
-     * {@see LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
+     * Default: The sum of {@link Ani.frameCount} and
+     * {@link LINE_WIDTH_OSCILLATION_PHASE_SHIFT}.
      * @type {number}
      */
     bpc;
     /**
-     * The line width of this {@see Dot}.
+     * The line width of this {@link Dot}.
      *
-     * Default: A random value between {@see LINE_WIDTH_MIN} and
-     * {@see LINE_WIDTH_MAX}.
+     * Default: A random value between {@link LINE_WIDTH_MIN} and
+     * {@link LINE_WIDTH_MAX}.
      * @type {number}
      */
     w;
     /**
      * A helper value that helps keep track of the frame number for the
-     * purposes of oscillating the luminosity of this {@see Dot}.
+     * purposes of oscillating the luminosity of this {@link Dot}.
      *
-     * Default: The value of {@see Ani.frameCount} at the time of creation.
+     * Default: The value of {@link Ani.frameCount} at the time of creation.
      * @type {number}
      * @protected
      */
     pfx;
     /**
      * A helper value that helps keep track of the frame number for the
-     * purposes of oscillating the line width of this {@see Dot}.
+     * purposes of oscillating the line width of this {@link Dot}.
      *
-     * Default: The value of {@see Ani.frameCount} at the time of creation.
+     * Default: The value of {@link Ani.frameCount} at the time of creation.
      * @type {number}
      * @protected
      */
@@ -1503,7 +1503,7 @@ class Dot {
     /**
      * A helper value that helps keep track of the last
      * AUDIO_PEAK_MULTIPLIER value fro the purposes of modifying the speed
-     * of the animation of this {@see Dot}.
+     * of the animation of this {@link Dot}.
      *
      * @default 1
      * @type {number}
@@ -1511,25 +1511,25 @@ class Dot {
      */
     oapm = 1;
     /**
-     * The y-coordinate of the spot this {@see Dot} was on in the previous
+     * The y-coordinate of the spot this {@link Dot} was on in the previous
      * frame.
      * @type {number}
      */
     py = null;
     /**
-     * The y-coordinate of the spot this {@see Dot} was on in the frame
+     * The y-coordinate of the spot this {@link Dot} was on in the frame
      * before the previous frame.
      * @type {number}
      */
     ppy = null;
     /**
-     * The x-coordinate of the spot this {@see Dot} was on in the previous
+     * The x-coordinate of the spot this {@link Dot} was on in the previous
      * frame.
      * @type {number}
      */
     px = null;
     /**
-     * The x-coordinate of the spot this {@see Dot} was on in the frame
+     * The x-coordinate of the spot this {@link Dot} was on in the frame
      * before the previous frame.
      * @type {number}
      */
@@ -1551,12 +1551,12 @@ class Dot {
         this.sa = Dot.rand(Ani.sObj.snTrail, Ani.sObj.sxTrail);
         this.f = Ani.frameCount;
         this.pa = Dot.rand(Ani.sObj.oanLum, Ani.sObj.oaxLum);
-        this.pb = Dot.getB(vpb);
+        this.pb = Dot.getFrequency(vpb);
         this.pp = vpb;
         this.opp = vpb;
         this.pc = Ani.frameCount + Ani.sObj.opsLum;
         this.bpa = Dot.rand(Ani.sObj.oanwLine, Ani.sObj.oaxwLine);
-        this.bpb = Dot.getB(vbpb);
+        this.bpb = Dot.getFrequency(vbpb);
         this.bpp = vbpb;
         this.obpp = vbpb;
         this.bpc = Ani.frameCount + Ani.sObj.opswLine;
@@ -1568,7 +1568,7 @@ class Dot {
         Ani.hsTrail += Ani.sObj.hDrift;
     }
     /**
-     * Shifts the reference point coordinates for this {@see Dot}.
+     * Shifts the reference point coordinates for this {@link Dot}.
      */
     shiftRefPoints() {
         if (this.py === null) {
@@ -1582,19 +1582,19 @@ class Dot {
         this.py = this.y;
     }
     /**
-     * Updates the phase shifts of this {@see Dot} object so that modulating
+     * Updates the phase shifts of this {@link Dot} object so that modulating
      * the frequency of the sine waves does not cause jittering during the
      * animation.
      */
     updatePhaseShifts() {
-        if (Ani.audioPeakMultiplier !== this.oapm) {
-            const np = this.opp / Ani.audioPeakMultiplier;
-            const nbp = this.obpp / Ani.audioPeakMultiplier;
+        if (Ani.apMul !== this.oapm) {
+            const np = this.opp / Ani.apMul;
+            const nbp = this.obpp / Ani.apMul;
             this.pc = Dot.getNewShift(this.opp, np, this.pc, this.pfx);
-            this.pb = Dot.getB(np);
+            this.pb = Dot.getFrequency(np);
             this.pp = np;
             this.bpc = Dot.getNewShift(this.obpp, nbp, this.bpc, this.bpfx);
-            this.bpb = Dot.getB(nbp);
+            this.bpb = Dot.getFrequency(nbp);
             this.bpp = nbp;
         }
         /*
@@ -1604,16 +1604,13 @@ class Dot {
          */
     }
     /**
-     * Draws the {@see Dot} to the canvas.
+     * Draws the {@link Dot} to the canvas.
      * @param {CanvasRenderingContext2D} context
      *     The context in which to draw to.
      */
     draw(context) {
-        /*
-         * Skip the first and second frames of the animation to retrieve the
-         * second and third of the three points necessary for the animation
-         */
-        if (this.mustShift) {
+        //Skip 1st 2 frames to retrieve last 2 pts necessary for animation
+        if (this.py === null || this.ppy === null) {
             this.shiftRefPoints();
             return;
         }
@@ -1633,14 +1630,14 @@ class Dot {
         context.fillStyle = this.colorHSL;
 
         //Move to the oldest of the 3 reference points of the dot.
-        context.moveTo(this.rppx, this.rppy);
+        context.moveTo(Math.round(this.ppx), Math.round(this.ppy));
         //Make a line to the second oldest of the 3 reference points of the dot.
-        context.lineTo(this.rpx, this.rpy);
+        context.lineTo(Math.round(this.px), Math.round(this.py));
         //Draw the line.
         context.stroke();
 
         //Make a line to the first (newest) of the 3 reference points of the dot
-        context.lineTo(this.rx, this.ry);
+        context.lineTo(Math.round(this.x), Math.round(this.y));
         //Draw the line.
         context.stroke();
 
@@ -1648,7 +1645,7 @@ class Dot {
         this.shiftRefPoints();
 
         //Move the dot upwards based on the dot's speed.
-        this.y -= this.s * Ani.audioPeakMultiplier;
+        this.y -= this.s * Ani.apMul;
         //Increase the dot's speed based on its acceleration.
         this.s += this.a;// * AUDIO_PEAK_MULTIPLIER;
         /* eslint-disable-next-line capitalized-comments */
@@ -1659,24 +1656,12 @@ class Dot {
     }
 
     /**
-     * Gets a value that indicates whether or not more reference points are
-     * needed before this {@see Dot} can be animated properly.
-     * @returns {boolean}
-     *     Whether or not more reference points are needed before this dot can
-     *     be animated properly.
-     */
-    get mustShift() {
-        return this.py === null || this.ppy === null;
-    }
-    /**
-     * Gets the current luminosity of this {@see Dot}.
-     * @returns {number} The luminosity of this {@see Dot}.
+     * Gets the current luminosity of this {@link Dot} based on the current
+     * frame count.
+     * @returns {number}
+     *     The luminosity of this {@link Dot}.
      */
     get currentLuminosity() {
-        /*
-         * Determine the current effective luminosity of the dot based on the
-         * current frame count
-         */
         return Dot.sinusoidal(
             this.pa,
             this.pb,
@@ -1686,14 +1671,12 @@ class Dot {
         );
     }
     /**
-     * Gets the current line width of this {@see Dot}.
-     * @returns {number} The line width of this {@see Dot}.
+     * Gets the current line width of this {@link Dot} based on the current
+     * frame count.
+     * @returns {number}
+     *     The line width of this {@link Dot}.
      */
     get currentLineWidth() {
-        /*
-         * Determine the current effective line width of the dot based on the
-         * current frame count
-         */
         return Dot.sinusoidal(
             this.bpa,
             this.bpb,
@@ -1703,69 +1686,21 @@ class Dot {
         );
     }
     /**
-     * Gets the color of this {@see Dot} as a valid CSS color tag.
-     * @returns {string} The color of this {@see Dot} as a valid CSS color tag.
+     * Gets the color of this {@link Dot} as a valid CSS color tag.
+     * @returns {string}
+     *     The color of this {@link Dot} as a valid CSS color tag.
      */
     get colorHSL() {
         return `hsla(${this.c},${this.sa}%,`
             + `${this.currentLuminosity}%,${Ani.sObj.oTrail})`;
     }
     /**
-     * Gets whether or not this {@see Dot} is off-screen.
-     * @returns {boolean} Whether or not this {@see Dot} is off-screen.
+     * Gets whether or not this {@link Dot} is off-screen.
+     * @returns {boolean}
+     *     Whether or not this {@link Dot} is off-screen.
      */
     get offScreen() {
         return this.ppy < 0;
-    }
-    /**
-     * Gets the rounded x-coordinate of this {@see Dot} on the previous frame.
-     * @returns {number}
-     *     The rounded x-coordinate of this {@see Dot} on the previous frame.
-     */
-    get rpx() {
-        return Math.round(this.px);
-    }
-    /**
-     * Gets the rounded x-coordinate of this {@see Dot} on the frame before the
-     * previous frame.
-     * @returns {number}
-     *     The rounded x-coordinate of this {@see Dot} on the frame before the
-     *     previous frame.
-     */
-    get rppx() {
-        return Math.round(this.ppx);
-    }
-    /**
-     * Gets the rounded y-coordinate of this {@see Dot} on the previous frame.
-     * @returns {number}
-     *     The rounded y-coordinate of this {@see Dot} on the previous frame.
-     */
-    get rpy() {
-        return Math.round(this.py);
-    }
-    /**
-     * Gets the rounded y-coordinate of this {@see Dot} on the frame before the
-     * previous frame.
-     * @returns {number}
-     *     The rounded y-coordinate of this {@see Dot} on the frame before the
-     *     previous frame.
-     */
-    get rppy() {
-        return Math.round(this.ppy);
-    }
-    /**
-     * Gets the rounded x-coordinate of this {@see Dot}.
-     * @returns {number} The rounded x-coordinate of this {@see Dot}.
-     */
-    get rx() {
-        return Math.round(this.x);
-    }
-    /**
-     * Gets the rounded y-coordinate of this {@see Dot}.
-     * @returns {number} The rounded y-coordinate of this {@see Dot}.
-     */
-    get ry() {
-        return Math.round(this.y);
     }
 
     /**
@@ -1900,7 +1835,8 @@ class Dot {
      *     The inclusive lower bound of the random number.
      * @param {number} max
      *     The exclusive upper bound of the random number.
-     * @returns {number} The pseudorandom number that was generated.
+     * @returns {number}
+     *     The pseudorandom number that was generated.
      */
     static rand(min, max) {
         /* eslint-disable-next-line no-extra-parens */
@@ -1916,7 +1852,7 @@ class Dot {
      * @returns {number}
      *     The frequency of the sinusoidal function.
      */
-    static getB(period) {
+    static getFrequency(period) {
         return 2 * Math.PI / period;
     }
 }
@@ -1927,8 +1863,8 @@ class Dot {
  */
 class Ani {
     /*
-     * ... It took me two hours to realize how to document static properties
-     * like this. I feel dead inside...
+     * ... It took me 2hrs to realize how to document static properties like
+     * this. I feel dead inside...
      */
 
     /**
@@ -1952,7 +1888,7 @@ class Ani {
      * based on system audio volume.
      * @type {number}
      */
-    static audioPeakMultiplier = 1;
+    static apMul = 1;
     /**
      * An object that is used to update the status HUD screen.
      * @type {StatusElementCollection}
@@ -2460,15 +2396,9 @@ class Ani {
         //Get a 2D drawing context for the canvas
         Ani.context = Ani.canvas.getContext("2d");
 
-        /*
-         * Get the size of the canvas, which should be stretched to the full
-         * size of the window.
-         */
+        //Get canvas size, which should be stretched to full size of window.
         Ani.size = Ani.canvas.getBoundingClientRect();
-        /*
-         * Set the width and height of the canvas internally, so that the
-         * canvas has a 1:1 ratio between itself and the screen.
-         */
+        //Set w&h of canvas internally so canvas has a 1:1 ratio to the screen.
         Ani.canvas.setAttribute("width", Ani.width);
         Ani.canvas.setAttribute("height", Ani.height);
 
@@ -2495,21 +2425,8 @@ class Ani {
         }
     }
     /**
-     * Gets the rounded width of the animation canvas.
-     * @returns {number} The rounded width of the animation canvas.
-     */
-    static get width() {
-        return Math.round(Ani.size.width);
-    }
-    /**
-     * Gets the rounded height of the animation canvas.
-     * @returns {number} The rounded height of the animation canvas.
-     */
-    static get height() {
-        return Math.round(Ani.size.height);
-    }
-    /**
      * Renders the next animation frame.
+     * @protected
      */
     static animate() {
         if (!Ani.started) {
@@ -2532,6 +2449,7 @@ class Ani {
     /**
      * Adds new dots to the animation.
      * @since 2.1.7.4
+     * @protected
      */
     static addDots() {
         if (!Ani.started) {
@@ -2540,7 +2458,6 @@ class Ani {
         }
         let i;
         for (i = 0; i < Ani.sObj.rDot; i += 1) {
-            //Orig peak mod was "rDot * mult"
             if (Ani.dots.length >= Ani.sObj.xDots) {
                 break; //Can't add more dots.
             }
@@ -2549,7 +2466,7 @@ class Ani {
         }
         window.setTimeout(
             Ani.addDots,
-            Math.round(Ani.sObj.iFrame * (1 / Ani.audioPeakMultiplier))
+            Math.round(Ani.sObj.iFrame * (1 / Ani.apMul))
         );
     }
 
@@ -2625,6 +2542,7 @@ class Ani {
     }
     /**
      * Loads the saved application settings.
+     * @private
      */
     static loadSettings() {
         Ani.settingsFactory = new SettingsDB();
@@ -2853,6 +2771,21 @@ class Ani {
     }
     static get hsTrail() {
         return Ani.ths;
+    }
+
+    /**
+     * Gets the rounded width of the animation canvas.
+     * @returns {number} The rounded width of the animation canvas.
+     */
+    static get width() {
+        return Math.round(Ani.size.width);
+    }
+    /**
+     * Gets the rounded height of the animation canvas.
+     * @returns {number} The rounded height of the animation canvas.
+     */
+    static get height() {
+        return Math.round(Ani.size.height);
     }
 
     static set heTrail(value) {
@@ -3104,7 +3037,7 @@ class Settings {
     __keys;
 
     /**
-     * Creates a new {@see Settings} object from a {@see SettingsDB} object,
+     * Creates a new {@link Settings} object from a {@link SettingsDB} object,
      * the id of the settings, and the JSON string containing the raw settings.
      * @protected
      * @param {SettingsDB} db
@@ -3121,7 +3054,7 @@ class Settings {
         this.__keys = Object.keys(this.__data);
     }
     /**
-     * Saves these settings to the {@see SettingsDB}.
+     * Saves these settings to the {@link SettingsDB}.
      * @returns {Promise<void>}
      *     A promise object that determines if the data was saved successfully
      *     or null, if the data cannot be saved.
@@ -3175,7 +3108,7 @@ class Settings {
 
     /**
      * Deletes this settings store from the storage database. This
-     * {@see Settings} object will be unusable after calling this method.
+     * {@link Settings} object will be unusable after calling this method.
      * @since 2.1.7.9
      * @returns {?Promise<void>}
      *     A promise that returns when the settings have been deleted or null
@@ -3612,7 +3545,7 @@ class AudioPeaks {
     __socket;
 
     /**
-     * Creates a new {@see AudioPeaks} object.
+     * Creates a new {@link AudioPeaks} object.
      */
     constructor() {
         if (Ani.sObj.ePeaks) {
@@ -3640,7 +3573,7 @@ class AudioPeaks {
             window.setTimeout(() => this.reconnect(), Ani.sObj.ewPeaks);
             this.__reconnect = true;
         }
-        Ani.audioPeakMultiplier = 1;
+        Ani.apMul = 1;
     }
     /**
      * @private
@@ -3652,7 +3585,7 @@ class AudioPeaks {
             window.setTimeout(() => this.reconnect(), Ani.sObj.wPeaks);
             this.__reconnect = true;
         }
-        Ani.audioPeakMultiplier = 1;
+        Ani.apMul = 1;
         this.__connected = false;
     }
     /**
@@ -3666,13 +3599,13 @@ class AudioPeaks {
         case "Success":
             peak = message.data.max;
             if (peak === 0.5) {
-                Ani.audioPeakMultiplier = 1;
+                Ani.apMul = 1;
             } else if (peak < 0.5) {
-                Ani.audioPeakMultiplier
+                Ani.apMul
                     /* eslint-disable-next-line no-extra-parens */
                     = 1 - ((0.5 - peak) * 2 * (1 - Ani.sObj.vnPeaks));
             } else { // > 0.5
-                Ani.audioPeakMultiplier
+                Ani.apMul
                     /* eslint-disable-next-line no-extra-parens */
                     = 1 + ((peak - 0.5) * 2 * (Ani.sObj.vxPeaks - 1));
             }
