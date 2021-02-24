@@ -3661,6 +3661,19 @@ if (document.readyState === "complete") {
  *       The only other modification that I can think of is Collision detection,
  *       ie: particles that bump other particles from behind randomly shift to
  *       the left or right
+ * @todo Change how changing the FPS works (add in BASE_FPS and use that with
+ *       current FPS to multiply the speed/acceleration/frequencies)
+ *       This should effectively nullify the speed-up/down caused by changing
+ *       the FPS. Why do this? This will increase the smoothness of the
+ *       animation.
+ *       We might have to move the background wipe to another "thread" and have
+ *       that run at BASE_FPS so that the trails don't shrink/grow from
+ *       changing the FPS.
+ *       We need to debug the phaseshift code so that we can use it to detect
+ *       the proper phaseshift in conjunction with this. (That will prevent
+ *       jittering)
+ *       One last note, the acceleration change might be more tricky than just
+ *       multiplying by the ratio of the BASE_FPS and FPS.
  *
  * REMEMBER: Document AT SINCE for all new properties and objects.
  */
