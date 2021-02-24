@@ -85,14 +85,14 @@ template-curly-spacing: 2, yield-star-spacing: 2
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.16
+ * @version 2.1.7.17
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.16";
+const VERSION = "2.1.7.17";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -2082,9 +2082,13 @@ class Ani {
                 "value": () => [Ani.dots.length, Ani.sObj.xDots]
             }, {
                 "name": "Dot Rate",
-                "type": "number.integer",
-                "unit": "dots/frame",
-                "value": () => Ani.sObj.rDot
+                "type": "range.number.integer",
+                "unit": ["dot(s)", "ms"],
+                "sep": " per ",
+                "value": () => [
+                    Ani.sObj.rDot,
+                    Math.round(Ani.sObj.iFrame * (1 / Ani.apMul))
+                ]
             }, {
                 "name": "Trail Opacity",
                 "type": "color.alpha",
