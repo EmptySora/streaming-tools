@@ -85,14 +85,14 @@ template-curly-spacing: 2, yield-star-spacing: 2
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.15
+ * @version 2.1.7.16
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.15";
+const VERSION = "2.1.7.16";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -811,13 +811,6 @@ class StatusElement {
      * @type {HTMLElement}
      * @private
      */
-    widget;
-    /**
-     * The {@link HTMLElement} that this {@link StatusElement} is
-     * displayed via.
-     * @type {HTMLElement}
-     * @private
-     */
     owner;
     /**
      * The first of the two parameter value Elements that the value of this
@@ -835,6 +828,21 @@ class StatusElement {
      */
     param1;
     /**
+     * @type {boolean}
+     * @private
+     */
+    isRange = false;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    isHeader = false;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    isVisible = false;
+    /**
      * Creates a new {@link StatusElement} from the HTML node containing it and
      * the settings configuration information it is based upon.
      * @param {HTMLElement} tbody
@@ -846,7 +854,8 @@ class StatusElement {
      */
     constructor(tbody, statrow) {
         this.__original = statrow;
-        if (typeof statrow.show !== "undefined" && !statrow.show) {
+        this.isVisible = typeof statrow.show === "undefined" || statrow.show;
+        if (!this.isVisible) {
             return;
         }
         const trow = tbody.insertRow(-1);
@@ -859,70 +868,35 @@ class StatusElement {
         const type = statrow.type.split(/\./g).map((t) => t.split(/,/g));
         this.pType = type;
         if (statrow.type === "header") {
+            this.isHeader = true;
             trow.classList.add("header");
             c.setAttribute("colspan", "2");
         } else {
             c = trow.insertCell(-1);
-            this.widget = c;
             this.owner = c;
             if (type[0][0] === "range") {
-                this.craftStatusElement(type.slice(1)[0][0], 0);
+                this.isRange = true;
+                this.pType = type.slice(1);
+            }
+            this.craftStatusElement(this.pType[0][0], 0);
+            if (this.isRange) {
                 c = this.owner.appendChild(document.createElement("SPAN"));
                 c.classList.add("range-to");
-                c.appendChild(document.createTextNode(this.sep || ""));
-                this.craftStatusElement(type.slice(1)[0][0], 1);
-            } else {
-                this.craftStatusElement(type[0][0], 0);
+                c.appendChild(
+                    document.createTextNode(this.__original.sep || " to ")
+                );
+                this.craftStatusElement(this.pType[0][0], 1);
             }
         }
-    }
-    /**
-     * Gets the display name of the {@link StatusElement}.
-     * @returns {string} The display name of the {@link StatusElement}.
-     */
-    get name() {
-        return this.__original.name;
-    }
-    /**
-     * Gets the type of the {@link StatusElement}.
-     * @returns {string} The type of the {@link StatusElement}.
-     * @see {@link StatusElementProperties#type}
-     */
-    get type() {
-        return this.__original.type;
-    }
-    /**
-     * Gets the units of the {@link StatusElement}.
-     * @returns {string|string[]} The units of the {@link StatusElement}.
-     */
-    get unit() {
-        return this.__original.unit;
     }
     /**
      * Gets the value of the {@link StatusElement}.
      * @returns {object} The value of the {@link StatusElement}.
      */
     get value() {
-        const fn = this.__original.value;
-        if (fn instanceof Function) {
-            return this.pType[0][0] === "range" ? fn() : [fn()];
-        }
-        return null;
-    }
-    /**
-     * Gets the separators of the {@link StatusElement}.
-     * @returns {string|string[]} The separators of the {@link StatusElement}.
-     */
-    get sep() {
-        return this.__original.sep || " to ";
-    }
-    /**
-     * Gets whether or not the {@link StatusElement} is visible.
-     * @returns {boolean} Whether or not the {@link StatusElement} is visible.
-     */
-    get visible() {
-        return typeof this.__original.show === "undefined"
-            || this.__original.show;
+        return this.isRange
+            ? this.__original.value()
+            : [this.__original.value()];
     }
 
     /**
@@ -1064,19 +1038,13 @@ class StatusElement {
      * Updates the value of this {@link StatusElement} and updates the HUD.
      */
     update() {
-        if (!this.visible) {
+        if (!this.isVisible) {
             return;
         }
-        if (this.type !== "header") {
-            /*
-             * This might be bugged. Refactored this or whatever.
-             * The conditional block contents might need to be swapped...
-             */
-            if (this.pType[0][0] === "range") {
-                this.__updateInternal(this.pType.slice(1), 0);
-                this.__updateInternal(this.pType.slice(1), 1);
-            } else {
-                this.__updateInternal(this.pType, 0);
+        if (!this.isHeader) {
+            this.__updateInternal(this.pType, 0);
+            if (this.isRange) {
+                this.__updateInternal(this.pType, 1);
             }
         }
     }
@@ -2414,6 +2382,7 @@ class Ani {
 
         //Create a timer to start the animation.
         Ani.threadCount = 2;
+        Ani.startTime = new Date().getTime();
         window.setTimeout(Ani.animate, Ani.sObj.iFrame);
         window.setTimeout(Ani.addDots, Ani.sObj.iFrame);
         Ani.status.update();
@@ -2433,9 +2402,7 @@ class Ani {
             Ani.threadCount -= 1; //Decrement "thread" count
             return; //Terminate animation if stopping
         }
-        if (!Ani.startTime) {
-            Ani.startTime = new Date().getTime();
-        }
+
         //Increment the frame counter.
         Ani.frameCount += 1;
         try {
@@ -2484,16 +2451,10 @@ class Ani {
 
         //Verify that resize is actually enabled
         if (Ani.sObj.resize) {
-            /*
-             * Get size of the canvas, which should be stretched to the full
-             * size of the window.
-             */
+            //Get canvas size, which should be stretched to full window size
             Ani.size = Ani.canvas.getBoundingClientRect();
 
-            /*
-             * Set width and height of the canvas internally, so that the canvas
-             * has a 1 to 1 ratio between itself and the screen.
-             */
+            //Set w&h of canvas internally, so canvas has 1:1 ratio to screen
             Ani.canvas.setAttribute("width", Ani.width);
             Ani.canvas.setAttribute("height", Ani.height);
 
@@ -2530,7 +2491,7 @@ class Ani {
         context.fill();
 
         //Draw and move all dots.
-        Ani.dots.forEach((d) => d.draw(Ani.context));
+        Ani.dots.forEach((d) => d.draw(context));
 
         //Remove dots if they're off-screen
         for (i = 0; i < Ani.dots.length; i += 1) {
@@ -2547,19 +2508,19 @@ class Ani {
     static loadSettings() {
         Ani.settingsFactory = new SettingsDB();
         Ani.settingsFactory.addEventListener("open", () => {
-            Ani.settingsFactory.loadSettings("(default)").then((s) => {
+            Ani.settingsFactory.loadSettings().then((s) => {
                 Ani.sObj = s;
                 Ani.start();
             }).catch(() => {
                 console.error("Failed to load/parse IDB settings... :(");
-                Ani.sObj = new Settings(Ani.settingsFactory, "(default)", "{}");
+                Ani.sObj = new Settings(Ani.settingsFactory, "{}");
                 Ani.sObj.save();
                 Ani.start();
             });
         });
         Ani.settingsFactory.addEventListener("error", () => {
             console.error("Failed to load IDB settings... :(");
-            Ani.sObj = new Settings(null, "(default)", "{}");
+            Ani.sObj = new Settings(null, "{}");
             Ani.start();
         });
         Ani.settingsFactory.open();
@@ -2571,8 +2532,7 @@ class Ani {
         if (Ani.stopping) {
             return;
         }
-        Ani.sObj.fps += 5;
-        console.info(`Now targeting ${Ani.sObj.fps} frames per second.`);
+        console.info(`Now targeting ${Ani.sObj.fps += 5} frames per second.`);
     }
     /**
      * Steps the FPS down by 5 frames per second.
@@ -2688,7 +2648,7 @@ class Ani {
      * @returns {Promise<void>}
      *     A promise that returns when the application has been stopped.
      */
-    static stop(leaveSettings) {
+    static stop(leaveSettings = false) {
         //Ugh, this was an ass to implement.
         return new Promise((resolve, reject) => {
             if (Ani.stopping) {
@@ -2699,17 +2659,10 @@ class Ani {
             }
             //This will prevent bugs if the user hits a keybind while stopping
             Ani.stopping = true;
-            if (Ani.status.displayed) {
-                Ani.toggleStatus(); //Hide status overlay
-            }
-            if (Ani.statusHelp.displayed) {
-                Ani.toggleHelp(); //Hide help overlay.
-            }
+
             //Remove overlays from doc.
             Ani.status.dispose();
             Ani.statusHelp.dispose();
-            Ani.status = null;
-            Ani.statusHelp = null;
             Ani.started = false;
 
             new Promise((innerResolve) => {
@@ -2723,23 +2676,12 @@ class Ani {
             }).then(() => new Promise((innerResolve) => {
                 //Disconnect peaks server
                 if (Ani.peaks && Ani.peaks.connected) {
+                    Ani.peaks.addEventListener("close", innerResolve);
                     Ani.peaks.disconnect();
-                    const interval = window.setInterval(() => {
-                        if (!Ani.peaks.connected) {
-                            window.clearInterval(interval);
-                            innerResolve();
-                            //Wait until disconnect
-                        }
-                    }, 10);
                 } else {
                     innerResolve();
                 }
             })).then(() => {
-                /*
-                 * Do something
-                 * Animation ticks are dead.
-                 * Overlays are also dead.
-                 */
                 if (!leaveSettings) {
                     Ani.sObj = null;
                     Ani.settingsFactory = null;
@@ -2932,27 +2874,23 @@ class SettingsDB extends EventTarget {
      *     The Settings object obtained, or "null" if the application was
      *     unable to attempt this;
      */
-    loadSettings(id) {
-        let xid = id;
+    loadSettings(id = "(default)") {
         if (this.__state !== "open") {
             return null;
-        }
-        if (!(xid instanceof String) || xid.trim().length === 0) {
-            xid = "(default)";
         }
         const self = this;
         return new Promise((resolve, reject) => {
             const t = self.__db.transaction(["settings"], "readwrite");
             t.addEventListener("error", reject);
             const store = t.objectStore("settings");
-            const tr = store.get(xid);
+            const tr = store.get(id);
             tr.addEventListener("error", reject);
             tr.addEventListener("success", (e) => {
                 const {result} = e.target;
                 let sett;
                 if (result) {
                     try {
-                        sett = new Settings(self, xid, result.data);
+                        sett = new Settings(self, result.data, id);
                     } catch (ex) {
                         reject();
                     }
@@ -2967,6 +2905,8 @@ class SettingsDB extends EventTarget {
     /**
      * Saves the specified settings store.
      *
+     * @param {string} data
+     *     The settings data
      * @param {string} id
      *     The ID used to save the settings. This will be "(default)"
      *     for the default settings.
@@ -2975,28 +2915,22 @@ class SettingsDB extends EventTarget {
      *     application using "(default)" instead.
      *
      *     You can use this property to save multiple settings presets.
-     * @param {string} data
-     *     The settings data
      * @returns {Promise<void>}
      *     The Settings object obtained, or "null" if the application was
      *     unable to attempt this;
      * @protected
      */
-    saveSettings(id, data) {
-        let xid = id;
+    saveSettings(data, id = "(default)") {
         const self = this;
         if (this.__state !== "open") {
             return null;
-        }
-        if (!(xid instanceof String) || xid.trim().length === 0) {
-            xid = "(default)";
         }
         return new Promise((resolve, reject) => {
             const t = self.__db.transaction(["settings"], "readwrite");
             t.addEventListener("error", reject);
             t.addEventListener("complete", resolve);
             const store = t.objectStore("settings");
-            store.put({"id": xid, data});
+            store.put({id, data});
             t.commit();
         });
     }
@@ -3042,12 +2976,12 @@ class Settings {
      * @protected
      * @param {SettingsDB} db
      *     The database backing-store for these settings, or null.
-     * @param {string} id
-     *     The id of the settings for DB use.
      * @param {string} data
      *     A JSON string containing the unparsed settings data.
+     * @param {string} id
+     *     The id of the settings for DB use.
      */
-    constructor(db, id, data) {
+    constructor(db, data, id = "(default)") {
         this.__db = db;
         this.__id = id;
         this.__data = JSON.parse(data);
@@ -3064,8 +2998,8 @@ class Settings {
             return null;
         }
         return this.__db.saveSettings(
-            this.__id,
-            JSON.stringify(this.__data)
+            JSON.stringify(this.__data),
+            this.__id
         );
     }
     /**
@@ -3098,8 +3032,8 @@ class Settings {
             const id = self.__id;
             self.__id = newID;
             self.__db
-                .saveSettings(self.__id, JSON.stringify(self.__data))
-                .then(() => self.__db.saveSettings(id, ""))
+                .saveSettings(JSON.stringify(self.__data), self.__id)
+                .then(() => self.__db.saveSettings("", id))
                 .then(resolve)
                 .catch(reject);
             //Ahhh, I love stringing promises together.
@@ -3122,7 +3056,7 @@ class Settings {
         this.__id = null;
         this.__data = {};
         this.__refreshKeys();
-        const promise = this.__db.saveSettings(id, "");
+        const promise = this.__db.saveSettings("", id);
         this.__db = null;
         return promise;
     }
@@ -3522,7 +3456,7 @@ class Settings {
  * A class that enables connection to an AudioPeaks server and dynamically
  * alter aspects of the animation based on the volume.
  */
-class AudioPeaks {
+class AudioPeaks extends EventTarget {
     /**
      * @type {boolean}
      * @private
@@ -3548,6 +3482,7 @@ class AudioPeaks {
      * Creates a new {@link AudioPeaks} object.
      */
     constructor() {
+        super();
         if (Ani.sObj.ePeaks) {
             this.connect();
         }
@@ -3559,6 +3494,7 @@ class AudioPeaks {
     __open() {
         console.info("Connected to the Audio peaks sever successfully.");
         this.__connected = true;
+        this.dispatchEvent(new CustomEvent("open"));
     }
     /**
      * @private
@@ -3574,6 +3510,7 @@ class AudioPeaks {
             this.__reconnect = true;
         }
         Ani.apMul = 1;
+        this.dispatchEvent(new CustomEvent("error", {detail: e}));
     }
     /**
      * @private
@@ -3587,6 +3524,7 @@ class AudioPeaks {
         }
         Ani.apMul = 1;
         this.__connected = false;
+        this.dispatchEvent(new CustomEvent("close"));
     }
     /**
      * @private
@@ -3715,6 +3653,11 @@ if (document.readyState === "complete") {
  * @todo Implement the canvas resize code (and test it)
  * @todo add ability to modify keybindings (though I'm not sure why we would
  *       need this...)
+ * @todo Open firefox and use the dev console to check GC for potential issues
+ *       With the slowdown from peaks and a target fps of 30, we *are*
+ *       averaging 29fps (which is really good given we have to do the
+ *       calculations synchronously)
+ *       See if there's any potential GC issues and fix them.
  *
  * REMEMBER: Document AT SINCE for all new properties and objects.
  */
