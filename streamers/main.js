@@ -1,10 +1,12 @@
-"use strict"; //For some reason, eslint is saying this is an error.
+/* eslint-disable-next-line strict */
+"use strict";
 /* eslint-env browser, es2021 */
 /*
 eslint eqeqeq: 2, for-direction: 2, getter-return: 2, no-compare-neg-zero: 2,
 no-debugger: 2, no-dupe-args: 2, no-dupe-else-if: 2, no-dupe-keys: 2,
 no-duplicate-case: 2, no-empty: 1, no-empty-character-class: 2,
-no-ex-assign: 2, no-extra-boolean-cast: 2, no-extra-parens: 2,
+no-ex-assign: 2, no-extra-boolean-cast: 2,
+no-extra-parens: [2,"all",{"nestedBinaryExpressions": true}],
 no-extra-semi: 2, no-func-assign: 2, no-import-assign: 2,
 no-inner-declarations: 2, no-invalid-regexp: 2, no-irregular-whitespace: 2,
 no-misleading-character-class: 2, no-obj-calls: 2, no-prototype-builtins: 2,
@@ -12,7 +14,7 @@ no-regex-spaces: 2, no-setter-return: 2, no-sparse-arrays: 2,
 no-template-curly-in-string: 2, no-unexpected-multiline: 2, no-unreachable: 1,
 no-unsafe-finally: 2, no-unsafe-negation: 2, require-atomic-updates: 2,
 use-isnan: 2, valid-typeof: 2, array-callback-return: 2, block-scoped-var: 2,
-class-methods-use-this: 1, complexity: [2, 20], consistent-return: 2, curly: 2,
+class-methods-use-this: 1, complexity: [2, 24], consistent-return: 2, curly: 2,
 default-param-last: 2, dot-location: [2, "property"], dot-notation: 2,
 no-alert: 2, no-caller: 2, no-case-declarations: 2, no-constructor-return: 2,
 no-div-regex: 2, no-else-return: 1, no-empty-function: 2,
@@ -31,7 +33,8 @@ no-warning-comments: 1, no-with: 2, prefer-named-capture-group: 2,
 prefer-regex-literals: 2, radix: [2, "as-needed"], require-await: 2,
 vars-on-top: 1, wrap-iife: [2, "inside"], yoda: 2, strict: [2, "global"],
 no-delete-var: 2, no-label-var: 2, no-shadow: 2, no-undef: 2, no-undef-init: 2,
-no-undefined: 2, no-unused-vars: 1, no-use-before-define: 2,
+no-undefined: 2, no-unused-vars: 1, no-use-before-define:
+[2,{ "classes": false }],
 array-bracket-newline: [2, "consistent"], array-bracket-spacing: [2, "never"],
 array-element-newline: [2, "consistent"], block-spacing: 2, brace-style: 2,
 capitalized-comments: 1, comma-dangle: [2, "never"],
@@ -50,7 +53,9 @@ no-array-constructor: 2, no-bitwise: 2, no-lonely-if: 2, no-mixed-operators: 2,
 no-mixed-spaces-and-tabs: 2, no-multi-assign: 1,
 no-multiple-empty-lines: 2, no-negated-condition: 2, no-nested-ternary: 1,
 no-new-object: 2, no-plusplus: 2, no-tabs: 2, no-trailing-spaces: 2,
-no-underscore-dangle: 2, no-unneeded-ternary: 2,
+no-underscore-dangle: [2, {"allowAfterThis": true, "allow": ["__constructor",
+"__state","__db","__id","__data"]}],
+no-unneeded-ternary: 2,
 no-whitespace-before-property: 2,
 object-curly-newline: [2, { "consistent": true }], object-curly-spacing: 2,
 object-property-newline: [2, { "allowAllPropertiesOnSameLine": true }],
@@ -72,10 +77,6 @@ prefer-rest-params: 1, prefer-spread: 1, prefer-template: 1, require-yield: 2,
 template-curly-spacing: 2, yield-star-spacing: 2
 */
 /*
- * FINALLY DONE WITH THIS... NOW TO ACTUALLY RESOLVE THE ERRORS AND STUFF.
- * There are... 490 errors and 140 warnings...
- */
-/*
  * Unavailable in my version of VisualStudio right now
  * no-loss-of-precision: 2, no-promise-executor-return: 2,
  * no-unreachable-loop: 2, no-unsafe-optional-chaining: 2,
@@ -84,14 +85,14 @@ template-curly-spacing: 2, yield-star-spacing: 2
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.11
+ * @version 2.1.7.13
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.11";
+const VERSION = "2.1.7.13";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -112,28 +113,24 @@ const VERSION = "2.1.7.11";
 /**
  * The default min luminosity oscillation period factor that is used to
  * determine the allowed oscillation period range based on the current FPS.
- * @constant {number}
  * @default 0.5
  */
 const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR = 0.5;
 /**
  * The default max luminosity oscillation period factor that is used to
  * determine the allowed oscillation period range based on the current FPS.
- * @constant {number}
  * @default 1
  */
 const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR = 1;
 /**
  * The default min line width oscillation period factor that is used to
  * determine the allowed oscillation period range based on the current FPS.
- * @constant {number}
  * @default 0.5
  */
 const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR = 0.5;
 /**
  * The default max line width oscillation period factor that is used to
  * determine the allowed oscillation period range based on the current FPS.
- * @constant {number}
  * @default 1
  */
 const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR = 1;
@@ -148,7 +145,6 @@ const DEFAULT_BACKGROUND = [0, 0, 0];
 /**
  * A number ranging from 0.0 - 1.0 that represents the opacity of the trails
  * the dots leave.
- * @see {@link Opacity}
  * @constant {Opacity}
  * @default 1.0
  */
@@ -156,8 +152,7 @@ const DEFAULT_TRAIL_OPACITY = 1.0;
 
 /**
  * The minimum saturation allowed for trail components.
- * @see {@link Saturation}
- * @see {@link TRAIL_SATURATION_MAX}
+ * @see {@link DEFAULT_TRAIL_SATURATION_MAX}
  * @constant {Saturation}
  * @default 100.0
  */
@@ -165,8 +160,7 @@ const DEFAULT_TRAIL_SATURATION_MIN = 100.0;
 
 /**
  * The maximum saturation allowed for trail components.
- * @see {@link Saturation}
- * @see {@link TRAIL_SATURATION_MIN}
+ * @see {@link DEFAULT_TRAIL_SATURATION_MIN}
  * @constant {Saturation}
  * @default 100.0
  */
@@ -174,8 +168,7 @@ const DEFAULT_TRAIL_SATURATION_MAX = 100.0;
 
 /**
  * The minimum luminosity allowed for trail components.
- * @see {@link Luminosity}
- * @see {@link TRAIL_LUMINOSITY_MAX}
+ * @see {@link DEFAULT_TRAIL_LUMINOSITY_MAX}
  * @constant {Luminosity}
  * @default 25.0
  */
@@ -183,8 +176,7 @@ const DEFAULT_TRAIL_LUMINOSITY_MIN = 25.0;
 
 /**
  * The maximum luminosity allowed for trail components.
- * @see {@link Luminosity}
- * @see {@link TRAIL_LUMINOSITY_MIN}
+ * @see {@link DEFAULT_TRAIL_LUMINOSITY_MIN}
  * @constant {Luminosity}
  * @default 75.0
  */
@@ -198,7 +190,6 @@ const DEFAULT_TRAIL_LUMINOSITY_MAX = 75.0;
  * (since 475-360=115)
  * This value can also be negative.
  * @see {@link Hue}
- * @constant {number}
  * @default 0.1
  */
 const DEFAULT_HSL_DRIFT = 0.1;
@@ -206,9 +197,9 @@ const DEFAULT_HSL_DRIFT = 0.1;
 /**
  * The minimum speed in pixels per frame the dots move.
  * To calculate the approximate minimum number of pixels per second, use the
- * following formula: {@link FPS} x {@link MIN_SPEED}
- * @see {@link MAX_SPEED}
- * @constant {number}
+ * following formula:
+ * {@link DEFAULT_FPS} x {@link DEFAULT_MIN_SPEED}
+ * @see {@linkDEFAULT_ MAX_SPEED}
  * @default 0.1
  */
 const DEFAULT_MIN_SPEED = 0.1;
@@ -216,9 +207,9 @@ const DEFAULT_MIN_SPEED = 0.1;
 /**
  * The maximum speed in pixels per frame the dots move.
  * To calculate the approximate maximum number of pixels per second, use the
- * following formula: {@link FPS} x {@link MAX_SPEED}
- * @see {@link MIN_SPEED}
- * @constant {number}
+ * following formula:
+ * {@link DEFAULT_FPS} x {@link DEFAULT_MAX_SPEED}
+ * @see {@link DEFAULT_MIN_SPEED}
  * @default 2.0
  */
 const DEFAULT_MAX_SPEED = 2.0;
@@ -226,9 +217,9 @@ const DEFAULT_MAX_SPEED = 2.0;
 /**
  * The minimum acceleration in pixels per frame the dots move.
  * To calculate the approximate minimum acceleration number of pixels per
- * second, use the following formula: {@link FPS} x {@link MIN_ACCEL}
- * @see {@link MAX_ACCEL}
- * @constant {number}
+ * second, use the following formula:
+ * {@link DEFAULT_FPS} x {@link DEFAULT_MIN_ACCEL}
+ * @see {@link DEFAULT_MAX_ACCEL}
  * @default 0.01
  */
 const DEFAULT_MIN_ACCEL = 0.01;
@@ -236,9 +227,9 @@ const DEFAULT_MIN_ACCEL = 0.01;
 /**
  * The maximum acceleration in pixels per frame the dots move.
  * To calculate the approximate maximum acceleration number of pixels per
- * second, use the following formula: {@link FPS} x {@link MAX_ACCEL}
- * @see {@link MIN_ACCEL}
- * @constant {number}
+ * second, use the following formula:
+ * {@link DEFAULT_FPS} x {@link DEFAULT_MAX_ACCEL}
+ * @see {@link DEFAULT_MIN_ACCEL}
  * @default 0.50
  */
 const DEFAULT_MAX_ACCEL = 0.50;
@@ -247,17 +238,15 @@ const DEFAULT_MAX_ACCEL = 0.50;
  * The maximum number of dots that can concurrently be active at one time.
  * If you set this to a high value, your processor and/or GPU might have trouble
  * keeping up with the physics of each particle.
- * @constant {number}
  * @default 250
  */
 const DEFAULT_MAX_DOTS = 250;
 
 /**
  * The rate at which new dots are added to the simulation/animation. They are
- * effectively added at a rate of {@link DOT_RATE} dots per frame.
- * Setting this value to a value higher than {@link MAX_DOTS} will not pose
- * any issues.
- * @constant {number}
+ * effectively added at a rate of {@link DEFAULT_DOT_RATE} dots per frame.
+ * Setting this value to a value higher than {@link DEFAULT_MAX_DOTS} will not
+ * pose any issues.
  * @default 2
  */
 const DEFAULT_DOT_RATE = 2;
@@ -272,7 +261,6 @@ const DEFAULT_DOT_RATE = 2;
  * accross the canvas. They seem to leave a persistent trail whose color is
  * very slightly brighter or darker than the background color.
  * @see {@link Opacity}
- * @constant {Opacity}
  * @default 2
  */
 const DEFAULT_FADE_OPACITY = 0.2;
@@ -283,31 +271,16 @@ const DEFAULT_FADE_OPACITY = 0.2;
  * Values lower than 20 will result in stuttering.
  * Values greater than 30 will result in computational lag depending on other
  * settings.
- * @constant {number}
  * @default 30
  */
 const DEFAULT_FPS = 30;
 
 /**
- * DO NOT MODIFY THIS CONSTANT!!!
- * This constant holds the number of milliseconds between each frame. It is used
- * internally to cooperate with [window.setTimeout]{@link Window.setTimeout} to
- * schedule when the next frame should occur.
- * You should have no reason to modify this value, unless, for some reason, the
- * laws of physics have changed and a second no longer consists of exactly 1000
- * milliseconds.
- * @constant {number}
- * @default
- */
-const DEFAULT_FRAME_INTERVAL = 1000 / DEFAULT_FPS;
-
-
-/**
  * The minimum width of the trails the dots produce. This value is effectively
  * like the radius of a circle, meaning that the produced trail extends both to
- * the left and right {@link LINE_WIDTH_MIN} pixels.
+ * the left and right {@link DEFAULT_LINE_WIDTH_MIN} pixels.
  * In other words, a value of 1.0 would actually take up 2-3 pixels.
- * @constant {number}
+ * @see {@link DEFAULT_LINE_WIDTH_MIN}
  * @default 0.5
  */
 const DEFAULT_LINE_WIDTH_MIN = 0.5;
@@ -315,51 +288,19 @@ const DEFAULT_LINE_WIDTH_MIN = 0.5;
 /**
  * The maximum width of the trails the dots produce. This value is effectively
  * like the radius of a circle, meaning that the produced trail extends both to
- * the left and right {@link LINE_WIDTH_MAX} pixels.
+ * the left and right {@link DEFAULT_LINE_WIDTH_MAX} pixels.
  * In other words, a value of 1.0 would actually take up 2-3 pixels.
- * @constant {number}
+ * @see {@link DEFAULT_LINE_WIDTH_MIN}
  * @default 3.0
  */
 const DEFAULT_LINE_WIDTH_MAX = 3.0;
-
-
-/**
- * The minimum amount of time before the luminosity of a dot, finishes an
- * oscillation. This value should be in the form
- * "{@link FPS} * [number of seconds]"
- * where "[number of seconds]" is how many seconds it should take to loop.
- * @see {@link Sinusoid}
- * @see {@link FPS}
- * @see {@link LUMINOSITY_OSCILLATION_PERIOD_MAX}
- * @see {@link Luminosity}
- * @constant {number}
- * @default
- */
-const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN = DEFAULT_FPS *
-    DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR;
-
-/**
- * The maximum amount of time before the luminosity of a dot, finishes an
- * oscillation. This value should be in the form
- * "{@link FPS} * [number of seconds]"
- * where "[number of seconds]" is how many seconds it should take to loop.
- * @see {@link Sinusoid}
- * @see {@link FPS}
- * @see {@link LUMINOSITY_OSCILLATION_PERIOD_MIN}
- * @see {@link Luminosity}
- * @constant {number}
- * @default
- */
-const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX = DEFAULT_FPS *
-    DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR;
 
 /**
  * The minimum variation in luminosity the dot should oscillate to/from.
  * This value is relative to the luminosity of the dot.
  * @see {@link Sinusoid}
- * @see {@link LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}
+ * @see {@link DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}
  * @see {@link Luminosity}
- * @constant {number}
  * @default 0.1
  */
 const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
@@ -368,9 +309,8 @@ const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
  * The maximum variation in luminosity the dot should oscillate to/from.
  * This value is relative to the luminosity of the dot.
  * @see {@link Sinusoid}
- * @see {@link LUMINOSITY_OSCILLATION_AMPLITUDE_MIN}
+ * @see {@link DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN}
  * @see {@link Luminosity}
- * @constant {number}
  * @default 25
  */
 const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
@@ -382,52 +322,15 @@ const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
  * randomized, as having this static does basically nothing.
  * @see {@link Sinusoid}
  * @see {@link Luminosity}
- * @constant {number}
  * @default 0
  */
 const DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
-
-
-/**
- * The minimum amount of time before the line width of a dot, finishes an
- * oscillation. This value should be in the form
- * "{@link FPS} * [number of seconds]"
- * where "[number of seconds]" is how many seconds it should take to loop.
- * @see {@link Sinusoid}
- * @see {@link FPS}
- * @see {@link LINE_WIDTH_OSCILLATION_PERIOD_MAX}
- * @see {@link LINE_WIDTH_MIN}
- * @see {@link LINE_WIDTH_MAX}
- * @constant {number}
- * @default
- */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN = DEFAULT_FPS *
-    DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR;
-
-/**
- * The maximum amount of time before the line width of a dot, finishes an
- * oscillation. This value should be in the form
- * "{@link FPS} * [number of seconds]"
- * where "[number of seconds]" is how many seconds it should take to loop.
- * @see {@link Sinusoid}
- * @see {@link FPS}
- * @see {@link LINE_WIDTH_OSCILLATION_PERIOD_MIN}
- * @see {@link LINE_WIDTH_MIN}
- * @see {@link LINE_WIDTH_MAX}
- * @constant {number}
- * @default
- */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX = DEFAULT_FPS *
-    DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR;
 
 /**
  * The minimum variation in line width the dot should oscillate to/from.
  * This value is relative to the line width of the dot.
  * @see {@link Sinusoid}
- * @see {@link LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}
- * @see {@link LINE_WIDTH_MIN}
- * @see {@link LINE_WIDTH_MAX}
- * @constant {number}
+ * @see {@link DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}
  * @default 0.1
  */
 const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
@@ -436,10 +339,7 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
  * The maximum variation in line width the dot should oscillate to/from.
  * This value is relative to the line width of the dot.
  * @see {@link Sinusoid}
- * @see {@link LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN}
- * @see {@link LINE_WIDTH_MIN}
- * @see {@link LINE_WIDTH_MAX}
- * @constant {number}
+ * @see {@link DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN}
  * @default 2.0
  */
 const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
@@ -450,9 +350,6 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
  * This value will likely be converted to a "MIN"/"MAX" so that it may be
  * randomized, as having this static does basically nothing.
  * @see {@link Sinusoid}
- * @see {@link LINE_WIDTH_MIN}
- * @see {@link LINE_WIDTH_MAX}
- * @constant {number}
  * @default 0
  */
 const DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
@@ -471,7 +368,6 @@ const DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
  * To see this effect, set this value to false, load the page with the window
  * really small, and then maximize the window, the contents of the canvas will
  * be stretched to the point that they blur really badly.
- * @constant {boolean}
  * @default false
  */
 const DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
@@ -479,13 +375,13 @@ const DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
 /**
  * Represents the initial minimum hue of the dots that are created in degrees
  * rotated around the color wheel.
- * The larger the difference between {@link TRAIL_HSL_START} and
- * {@link TRAIL_HSL_END}, the more variation in color the dots will display.
+ * The larger the difference between {@link DEFAULT_TRAIL_HSL_START} and
+ * {@link DEFAULT_TRAIL_HSL_END}, the more variation in color the dots will
+ * display.
  * Setting the range to anything larger than or equal to 360 will effectively
  * Eliminate the cycling of color.
  * @see {@link Hue}
- * @see {@link TRAIL_HSL_END}
- * @var {number}
+ * @see {@link DEFAULT_TRAIL_HSL_END}
  * @default 180.0
  */
 const DEFAULT_TRAIL_HSL_START = 180.0;
@@ -493,14 +389,14 @@ const DEFAULT_TRAIL_HSL_START = 180.0;
 /**
  * Represents the initial maximum hue of the dots that are created in degrees
  * rotated around the color wheel.
- * The larger the difference between {@link TRAIL_HSL_START} and
- * {@link TRAIL_HSL_END}, the more variation in color the dots will display.
+ * The larger the difference between {@link DEFAULT_TRAIL_HSL_START} and
+ * {@link DEFAULT_TRAIL_HSL_END}, the more variation in color the dots will
+ * display.
  * Setting the range to anything larger than or equal to 360 will effectively
  * Eliminate the cycling of color.
  * @see {@link Hue}
- * @see {@link TRAIL_HSL_START}
- * @var {number}
- * @default 180.0
+ * @see {@link DEFAULT_TRAIL_HSL_START}
+ * @default 240.0
  */
 const DEFAULT_TRAIL_HSL_END = 240.0;
 
@@ -508,7 +404,6 @@ const DEFAULT_TRAIL_HSL_END = 240.0;
  * The port on the server running WinAudioLevels.exe that is listening
  * for WebSocket Connections.
  * @default 8069
- * @constant {number}
  */
 const DEFAULT_PEAKS_APP_PORT = 8069;
 
@@ -516,7 +411,6 @@ const DEFAULT_PEAKS_APP_PORT = 8069;
  * The domain of the server running WinAudioLevels.exe. If you are selfhosting,
  * set this to one of: "127.0.0.1", "localhost", or "::1"
  * @default "localhost"
- * @constant {string}
  */
 const DEFAULT_PEAKS_APP_DOMAIN = "localhost";
 
@@ -526,7 +420,6 @@ const DEFAULT_PEAKS_APP_DOMAIN = "localhost";
  * If you are selfhosting, most likely, this will be set to false. Otherwise,
  * this must be set to true due to JS security restrictions.
  * @default false
- * @constant {boolean}
  */
 const DEFAULT_PEAKS_APP_SECURE = false;
 
@@ -534,7 +427,6 @@ const DEFAULT_PEAKS_APP_SECURE = false;
  * Whether or not to try connection to the audio peaks server at all. Set this
  * to false if you are not running an audio peaks server.
  * @default true
- * @constant {boolean}
  */
 const DEFAULT_PEAKS_APP_ENABLED = true;
 
@@ -542,7 +434,6 @@ const DEFAULT_PEAKS_APP_ENABLED = true;
  * How long to wait, in milliseconds, before attempting to reconnect to the
  * audio peaks server after an error occurs.
  * @default 30000
- * @constant {number}
  */
 const DEFAULT_PEAKS_APP_ERROR_RECONNECT_WAIT = 30000;
 
@@ -550,7 +441,6 @@ const DEFAULT_PEAKS_APP_ERROR_RECONNECT_WAIT = 30000;
  * How long to wait, in milliseconds, before attempting to reconnect to the
  * audio peaks server after a disconnection occurs.
  * @default 5000
- * @constant {number}
  */
 const DEFAULT_PEAKS_APP_RECONNECT_WAIT = 5000;
 
@@ -566,9 +456,8 @@ const DEFAULT_PEAKS_APP_RECONNECT_WAIT = 5000;
  * animation.
  * So, the range between MIN and MAX is not evenly spread out. MIN to 1, and 1
  * to MAX are spread out evenly.
- * @default 0.5
- * @constant {number}
- * @see {AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER}
+ * @default 0.125
+ * @see {DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER}
  */
 const DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
 
@@ -584,15 +473,16 @@ const DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
  * animation.
  * So, the range between MIN and MAX is not evenly spread out. MIN to 1, and 1
  * to MAX are spread out evenly.
- * @default 2.0
- * @constant {number}
- * @see {AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER}
+ * @default 8.0
+ * @see {DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER}
  */
 const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
 
-/* ************************************************************************* *
+/*
+ * ************************************************************************* *
  * ********************* END OF CONFIGURATION SETTINGS ********************* *
- * ************************************************************************* */
+ * ************************************************************************* *
+ */
 
 /**
  * Represents a color using Red, Green, and Blue components in that order.
@@ -641,7 +531,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * Refer to conical models of the HSL and HSV color spaces. HSV looks like an
  * upside-down cone, while HSL looks like a di-cone.
  * Img: {@link https://learnui.design/blog/img/hsb/hsb-cone-and-hsl-dicone.png}
-
+ *
  * Even though this value represents a percentage, you must express the value
  * as a number ranging from 0 to 100.
  * @typedef {number} Luminosity
@@ -956,19 +846,22 @@ class StatusElement {
      */
     constructor(tbody, statrow) {
         this.__original = statrow;
-        if (statrow.show !== undefined && !statrow.show) {
+        if (typeof statrow.show !== "undefined" && !statrow.show) {
             return;
         }
-        var trow = tbody.insertRow(-1);
+        const trow = tbody.insertRow(-1);
         trow.classList.add("status-info-row");
         if (statrow.verbose) {
             trow.classList.add("status-info-row-verbose");
         }
-        var c = trow.insertCell(-1);
+        let c = trow.insertCell(-1);
         c.textContent = statrow.name;
-        var type = statrow.type.split(/\./g).map((t) => t.split(/,/g));
+        const type = statrow.type.split(/\./g).map((t) => t.split(/,/g));
         this.pType = type;
-        if (statrow.type !== "header") {
+        if (statrow.type === "header") {
+            trow.classList.add("header");
+            c.setAttribute("colspan", "2");
+        } else {
             c = trow.insertCell(-1);
             this.widget = c;
             this.owner = c;
@@ -981,9 +874,6 @@ class StatusElement {
             } else {
                 this.craftStatusElement(type[0][0], 0);
             }
-        } else {
-            trow.classList.add("header");
-            c.setAttribute("colspan", "2");
         }
     }
     /**
@@ -1013,12 +903,11 @@ class StatusElement {
      * @returns {object} The value of the {@link StatusElement}.
      */
     get value() {
-        var fn = this.__original.value;
+        const fn = this.__original.value;
         if (fn instanceof Function) {
-            return this.pType[0][0] !== "range" ? [fn()] : fn();
-        } else {
-            return null;
+            return this.pType[0][0] === "range" ? fn() : [fn()];
         }
+        return null;
     }
     /**
      * Gets the separators of the {@link StatusElement}.
@@ -1032,7 +921,8 @@ class StatusElement {
      * @returns {boolean} Whether or not the {@link StatusElement} is visible.
      */
     get visible() {
-        return this.__original.show === undefined || this.__original.show;
+        return typeof this.__original.show === "undefined"
+            || this.__original.show;
     }
 
     /**
@@ -1047,11 +937,12 @@ class StatusElement {
      *     If there are not multiple values, this should be set to 0.
      */
     __updateInternal(types, parameter) {
-        var value = this.value[parameter];
-        var widget = this[`param${parameter}`];
-        var main_type = types[0][0];
-        var subs = types.slice(1);
-        var sub_param = (subs[0] || [])[parameter] || (subs[0] || [])[0];
+        let value = this.value[parameter];
+        const widget = this[`param${parameter}`];
+        /* eslint-disable-next-line prefer-destructuring */
+        const main_type = types[0][0];
+        const subs = types.slice(1);
+        const sub_param = (subs[0] || [])[parameter] || (subs[0] || [])[0];
         switch (main_type) {
         case "color":
             switch (sub_param) {
@@ -1089,11 +980,11 @@ class StatusElement {
                 break;
             case "sat":
                 widget.style.backgroundColor = `hsl(0,${value}%,50%)`;
-                widget.title = value + "%";
+                widget.title = `${value}%`;
                 break;
             case "luma":
                 widget.style.backgroundColor = `hsl(0,100%,${value}%)`;
-                widget.title = value + "%";
+                widget.title = `${value}%`;
                 break;
             case "alpha":
                 widget.style.backgroundColor = `rgba(255,0,0,${value})`;
@@ -1139,7 +1030,7 @@ class StatusElement {
      *     If there are not multiple values, this should be set to 0.
      */
     craftStatusElement(type, parameter) {
-        var widget = document.createElement("DIV");
+        let widget = document.createElement("DIV");
         switch (type) {
         case "color":
             widget.classList.add("status-widget");
@@ -1155,9 +1046,9 @@ class StatusElement {
         widget.classList.add("status-widget-parameter");
 
         this[`param${parameter}`] = widget;
-        var units = this.__original.unit instanceof Array ?
-            this.__original.unit[parameter] :
-            this.__original.unit;
+        const units = this.__original.unit instanceof Array
+            ? this.__original.unit[parameter]
+            : this.__original.unit;
         if (units) {
             widget = document.createElement("DIV");
             this.owner.appendChild(widget);
@@ -1177,11 +1068,15 @@ class StatusElement {
             return;
         }
         if (this.type !== "header") {
-            if (this.pType[0][0] !== "range") {
-                this.__updateInternal(this.pType, 0);
-            } else {
+            /*
+             * This might be bugged. Refactored this or whatever.
+             * The conditional block contents might need to be swapped...
+             */
+            if (this.pType[0][0] === "range") {
                 this.__updateInternal(this.pType.slice(1), 0);
                 this.__updateInternal(this.pType.slice(1), 1);
+            } else {
+                this.__updateInternal(this.pType, 0);
             }
         }
     }
@@ -1235,10 +1130,10 @@ class StatusElementCollection {
          *     The property list to attribute to the element.
          */
         function createElement(name, obj) {
-            var element = document.createElement(name);
-            var oKeys = Object.keys(obj);
-            var keys;
-            var i;
+            const element = document.createElement(name);
+            const oKeys = Object.keys(obj);
+            let keys;
+            let i;
             if (oKeys.includes("classes")) {
                 obj.classes.forEach((className) => {
                     element.classList.add(className);
@@ -1249,7 +1144,8 @@ class StatusElementCollection {
                 for (i = 0; i < keys.length; i += 1) {
                     element.setAttribute(
                         keys[i],
-                        obj.attributes[keys[i]]);
+                        obj.attributes[keys[i]]
+                    );
                 }
             }
             if (oKeys.includes("text")) {
@@ -1265,8 +1161,8 @@ class StatusElementCollection {
             }
             return element;
         }
-        var body = document.body;
-        var container = body.appendChild(createElement("DIV", {
+        const {body} = document;
+        const container = body.appendChild(createElement("DIV", {
             classes: ["status-info-container", "status-hide"],
             style: settings.customCSS || "",
             children: [
@@ -1281,7 +1177,7 @@ class StatusElementCollection {
                 })
             ]
         }));
-        var element = container
+        const element = container
             .appendChild(document.createElement("TABLE"));
         element.classList.add("status-table");
         element
@@ -1295,20 +1191,20 @@ class StatusElementCollection {
                     text: settings.valueText || "Value"
                 })
             );
-        var output = element
+        const output = element
             .appendChild(document.createElement("TBODY"));
         output.classList.add("status-table-body");
 
         console.info("creating rows!");
-        var nrows = [];
+        const nrows = [];
         settings.rows.forEach((row) => {
             nrows.push(new StatusElement(output, row));
         });
 
         this.rows = nrows;
         this.__container = container;
-        this.__enabled = !Object.keys(settings).includes("enableUpdate") ||
-            settings.enableUpdate;
+        this.__enabled = !Object.keys(settings).includes("enableUpdate")
+            || settings.enableUpdate;
         this.displayed = false;
         this.showVerbose = false;
     }
@@ -1323,14 +1219,14 @@ class StatusElementCollection {
             throw new Error("Object disposed already!");
         }
         if (!this.displayed) {
-            return; //don't update, save the frames; kill the animals.
+            return; //Don't update, save the frames; kill the animals.
         }
         this.rows.forEach((row) => {
             try {
                 row.update();
             } catch (e) {
                 console.error("Error during update: ", e);
-                //this will be run if AudioPeaks is not enabled (most likely).
+                //This will be run if AudioPeaks is not enabled (most likely).
             }
         });
     }
@@ -1367,7 +1263,7 @@ class StatusElementCollection {
             this.__container.classList.add("status-hide");
             if (this.__interval && this.__enabled) {
                 window.clearInterval(this.__interval, 10);
-                this.__interval = undefined;
+                this.__interval = null;
             }
         }
     }
@@ -1412,8 +1308,10 @@ class StatusElementCollection {
         this.displayed = false;
         this.__container.parentElement.removeChild(this.__container);
     }
-    //this is intended to be used such that we can remove an overlay
-    //and recreate it (namely so we can modify keybindings on the fly)
+    /*
+     * This is intended to be used such that we can remove an overlay
+     * and recreate it (namely so we can modify keybindings on the fly)
+     */
 }
 
 /**
@@ -1641,33 +1539,33 @@ class Dot {
      * Creates a new {@link Dot}.
      */
     constructor() {
-        var vpb = Dot.rand(Ani.opnLum, Ani.opxLum);
-        var vbpb = Dot.rand(Ani.opnwLine, Ani.opxwLine);
+        const vpb = Dot.rand(Ani.opnLum, Ani.opxLum);
+        const vbpb = Dot.rand(Ani.opnwLine, Ani.opxwLine);
 
         this.x = Dot.rand(0, Ani.size.width);
         this.y = Ani.size.height;
-        this.s = Dot.rand(Ani.nSpeed, Ani.xSpeed);
-        this.a = Dot.rand(Ani.nAccel, Ani.xAccel);
+        this.s = Dot.rand(Ani.sObj.nSpeed, Ani.sObj.xSpeed);
+        this.a = Dot.rand(Ani.sObj.nAccel, Ani.sObj.xAccel);
         this.c = Dot.rand(Ani.hsTrail, Ani.heTrail);
-        this.l = Dot.rand(Ani.lnTrail, Ani.lxTrail);
-        this.sa = Dot.rand(Ani.snTrail, Ani.sxTrail);
+        this.l = Dot.rand(Ani.sObj.lnTrail, Ani.sObj.lxTrail);
+        this.sa = Dot.rand(Ani.sObj.snTrail, Ani.sObj.sxTrail);
         this.f = Ani.frameCount;
-        this.pa = Dot.rand(Ani.oanLum, Ani.oaxLum);
+        this.pa = Dot.rand(Ani.sObj.oanLum, Ani.sObj.oaxLum);
         this.pb = Dot.getB(vpb);
         this.pp = vpb;
         this.opp = vpb;
-        this.pc = Ani.frameCount + Ani.opsLum;
-        this.bpa = Dot.rand(Ani.oanwLine, Ani.oaxwLine);
+        this.pc = Ani.frameCount + Ani.sObj.opsLum;
+        this.bpa = Dot.rand(Ani.sObj.oanwLine, Ani.sObj.oaxwLine);
         this.bpb = Dot.getB(vbpb);
         this.bpp = vbpb;
         this.obpp = vbpb;
-        this.bpc = Ani.frameCount + Ani.opswLine;
-        this.w = Dot.rand(Ani.wnLine, Ani.wxLine);
+        this.bpc = Ani.frameCount + Ani.sObj.opswLine;
+        this.w = Dot.rand(Ani.sObj.wnLine, Ani.sObj.wxLine);
         this.pfx = Ani.frameCount;
         this.bpfx = Ani.frameCount;
 
-        Ani.heTrail += Ani.hDrift;
-        Ani.hsTrail += Ani.hDrift;
+        Ani.heTrail += Ani.sObj.hDrift;
+        Ani.hsTrail += Ani.sObj.hDrift;
     }
     /**
      * Shifts the reference point coordinates for this {@see Dot}.
@@ -1690,8 +1588,8 @@ class Dot {
      */
     updatePhaseShifts() {
         if (Ani.audioPeakMultiplier !== this.oapm) {
-            var np = this.opp / Ani.audioPeakMultiplier;
-            var nbp = this.obpp / Ani.audioPeakMultiplier;
+            const np = this.opp / Ani.audioPeakMultiplier;
+            const nbp = this.obpp / Ani.audioPeakMultiplier;
             this.pc = Dot.getNewShift(this.opp, np, this.pc, this.pfx);
             this.pb = Dot.getB(np);
             this.pp = np;
@@ -1699,9 +1597,11 @@ class Dot {
             this.bpb = Dot.getB(nbp);
             this.bpp = nbp;
         }
-        //we need to...
-        //keep the original period and the last period/phaseshift
-        //new period is the multiplier*original
+        /*
+         * We need to...
+         * keep the original period and the last period/phaseshift
+         * new period is the multiplier*original
+         */
     }
     /**
      * Draws the {@see Dot} to the canvas.
@@ -1709,14 +1609,16 @@ class Dot {
      *     The context in which to draw to.
      */
     draw(context) {
-        //Skip the first and second frames of the animation to retrieve the
-        //second and third of the three points necessary for the animation
+        /*
+         * Skip the first and second frames of the animation to retrieve the
+         * second and third of the three points necessary for the animation
+         */
         if (this.mustShift) {
             this.shiftRefPoints();
             return;
         }
 
-        //sin x = 2pi    b/2pi=period
+        //Calc: sin x = 2pi    b/2pi=period
         this.pfx = (this.pfx + 1) % this.pp;
         this.bpfx = (this.bpfx + 1) % this.bpp;
 
@@ -1727,8 +1629,8 @@ class Dot {
         context.beginPath();
 
         //Set the stroke and fill styles to the color of the current dot.
-        context.strokeStyle =
-            context.fillStyle = this.colorHSL;
+        context.strokeStyle = this.colorHSL;
+        context.fillStyle = this.colorHSL;
 
         //Move to the oldest of the 3 reference points of the dot.
         context.moveTo(this.rppx, this.rppy);
@@ -1749,6 +1651,7 @@ class Dot {
         this.y -= this.s * Ani.audioPeakMultiplier;
         //Increase the dot's speed based on its acceleration.
         this.s += this.a;// * AUDIO_PEAK_MULTIPLIER;
+        /* eslint-disable-next-line capitalized-comments */
         //this.updatePhaseShifts(); //BUGGED
 
         //Reset the line width
@@ -1770,36 +1673,42 @@ class Dot {
      * @returns {number} The luminosity of this {@see Dot}.
      */
     get currentLuminosity() {
-        //Determine the current effective luminosity of the dot based on the
-        //current frame count
+        /*
+         * Determine the current effective luminosity of the dot based on the
+         * current frame count
+         */
         return Dot.sinusoidal(
             this.pa,
             this.pb,
             this.pc,
             this.l,
-            Ani.frameCount);
+            Ani.frameCount
+        );
     }
     /**
      * Gets the current line width of this {@see Dot}.
      * @returns {number} The line width of this {@see Dot}.
      */
     get currentLineWidth() {
-        //Determine the current effective line width of the dot based on the
-        //current frame count
+        /*
+         * Determine the current effective line width of the dot based on the
+         * current frame count
+         */
         return Dot.sinusoidal(
             this.bpa,
             this.bpb,
             this.bpc,
             this.w,
-            Ani.frameCount);
+            Ani.frameCount
+        );
     }
     /**
      * Gets the color of this {@see Dot} as a valid CSS color tag.
      * @returns {string} The color of this {@see Dot} as a valid CSS color tag.
      */
     get colorHSL() {
-        return `hsla(${this.c},${this.sa}%,` +
-            `${this.currentLuminosity}%,${Ani.oTrail})`;
+        return `hsla(${this.c},${this.sa}%,`
+            + `${this.currentLuminosity}%,${Ani.sObj.oTrail})`;
     }
     /**
      * Gets whether or not this {@see Dot} is off-screen.
@@ -1953,8 +1862,9 @@ class Dot {
      *     The current frame.
      */
     static getNewShift(oP, nP, oPS, x) {
-        return ((oP - nP) * ((x - oPS) % oP / oP) + oPS) % nP;
-        //fuck this calculation...
+        /* eslint-disable-next-line no-extra-parens */
+        return (((oP - nP) * ((x - oPS) % oP / oP)) + oPS) % nP;
+        //Fuck this calculation...
     }
 
     /**
@@ -1979,7 +1889,8 @@ class Dot {
      *     is equal to the the current [frame count]{@link FRAME_COUNT}.
      */
     static sinusoidal(a, b, c, d, x) {
-        return a * Math.sin(b * (x - c)) + d;
+        /* eslint-disable-next-line no-extra-parens */
+        return (a * Math.sin(b * (x - c))) + d;
     }
 
     /**
@@ -1992,7 +1903,8 @@ class Dot {
      * @returns {number} The pseudorandom number that was generated.
      */
     static rand(min, max) {
-        return Math.random() * (max - min) + min;
+        /* eslint-disable-next-line no-extra-parens */
+        return (Math.random() * (max - min)) + min;
     }
 
     /**
@@ -2014,8 +1926,10 @@ class Dot {
  * to manage the animation being run.
  */
 class Ani {
-    //... It took me two hours to realize how to document static properties
-    //like this. I feel dead inside...
+    /*
+     * ... It took me two hours to realize how to document static properties
+     * like this. I feel dead inside...
+     */
 
     /**
      * An object used to obtain application settings.
@@ -2073,12 +1987,12 @@ class Ani {
      * @type {number}
      * @private
      */
-    static __the = DEFAULT_TRAIL_HSL_END;
+    static the = DEFAULT_TRAIL_HSL_END;
     /**
      * @type {number}
      * @private
      */
-    static __ths = DEFAULT_TRAIL_HSL_START;
+    static ths = DEFAULT_TRAIL_HSL_START;
     /**
      * The AudioPeaks client that retrieves the system audio peaks.
      * @type {AudioPeaks}
@@ -2130,67 +2044,72 @@ class Ani {
     static keybinds = [
         {
             "key": "e",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": () => window.location.reload()
         }, {
             "key": "s",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.toggleStatus
         }, {
             "key": "v",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.toggleVerboseStatus
         }, {
             "key": "r",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.reset
         }, {
             "key": "h",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.toggleHelp
         }, {
             "key": "+",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.upFPS
         }, {
             "key": "-",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.downFPS
         }, {
             "key": "_",
-            "conditions": [{ "ctrl": false, "shift": true }],
+            "conditions": [{"ctrl": false, "shift": true}],
             "handler": Ani.downFPS
         }, {
             "key": "=",
-            "conditions": [{ "ctrl": false, "shift": false }],
+            "conditions": [{"ctrl": false, "shift": false}],
             "handler": Ani.upFPS
         }, {
             "key": "a",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.togglePeaks
         }, {
             "key": "q",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.toggleAnimation
         }, {
             "key": "t",
-            "conditions": [{ "ctrl": false }],
+            "conditions": [{"ctrl": false}],
             "handler": Ani.resetDefaultSettings
         }
-        //a - toggle peaks
-        //e - reload
-        //h - toggle help
-        //q - toggle animation
-        //r - reset
-        //s - toggle status
-        //t - reset default settings
-        //v - toggle verbose
-        //+ - up fps
-        //- - down fps
+        /*
+         * Keybinds
+         * a - toggle peaks
+         * e - reload
+         * h - toggle help
+         * q - toggle animation
+         * r - reset
+         * s - toggle status
+         * t - reset default settings
+         * v - toggle verbose
+         * + - up fps
+         * - - down fps
+         */
     ];
-    //Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp,
-    //PageDown, Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause,
-    //AudioVolumeMute, AudioVolumeDown, AudioVolumeUp, ContextMenu
+    /*
+     * Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp,
+     * PageDown, Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause,
+     * AudioVolumeMute, AudioVolumeDown, AudioVolumeUp, ContextMenu
+     */
     /**
      * The status settings object.
      * @type {StatusCollectionSettings}
@@ -2215,11 +2134,11 @@ class Ani {
             }, {
                 "name": "Auto Resize",
                 "type": "flag",
-                "value": () => Ani.resize
+                "value": () => Ani.sObj.resize
             }, {
                 "name": "Background",
                 "type": "color.rgb",
-                "value": () => Ani.cBackground
+                "value": () => Ani.sObj.cBackground
             }, {
                 "name": "Frame Statistics",
                 "type": "header"
@@ -2227,20 +2146,17 @@ class Ani {
                 "name": "Target FPS",
                 "type": "string",
                 "unit": "frames/second",
-                "value": () => Ani.fps.toFixed(2)
+                "value": () => Ani.sObj.fps.toFixed(2)
             }, {
                 "name": "Achieved FPS",
                 "type": "string",
                 "unit": "frames/second",
-                "value": () =>
-                    (Math.round(
-                        (
-                            Ani.frameCount
-                            / ((
-                                (new Date()).getTime()
-                                - Ani.startTime) / 1000)
-                        ) * 100) / 100)
-                        .toFixed(2)
+                "value": () => (
+                    Math.round(Ani.frameCount / (
+                        (new Date().getTime() - Ani.startTime)
+                        / 1000
+                    ) * 100) / 100)
+                    .toFixed(2)
             }, {
                 "name": "Frame Count",
                 "type": "number.integer",
@@ -2253,44 +2169,44 @@ class Ani {
                 "name": "Speed",
                 "type": "range.number.decimal",
                 "unit": ["", "pixels/second"],
-                "value": () => [Ani.nSpeed, Ani.xSpeed]
+                "value": () => [Ani.sObj.nSpeed, Ani.sObj.xSpeed]
             }, {
                 "name": "Acceleration",
                 "type": "range.number.decimal",
                 "unit": ["", "pixels/second"],
-                "value": () => [Ani.nAccel, Ani.xAccel]
+                "value": () => [Ani.sObj.nAccel, Ani.sObj.xAccel]
             }, {
                 "name": "Active Dots",
                 "type": "range.number.integer",
                 "unit": ["", "dots"],
                 "sep": " of ",
-                "value": () => [Ani.dots.length, Ani.xDots]
+                "value": () => [Ani.dots.length, Ani.sObj.xDots]
             }, {
                 "name": "Dot Rate",
                 "type": "number.integer",
                 "unit": "dots/frame",
-                "value": () => Ani.rDot
+                "value": () => Ani.sObj.rDot
             }, {
                 "name": "Trail Opacity",
                 "type": "color.alpha",
-                "value": () => Ani.oTrail
+                "value": () => Ani.sObj.oTrail
             }, {
                 "name": "Trail Saturation",
                 "type": "range.color.sat",
-                "value": () => [Ani.snTrail, Ani.sxTrail]
+                "value": () => [Ani.sObj.snTrail, Ani.sObj.sxTrail]
             }, {
                 "name": "Trail Luminosity",
                 "type": "range.color.luma",
-                "value": () => [Ani.lnTrail, Ani.lxTrail]
+                "value": () => [Ani.sObj.lnTrail, Ani.sObj.lxTrail]
             }, {
                 "name": "Fade Opacity",
                 "type": "number.percentage",
-                "value": () => Ani.oFade
+                "value": () => Ani.sObj.oFade
             }, {
                 "name": "Line Width",
                 "type": "range.number.decimal",
                 "unit": ["", "pixels"],
-                "value": () => [Ani.wnLine, Ani.wxLine]
+                "value": () => [Ani.sObj.wnLine, Ani.sObj.wxLine]
             }, {
                 "name": "Trail Hue Range",
                 "type": "header"
@@ -2298,7 +2214,7 @@ class Ani {
                 "name": "Hue Drift",
                 "type": "number.decimal",
                 "unit": "degrees",
-                "value": () => Ani.hDrift
+                "value": () => Ani.sObj.hDrift
             }, {
                 "name": "Current",
                 "type": "range.color.hue",
@@ -2324,12 +2240,12 @@ class Ani {
             }, {
                 "name": "Amplitude",
                 "type": "range.color.luma",
-                "value": () => [Ani.oanLum, Ani.oaxLum]
+                "value": () => [Ani.sObj.oanLum, Ani.sObj.oaxLum]
             }, {
                 "name": "Phase Shift",
                 "type": "string",
                 "unit": "seconds",
-                "value": () => Ani.opsLum.toFixed(2)
+                "value": () => Ani.sObj.opsLum.toFixed(2)
             }, {
                 "name": "Line Width Oscillation",
                 "type": "header"
@@ -2345,45 +2261,45 @@ class Ani {
                 "name": "Amplitude",
                 "type": "range.number.decimal",
                 "unit": ["", "pixels"],
-                "value": () => [Ani.oanwLine, Ani.oaxwLine]
+                "value": () => [Ani.sObj.oanwLine, Ani.sObj.oaxwLine]
             }, {
                 "name": "Phase Shift",
                 "type": "string",
                 "unit": "seconds",
-                "value": () => Ani.opswLine.toFixed(2)
+                "value": () => Ani.sObj.opswLine.toFixed(2)
             }, {
                 "name": "Audio Peaks",
                 "type": "header"
             }, {
                 "name": "Variance (Low)",
                 "type": "number.decimal",
-                "value": () => Ani.vnPeaks
+                "value": () => Ani.sObj.vnPeaks
             }, {
                 "name": "Variance (High)",
                 "type": "number.decimal",
-                "value": () => Ani.vxPeaks
+                "value": () => Ani.sObj.vxPeaks
             }, {
                 "name": "Reconnect Wait",
                 "type": "number.decimal",
                 "unit": "ms",
-                "value": () => Ani.wPeaks
+                "value": () => Ani.sObj.wPeaks
             }, {
                 "name": "Reconnect Wait (Err)",
                 "type": "number.decimal",
                 "unit": "ms",
-                "value": () => Ani.ewPeaks
+                "value": () => Ani.sObj.ewPeaks
             }, {
                 "name": "Enabled",
                 "type": "flag",
-                "value": () => Ani.ePeaks
+                "value": () => Ani.sObj.ePeaks
             }, {
                 "name": "Secure",
                 "type": "flag",
-                "value": () => Ani.sPeaks
+                "value": () => Ani.sObj.sPeaks
             }, {
                 "name": "Endpoint",
                 "type": "string",
-                "value": () => Ani.peaks.url
+                "value": () => AudioPeaks.url
             }
         ],
         "customCSS": "top: 0; left: 0;"
@@ -2471,26 +2387,24 @@ class Ani {
      * @since 2.1.7.9
      * @private
      */
-    static __keyhandle(e) {
+    static keyhandle(e) {
         if (Ani.stopping) {
-            return; //stopping animation, do not process keystrokes.
+            return; //Stopping animation, do not process keystrokes.
         }
         if (!Ani.started) {
-            return; //animation isn't loaded. do not process keystrokes.
+            return; //Animation isn't loaded. do not process keystrokes.
         }
-        var modifiers = ["ctrl", "alt", "shift", "meta"];
+        const modifiers = ["ctrl", "alt", "shift", "meta"];
         Ani.keybinds.forEach((binding) => {
             if (binding.key !== e.key) {
                 return;
             }
-            var keys = Object.keys(binding);
+            let keys = Object.keys(binding);
             if (keys.indexOf("conditions") !== -1) {
                 if (binding.conditions.some((cond) => {
                     keys = Object.keys(cond);
-                    return !modifiers.some((mod) => {
-                        return (keys.indexOf(mod) !== -1)
-                            && (e[mod + "Key"] === cond[mod]);
-                    });
+                    return !modifiers.some((mod) => keys.indexOf(mod) !== -1
+                            && e[`${mod}Key`] === cond[mod]);
                 })) {
                     return;
                 }
@@ -2504,7 +2418,7 @@ class Ani {
      * @since 2.1.7.9
      * @private
      */
-    static __mousehandle() {
+    static mousehandle() {
         document.body.style.cursor = "default";
         if (Ani.timeout !== null) {
             window.clearTimeout(Ani.timeout);
@@ -2520,8 +2434,8 @@ class Ani {
      * @private
      */
     static __constructor() {
-        document.body.addEventListener("mousemove", Ani.__mousehandle);
-        window.addEventListener("keyup", Ani.__keyhandle);
+        document.body.addEventListener("mousemove", Ani.mousehandle);
+        window.addEventListener("keyup", Ani.keyhandle);
         window.addEventListener("resize", Ani.updateSize);
         Ani.loadSettings();
     }
@@ -2531,10 +2445,11 @@ class Ani {
      */
     static start() {
         if (Ani.started) {
-            return; //duplicate call.
+            return; //Duplicate call.
         }
         Ani.started = true;
-        //load overlays.
+
+        //Load overlays.
         Ani.status = new StatusElementCollection(Ani.statusSettings);
         Ani.statusHelp = new StatusElementCollection(Ani.helpSettings);
 
@@ -2545,12 +2460,15 @@ class Ani {
         //Get a 2D drawing context for the canvas
         Ani.context = Ani.canvas.getContext("2d");
 
-        //Get the size of the canvas, which should be stretched to the full
-        //size of the window.
+        /*
+         * Get the size of the canvas, which should be stretched to the full
+         * size of the window.
+         */
         Ani.size = Ani.canvas.getBoundingClientRect();
-
-        //Set the width and height of the canvas internally, so that the
-        //canvas has a 1:1 ratio between itself and the screen.
+        /*
+         * Set the width and height of the canvas internally, so that the
+         * canvas has a 1:1 ratio between itself and the screen.
+         */
         Ani.canvas.setAttribute("width", Ani.width);
         Ani.canvas.setAttribute("height", Ani.height);
 
@@ -2558,8 +2476,8 @@ class Ani {
         Ani.context.beginPath();
 
         //Set the fill and stroke styles to the bg color at full opacity.
-        Ani.context.fillStyle = `rgba(${Ani.cBackground.join(",")},1)`;
-        Ani.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},1)`;
+        Ani.context.fillStyle = `rgba(${Ani.sObj.cBackground.join(",")},1)`;
+        Ani.context.strokeStyle = `rgba(${Ani.sObj.cBackground.join(",")},1)`;
 
         //Fill the entire canvas with the current fill style.
         Ani.context.fillRect(0, 0, Ani.width, Ani.height);
@@ -2595,20 +2513,20 @@ class Ani {
      */
     static animate() {
         if (!Ani.started) {
-            Ani.threadCount--; //decrement "thread" count
-            return; //terminate animation if stopping
+            Ani.threadCount -= 1; //Decrement "thread" count
+            return; //Terminate animation if stopping
         }
         if (!Ani.startTime) {
-            Ani.startTime = (new Date()).getTime();
+            Ani.startTime = new Date().getTime();
         }
         //Increment the frame counter.
         Ani.frameCount += 1;
         try {
-            Ani.__animateInternal(Ani.context);
+            Ani.animateInternal(Ani.context);
         } catch (e) {
             console.error(e);
         }
-        //set a timer to rerun this, when we need to animate the next frame.
+        //Set a timer to rerun this, when we need to animate the next frame.
         window.setTimeout(Ani.animate, Ani.iFrame);
     }
     /**
@@ -2617,12 +2535,13 @@ class Ani {
      */
     static addDots() {
         if (!Ani.started) {
-            Ani.threadCount--; //decrement "thread" count
-            return; //terminate animation if stopping
+            Ani.threadCount -= 1; //Decrement "thread" count
+            return; //Terminate animation if stopping
         }
-        var i;
-        for (i = 0; i < Ani.rDot; i += 1) { //orig peak mod was "rDot * mult"
-            if (Ani.dots.length >= Ani.xDots) {
+        let i;
+        for (i = 0; i < Ani.sObj.rDot; i += 1) {
+            //Orig peak mod was "rDot * mult"
+            if (Ani.dots.length >= Ani.sObj.xDots) {
                 break; //Can't add more dots.
             }
             //Add another dot and add it to the list.
@@ -2630,7 +2549,8 @@ class Ani {
         }
         window.setTimeout(
             Ani.addDots,
-            Math.round(Ani.iFrame * (1 / Ani.audioPeakMultiplier)));
+            Math.round(Ani.iFrame * (1 / Ani.audioPeakMultiplier))
+        );
     }
 
     /**
@@ -2642,27 +2562,32 @@ class Ani {
             return;
         }
         //Initialize variables.
-        var i;
-        var osize = Ani.size;
+        let i;
+        const osize = Ani.size;
 
-        //verify that resize is actually enabled
-        if (Ani.resize) {
-            //Get size of the canvas, which should be stretched to the full size
-            //of the window.
+        //Verify that resize is actually enabled
+        if (Ani.sObj.resize) {
+            /*
+             * Get size of the canvas, which should be stretched to the full
+             * size of the window.
+             */
             Ani.size = Ani.canvas.getBoundingClientRect();
 
-            //Set width and height of the canvas internally, so that the canvas
-            //has a 1 to 1 ratio between itself and the screen.
+            /*
+             * Set width and height of the canvas internally, so that the canvas
+             * has a 1 to 1 ratio between itself and the screen.
+             */
             Ani.canvas.setAttribute("width", Ani.width);
             Ani.canvas.setAttribute("height", Ani.height);
 
-            //check to see if the canvas was made smaller, if not, don't check.
+            //Check to see if the canvas was made smaller, if not, don't check.
             if (osize.width > Ani.size.width) {
-                //check all dots to see if they're still in bounds.
+                //Check all dots to see if they're still in bounds.
                 for (i = 0; i < Ani.dots.length; i += 1) {
                     if (Ani.dots[i].x > Ani.size.width) {
-                        //dot is out of bounds, remove it.
+                        /* eslint-disable-next-line no-plusplus */
                         Ani.dots.splice(i--, 1);
+                        //Dot is out of bounds, remove it.
                     }
                 }
             }
@@ -2675,12 +2600,14 @@ class Ani {
      * @param {CanvasRenderingContext2D} context
      *     The context in which to render to.
      */
-    static __animateInternal(context) {
-        var i;
+    static animateInternal(context) {
+        let i;
         //Clear the canvas to make the dot trails appear to fade away.
         context.beginPath();
-        context.fillStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
-        context.strokeStyle = `rgba(${Ani.cBackground.join(",")},${Ani.oFade})`;
+        context.fillStyle
+            = `rgba(${Ani.sObj.cBackground.join(",")},${Ani.sObj.oFade})`;
+        context.strokeStyle
+            = `rgba(${Ani.sObj.cBackground.join(",")},${Ani.sObj.oFade})`;
         context.moveTo(0, 0);
         context.rect(0, 0, Ani.width, Ani.height);
         context.fill();
@@ -2691,6 +2618,7 @@ class Ani {
         //Remove dots if they're off-screen
         for (i = 0; i < Ani.dots.length; i += 1) {
             if (Ani.dots[i].offScreen) {
+                /* eslint-disable-next-line no-plusplus */
                 Ani.dots.splice(i--, 1);
             }
         }
@@ -2725,8 +2653,8 @@ class Ani {
         if (Ani.stopping) {
             return;
         }
-        Ani.fps += 5;
-        console.info(`Now targeting ${Ani.fps} frames per second.`);
+        Ani.sObj.fps += 5;
+        console.info(`Now targeting ${Ani.sObj.fps} frames per second.`);
     }
     /**
      * Steps the FPS down by 5 frames per second.
@@ -2735,11 +2663,11 @@ class Ani {
         if (Ani.stopping) {
             return;
         }
-        var old_fps = Ani.fps;
-        Ani.fps -= 5;
-        console.info((old_fps !== Ani.fps)
-            ? `Now targeting ${Ani.fps} frames per second.`
-            : "Cannot reduce the framerate any lower than 5 FPS.");
+        const old_fps = Ani.sObj.fps;
+        Ani.sObj.fps -= 5;
+        console.info(old_fps === Ani.sObj.fps
+            ? "Cannot reduce the framerate any lower than 5 FPS."
+            : `Now targeting ${Ani.sObj.fps} frames per second.`);
     }
     /**
      * Resets the animation.
@@ -2748,7 +2676,7 @@ class Ani {
         if (Ani.stopping) {
             return;
         }
-        Ani.startTime = (new Date()).getTime();
+        Ani.startTime = new Date().getTime();
         Ani.dots = [];
         Ani.frameCount = 0;
         Ani.heTrail = DEFAULT_TRAIL_HSL_END;
@@ -2757,8 +2685,8 @@ class Ani {
         Ani.context.beginPath();
 
         //Set the fill and stroke styles to the bg color at full opacity.
-        Ani.context.fillStyle = `rgba(${Ani.cBackground.join(",")},1)`;
-        Ani.context.strokeStyle = `rgba(${Ani.cBackground.join(",")},1)`;
+        Ani.context.fillStyle = `rgba(${Ani.sObj.cBackground.join(",")},1)`;
+        Ani.context.strokeStyle = `rgba(${Ani.sObj.cBackground.join(",")},1)`;
 
         //Fill the entire canvas with the current fill style.
         Ani.context.fillRect(0, 0, Ani.width, Ani.height);
@@ -2770,9 +2698,11 @@ class Ani {
         if (Ani.stopping) {
             return;
         }
-        var d = (Ani.status.displayed = !Ani.status.displayed);
+        /* eslint-disable-next-line no-multi-assign */
+        const d = Ani.status.displayed = !Ani.status.displayed;
         console.info(
-            `Turned ${d ? "on" : "off"} the status overlay.`);
+            `Turned ${d ? "on" : "off"} the status overlay.`
+        );
     }
     /**
      * Toggles whether or not verbose information is displayed in the status
@@ -2782,7 +2712,8 @@ class Ani {
         if (Ani.stopping) {
             return;
         }
-        var d = (Ani.status.showVerbose = !Ani.status.showVerbose);
+        /* eslint-disable-next-line no-multi-assign */
+        const d = Ani.status.showVerbose = !Ani.status.showVerbose;
         console.info(`${d ? "Show" : "Hid"}ing verbose info on the overlay.`);
     }
     /**
@@ -2792,7 +2723,8 @@ class Ani {
         if (Ani.stopping) {
             return;
         }
-        var d = (Ani.statusHelp.displayed = !Ani.statusHelp.displayed);
+        /* eslint-disable-next-line no-multi-assign */
+        const d = Ani.statusHelp.displayed = !Ani.statusHelp.displayed;
         console.info(`Turned ${d ? "on" : "off"} the help overlay.`);
     }
     /**
@@ -2803,25 +2735,29 @@ class Ani {
         if (Ani.stopping) {
             return;
         }
-        var d = (Ani.ePeaks = !Ani.ePeaks);
+        /* eslint-disable-next-line no-multi-assign */
+        const d = Ani.sObj.ePeaks = !Ani.sObj.ePeaks;
         console.info(`${d ? "En" : "Dis"}abled the AudioPeaks subsystem.`);
     }
     /**
      * Resets the default settings to their values as defined in this script
      * file (the DEFAULT_* constants)
      * @since 2.1.7.9
+     * @returns {Promise<void>}
+     *     A promise that returns once the default settings have been restored.
      */
     static resetDefaultSettings() {
-        if (Ani.stopping) {
-            return;
-        }
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
+            if (Ani.stopping) {
+                reject();
+            }
             Ani.stop(true)
                 .then(() => Ani.sObj.deleteSettings())
                 .then(() => {
                     Ani.sObj = null;
                     Ani.settingsFactory = null;
                     Ani.__constructor(); //RELOAD
+                    resolve();
                 });
         });
     }
@@ -2836,64 +2772,64 @@ class Ani {
      *     if the application cannot be stopped right now.
      */
     static stop(leaveSettings) {
-        //ugh, this was an ass to implement.
-        if (Ani.stopping) {
-            return;
-        }
-        if (!Ani.started) {
-            return;
-        }
-         //this will prevent bugs if the user hits a keybind while stopping
-        Ani.stopping = true;
-        return new Promise(function (resolve) {
+        //Ugh, this was an ass to implement.
+        return new Promise((resolve, reject) => {
+            if (Ani.stopping) {
+                reject();
+            }
+            if (!Ani.started) {
+                reject();
+            }
+            //This will prevent bugs if the user hits a keybind while stopping
+            Ani.stopping = true;
             if (Ani.status.displayed) {
-                Ani.toggleStatus(); //hide status overlay
+                Ani.toggleStatus(); //Hide status overlay
             }
             if (Ani.statusHelp.displayed) {
-                Ani.toggleHelp(); //hide help overlay.
+                Ani.toggleHelp(); //Hide help overlay.
             }
-            //remove overlays from doc.
+            //Remove overlays from doc.
             Ani.status.dispose();
             Ani.statusHelp.dispose();
             Ani.status = null;
             Ani.statusHelp = null;
             Ani.started = false;
 
-            new Promise(function (innerResolve) {
-                var interval = window.setInterval(() => {
+            new Promise((innerResolve) => {
+                const interval = window.setInterval(() => {
                     if (Ani.threadCount <= 0) {
                         window.clearInterval(interval);
                         innerResolve();
-                        //wait until both ticks die.
+                        //Wait until both ticks die.
                     }
                 }, 10);
-            }).then(() => {
-                //disconnect peaks server
-                return new Promise(function (innerResolve) {
-                    if (Ani.peaks && Ani.peaks.connected) {
-                        Ani.peaks.disconnect();
-                        var interval = window.setInterval(() => {
-                            if (!Ani.peaks.connected) {
-                                window.clearInterval(interval);
-                                innerResolve();
-                                //wait until disconnect
-                            }
-                        }, 10);
-                    } else {
-                        innerResolve();
-                    }
-                });
-            }).then(() => {
-                //do something
-                //animation ticks are dead.
-                //overlays are also dead.
+            }).then(() => new Promise((innerResolve) => {
+                //Disconnect peaks server
+                if (Ani.peaks && Ani.peaks.connected) {
+                    Ani.peaks.disconnect();
+                    const interval = window.setInterval(() => {
+                        if (!Ani.peaks.connected) {
+                            window.clearInterval(interval);
+                            innerResolve();
+                            //Wait until disconnect
+                        }
+                    }, 10);
+                } else {
+                    innerResolve();
+                }
+            })).then(() => {
+                /*
+                 * Do something
+                 * Animation ticks are dead.
+                 * Overlays are also dead.
+                 */
                 if (!leaveSettings) {
                     Ani.sObj = null;
                     Ani.settingsFactory = null;
                 }
                 document.body
-                    .removeEventListener("mousemove", Ani.__mousehandle);
-                window.removeEventListener("keyup", Ani.__keyhandle);
+                    .removeEventListener("mousemove", Ani.mousehandle);
+                window.removeEventListener("keyup", Ani.keyhandle);
                 window.removeEventListener("resize", Ani.updateSize);
                 Ani.stopping = false;
                 Ani.started = false;
@@ -2914,259 +2850,45 @@ class Ani {
     }
 
     static get heTrail() {
-        return this.__the;
+        return this.the;
     }
     static get hsTrail() {
-        return this.__ths;
-    }
-    static get cBackground() {
-        return this.sObj.cBackground;
-    }
-    static get oTrail() {
-        return this.sObj.oTrail;
-    }
-    static get snTrail() {
-        return this.sObj.snTrail;
-    }
-    static get sxTrail() {
-        return this.sObj.sxTrail;
-    }
-    static get lnTrail() {
-        return this.sObj.lnTrail;
-    }
-    static get lxTrail() {
-        return this.sObj.lxTrail;
-    }
-    static get hDrift() {
-        return this.sObj.hDrift;
-    }
-    static get nSpeed() {
-        return this.sObj.nSpeed;
-    }
-    static get xSpeed() {
-        return this.sObj.xSpeed;
-    }
-    static get nAccel() {
-        return this.sObj.nAccel;
-    }
-    static get xAccel() {
-        return this.sObj.xAccel;
-    }
-    static get xDots() {
-        return this.sObj.xDots;
-    }
-    static get rDot() {
-        return this.sObj.rDot;
-    }
-    static get oFade() {
-        return this.sObj.oFade;
-    }
-    static get fps() {
-        return this.sObj.fps;
+        return this.ths;
     }
     static get iFrame() {
-        return 1000 / this.fps;
+        return 1000 / Ani.sObj.fps;
     } //NO SETTER
-    static get wnLine() {
-        return this.sObj.wnLine;
-    }
-    static get wxLine() {
-        return this.sObj.wxLine;
-    }
     static get opnLum() {
-        return Ani.fps * Ani.opnfLum;
+        return Ani.sObj.fps * Ani.sObj.opnfLum;
     } //NO SETTER
     static get opxLum() {
-        return Ani.fps * Ani.opxfLum;
+        return Ani.sObj.fps * Ani.sObj.opxfLum;
     } //NO SETTER
-    static get oanLum() {
-        return this.sObj.oanLum;
-    }
-    static get oaxLum() {
-        return this.sObj.oaxLum;
-    }
-    static get opsLum() {
-        return this.sObj.opsLum;
-    }
     static get opnwLine() {
-        return Ani.fps * Ani.opnfwLine;
+        return Ani.sObj.fps * Ani.sObj.opnfwLine;
     } //NO SETTER
     static get opxwLine() {
-        return Ani.fps * Ani.opxfwLine;
+        return Ani.sObj.fps * Ani.sObj.opxfwLine;
     } //NO SETTER
-    static get oanwLine() {
-        return this.sObj.oanwLine;
-    }
-    static get oaxwLine() {
-        return this.sObj.oaxwLine;
-    }
-    static get opswLine() {
-        return this.sObj.opswLine;
-    }
-    static get resize() {
-        return this.sObj.resize;
-    }
-    static get opnfLum() {
-        return this.sObj.opnfLum;
-    }
-    static get opxfLum() {
-        return this.sObj.opxfLum;
-    }
-    static get opnfwLine() {
-        return this.sObj.opnfwLine;
-    }
-    static get opxfwLine() {
-        return this.sObj.opxfwLine;
-    }
-    static get pPeaks() {
-        return this.sObj.pPeaks;
-    }
-    static get dPeaks() {
-        return this.sObj.dPeaks;
-    }
-    static get sPeaks() {
-        return this.sObj.sPeaks;
-    }
-    static get ePeaks() {
-        return this.sObj.ePeaks;
-    }
-    static get ewPeaks() {
-        return this.sObj.ewPeaks;
-    }
-    static get wPeaks() {
-        return this.sObj.wPeaks;
-    }
-    static get vnPeaks() {
-        return this.sObj.vnPeaks;
-    }
-    static get vxPeaks() {
-        return this.sObj.vxPeaks;
-    }
 
-    static set cBackground(value) {
-        this.sObj.cBackground = value;
-    }
-    static set oTrail(value) {
-        this.sObj.oTrail = value;
-    }
-    static set snTrail(value) {
-        this.sObj.snTrail = value;
-    }
-    static set sxTrail(value) {
-        this.sObj.sxTrail = value;
-    }
-    static set lnTrail(value) {
-        this.sObj.lnTrail = value;
-    }
-    static set lxTrail(value) {
-        this.sObj.lxTrail = value;
-    }
-    static set hDrift(value) {
-        this.sObj.hDrift = value;
-    }
-    static set nSpeed(value) {
-        this.sObj.nSpeed = value;
-    }
-    static set xSpeed(value) {
-        this.sObj.xSpeed = value;
-    }
-    static set nAccel(value) {
-        this.sObj.nAccel = value;
-    }
-    static set xAccel(value) {
-        this.sObj.xAccel = value;
-    }
-    static set xDots(value) {
-        this.sObj.xDots = value;
-    }
-    static set rDot(value) {
-        this.sObj.rDot = value;
-    }
-    static set oFade(value) {
-        this.sObj.oFade = value;
-    }
-    static set fps(value) {
-        this.sObj.fps = Math.max(value, 5);
-    }
-    static set wnLine(value) {
-        this.sObj.wnLine = value;
-    }
-    static set wxLine(value) {
-        this.sObj.wxLine = value;
-    }
-    static set oanLum(value) {
-        this.sObj.oanLum = value;
-    }
-    static set oaxLum(value) {
-        this.sObj.oaxLum = value;
-    }
-    static set opsLum(value) {
-        this.sObj.opsLum = value;
-    }
-    static set oanwLine(value) {
-        this.sObj.oanwLine = value;
-    }
-    static set oaxwLine(value) {
-        this.sObj.oaxwLine = value;
-    }
-    static set opswLine(value) {
-        this.sObj.opswLine = value;
-    }
-    static set resize(value) {
-        this.sObj.resize = value;
-    }
-    static set opnwfLine(value) {
-        this.sObj.opnwfLine = value;
-    }
-    static set opxwfLine(value) {
-        this.sObj.opxwfLine = value;
-    }
-    static set opnfLum(value) {
-        this.sObj.opnfLum = value;
-    }
-    static set opxfLum(value) {
-        this.sObj.opxfLum = value;
-    }
     static set heTrail(value) {
-        while (value < 0) {
-            value += 360;
+        let xvalue = value;
+        while (xvalue < 0) {
+            xvalue += 360;
         }
-        value %= 360;
-        Ani.__the = value;
+        xvalue %= 360;
+        Ani.the = value;
     }
     static set hsTrail(value) {
-        while (value < 0) {
-            value += 360;
+        let xvalue = value;
+        while (xvalue < 0) {
+            xvalue += 360;
         }
-        value %= 360;
-        Ani.__ths = value;
-        if (Ani.__ths > Ani.__the) {
-            Ani.__ths -= 360;
+        xvalue %= 360;
+        Ani.ths = value;
+        if (Ani.ths > Ani.the) {
+            Ani.ths -= 360;
         }
-    }
-    static set pPeaks(value) {
-        this.sObj.pPeaks = value;
-    }
-    static set dPeaks(value) {
-        this.sObj.dPeaks = value;
-    }
-    static set sPeaks(value) {
-        this.sObj.sPeaks = value;
-    }
-    static set ePeaks(value) {
-        this.sObj.ePeaks = value;
-    }
-    static set ewPeaks(value) {
-        this.sObj.ewPeaks = value;
-    }
-    static set wPeaks(value) {
-        this.sObj.wPeaks = value;
-    }
-    static set vnPeaks(value) {
-        this.sObj.vnPeaks = value;
-    }
-    static set vxPeaks(value) {
-        this.sObj.vxPeaks = value;
     }
     /*
      * The extra junk in heTrail/hsTrail is...
@@ -3204,13 +2926,6 @@ class SettingsDB extends EventTarget {
      */
     __db;
     /**
-     * Creates a new {@see SettingsDB} object.
-     */
-    constructor() {
-        super(); //Oh, so there is a way to do base() in JS. Kewl~.
-        //uh, can I remove this now...?
-    }
-    /**
      * Indicates the state of the settings database. It's one of the
      * following values:
      * + closed
@@ -3235,47 +2950,51 @@ class SettingsDB extends EventTarget {
             return false;
         }
         this.__state = "opening";
-        var self = this;
-        new Promise(function (resolve, reject) {
+        const self = this;
+        new Promise((resolve, reject) => {
             function create(db) {
                 try {
-                    db.createObjectStore("settings", { "keyPath": "id" });
+                    db.createObjectStore("settings", {"keyPath": "id"});
                     return true;
                 } catch (e) {
                     return false;
                 }
             }
-            var request = indexedDB.open("settingsDB", SettingsDB.version);
+            const request = indexedDB.open("settingsDB", SettingsDB.version);
 
-            request.addEventListener("success", function (e) {
-                var db = e.target.result;
+            request.addEventListener("success", (e) => {
+                const db = e.target.result;
                 db.addEventListener("error", reject);
                 if (db.setVersion) {
-                    if (db.version !== SettingsDB.version) {
-                        var sv = db.setVersion(SettingsDB.version);
-                        sv.addEventListener("success", function () {
-                            create(db)
-                                ? resolve(db)
-                                : reject();
-                        });
-                    } else {
+                    if (db.version === SettingsDB.version) {
                         resolve(db);
+                    } else {
+                        const sv = db.setVersion(SettingsDB.version);
+                        sv.addEventListener("success", () => {
+                            if (create(db)) {
+                                resolve(db);
+                            } else {
+                                reject();
+                            }
+                        });
                     }
                 } else {
                     resolve(db);
                 }
             });
-            request.addEventListener("upgradeneeded", function (e) {
-                var db = e.target.result;
-                create(db)
-                    ? resolve(db)
-                    : reject();
+            request.addEventListener("upgradeneeded", (e) => {
+                const db = e.target.result;
+                if (create(db)) {
+                    resolve(db);
+                } else {
+                    reject();
+                }
             });
-        }).then(function (db) {
+        }).then((db) => {
             self.__db = db;
             self.__state = "open";
             self.dispatchEvent(new CustomEvent("open"));
-        }).catch(function () {
+        }).catch(() => {
             self.__state = "closed";
             self.dispatchEvent(new CustomEvent("error"));
         });
@@ -3297,26 +3016,27 @@ class SettingsDB extends EventTarget {
      *     unable to attempt this;
      */
     loadSettings(id) {
+        let xid = id;
         if (this.__state !== "open") {
             return null;
         }
-        if (!(id instanceof String) || (id.trim().length === 0)) {
-            id = "(default)";
+        if (!(xid instanceof String) || xid.trim().length === 0) {
+            xid = "(default)";
         }
-        var self = this;
-        return new Promise(function (resolve, reject) {
-            var t = self.__db.transaction(["settings"], "readwrite");
+        const self = this;
+        return new Promise((resolve, reject) => {
+            const t = self.__db.transaction(["settings"], "readwrite");
             t.addEventListener("error", reject);
-            var store = t.objectStore("settings");
-            var tr = store.get(id);
+            const store = t.objectStore("settings");
+            const tr = store.get(xid);
             tr.addEventListener("error", reject);
-            tr.addEventListener("success", function (e) {
-                var result = e.target.result;
-                var sett;
+            tr.addEventListener("success", (e) => {
+                const {result} = e.target;
+                let sett;
                 if (result) {
                     try {
-                        sett = new Settings(self, id, result.data);
-                    } catch (e) {
+                        sett = new Settings(self, xid, result.data);
+                    } catch (ex) {
                         reject();
                     }
                     resolve(sett);
@@ -3346,22 +3066,20 @@ class SettingsDB extends EventTarget {
      * @protected
      */
     saveSettings(id, data) {
+        let xid = id;
+        const self = this;
         if (this.__state !== "open") {
             return null;
         }
-        if (!(id instanceof String) || (id.trim().length === 0)) {
-            id = "(default)";
+        if (!(xid instanceof String) || xid.trim().length === 0) {
+            xid = "(default)";
         }
-        var self = this;
-        return new Promise(function (resolve, reject) {
-            var t = self.__db.transaction(["settings"], "readwrite");
+        return new Promise((resolve, reject) => {
+            const t = self.__db.transaction(["settings"], "readwrite");
             t.addEventListener("error", reject);
             t.addEventListener("complete", resolve);
-            var store = t.objectStore("settings");
-            store.put({
-                "id": id,
-                "data": data
-            });
+            const store = t.objectStore("settings");
+            store.put({"id": xid, data});
             t.commit();
         });
     }
@@ -3430,7 +3148,8 @@ class Settings {
         }
         return this.__db.saveSettings(
             this.__id,
-            JSON.stringify(this.__data));
+            JSON.stringify(this.__data)
+        );
     }
     /**
      * Refreshes the key cache of the settings object.
@@ -3448,27 +3167,25 @@ class Settings {
      *     if there's not anything to be renamed.
      */
     rename(newID) {
-        if (!(newID instanceof String)) {
-            return null;
-        }
-        if (this.__db === null) {
-            return null;
-        }
-        if (this.__id === newID) {
-            return null;
-        }
-        var self = this;
-        return new Promise(function (resolve, reject) {
-            var id = self.__id;
+        const self = this;
+        return new Promise((resolve, reject) => {
+            if (!(newID instanceof String)) {
+                reject();
+            }
+            if (this.__db === null) {
+                reject();
+            }
+            if (this.__id === newID) {
+                reject();
+            }
+            const id = self.__id;
             self.__id = newID;
             self.__db
                 .saveSettings(self.__id, JSON.stringify(self.__data))
-                .then(() => {
-                    return self.__db.saveSettings(id, "");
-                    //ahhh, I love stringing promises together.
-                })
+                .then(() => self.__db.saveSettings(id, ""))
                 .then(resolve)
                 .catch(reject);
+            //Ahhh, I love stringing promises together.
         });
     }
 
@@ -3484,11 +3201,11 @@ class Settings {
         if (this.__db === null) {
             return null;
         }
-        var id = this.__id;
+        const id = this.__id;
         this.__id = null;
         this.__data = {};
         this.__refreshKeys();
-        var promise = this.__db.saveSettings(id, "");
+        const promise = this.__db.saveSettings(id, "");
         this.__db = null;
         return promise;
     }
@@ -3745,7 +3462,7 @@ class Settings {
         this.save();
     }
     set fps(value) {
-        this.__data.f = value;
+        this.__data.f = Math.max(5, value);
         this.__refreshKeys();
         this.save();
     }
@@ -3858,10 +3575,13 @@ class Settings {
         this.__refreshKeys();
         this.save();
     }
-    //a = amplitude, c = color, e = end, f = factor, h = height/hsl,
-    //i = interval, l = luminosity, o = opacity, p = period, ps = phase shift,
-    //r = rate, s = saturation / start, w = width
-    //-n = min, -x = max
+    /*
+     * Shorthands
+     * a = amplitude, c = color, e = end, f = factor, h = height/hsl,
+     * i = interval, l = luminosity, o = opacity, p = period, ps = phase shift,
+     * r = rate, s = saturation / start, w = width
+     * -n = min, -x = max
+     */
 }
 
 /**
@@ -3894,7 +3614,7 @@ class AudioPeaks {
      * Creates a new {@see AudioPeaks} object.
      */
     constructor() {
-        if (this.enabled) {
+        if (AudioPeaks.enabled) {
             this.connect();
         }
     }
@@ -3913,8 +3633,11 @@ class AudioPeaks {
     __error(e) {
         console.error("Failed to connect to the audio peaks server: ", e);
         if (!this.__reconnect) {
-            console.info(`Retrying in ${this.errorReconnectWait / 1000}s.`);
-            window.setTimeout(() => this.reconnect(), this.errorReconnectWait);
+            console.info(
+                `Retrying in ${AudioPeaks.errorReconnectWait / 1000}s.`
+            );
+            window.setTimeout(() => this.reconnect(),
+                AudioPeaks.errorReconnectWait);
             this.__reconnect = true;
         }
         Ani.audioPeakMultiplier = 1;
@@ -3925,8 +3648,9 @@ class AudioPeaks {
     __close() {
         console.info("Lost the connection to the audio peaks server.");
         if (!this.__reconnect) {
-            console.info(`Retrying in ${this.reconnectWait / 1000}s.`);
-            window.setTimeout(() => this.reconnect(), this.reconnectWait);
+            console.info(`Retrying in ${AudioPeaks.reconnectWait / 1000}s.`);
+            window.setTimeout(() => this.reconnect(),
+                AudioPeaks.reconnectWait);
             this.__reconnect = true;
         }
         Ani.audioPeakMultiplier = 1;
@@ -3936,24 +3660,27 @@ class AudioPeaks {
      * @private
      * @param {Event} e
      */
-    __message(e) {
-        var message = JSON.parse(e.data);
+    static message(e) {
+        const message = JSON.parse(e.data);
+        let peak;
         switch (message.status) {
-            case "Success":
-                var peak = message.data.max;
-                if (peak === 0.5) {
-                    Ani.audioPeakMultiplier = 1;
-                } else if (peak < 0.5) {
-                    Ani.audioPeakMultiplier =
-                        1 - ((0.5 - peak) * 2 * (1 - Ani.vnPeaks));
-                } else { // > 0.5
-                    Ani.audioPeakMultiplier =
-                        1 + ((peak - 0.5) * 2 * (Ani.vxPeaks - 1));
-                }
-                break;
-            case "Error":
-                console.error("AudioPeaks Error: ", message.data);
-                break;
+        case "Success":
+            peak = message.data.max;
+            if (peak === 0.5) {
+                Ani.audioPeakMultiplier = 1;
+            } else if (peak < 0.5) {
+                Ani.audioPeakMultiplier
+                    /* eslint-disable-next-line no-extra-parens */
+                    = 1 - ((0.5 - peak) * 2 * (1 - Ani.sObj.vnPeaks));
+            } else { // > 0.5
+                Ani.audioPeakMultiplier
+                    /* eslint-disable-next-line no-extra-parens */
+                    = 1 + ((peak - 0.5) * 2 * (Ani.sObj.vxPeaks - 1));
+            }
+            break;
+        case "Error":
+            console.error("AudioPeaks Error: ", message.data);
+            break;
         }
     }
 
@@ -3961,37 +3688,37 @@ class AudioPeaks {
      * Gets the port of the AudioPeaks server.
      * @type {number}
      */
-    get port() {
-        return Ani.pPeaks;
+    static get port() {
+        return Ani.sObj.pPeaks;
     }
     /**
      * Gets the domain of the AudioPeaks server.
      * @type {string}
      */
-    get domain() {
-        return Ani.dPeaks;
+    static get domain() {
+        return Ani.sObj.dPeaks;
     }
     /**
      * Gets whether or not to connect to the AudioPeaks server securely.
      * @type {boolean}
      */
-    get secure() {
-        return Ani.sPeaks;
+    static get secure() {
+        return Ani.sObj.sPeaks;
     }
     /**
      * Gets whether or not the AudioPeaks subsystem is enabled.
      * @type {boolean}
      */
-    get enabled() {
-        return Ani.ePeaks;
+    static get enabled() {
+        return Ani.sObj.ePeaks;
     }
     /**
      * Gets the amount of time, in milliseconds, to wait before attempting
      * to reconnect to the AudioPeaks server after an error.
      * @type {number}
      */
-    get errorReconnectWait() {
-        return Ani.ewPeaks;
+    static get errorReconnectWait() {
+        return Ani.sObj.ewPeaks;
     }
     /**
      * Gets the amount of time, in milliseconds, to wait before attempting
@@ -3999,16 +3726,16 @@ class AudioPeaks {
      * connection.
      * @type {number}
      */
-    get reconnectWait() {
-        return Ani.wPeaks;
+    static get reconnectWait() {
+        return Ani.sObj.wPeaks;
     }
     /**
      * Gets the full URL being connected to.
      * @type {string}
      */
-    get url() {
-        return `ws${this.secure ? "s" : ""}://` +
-            `${this.domain}:${this.port}/AudioPeaks`;
+    static get url() {
+        return `ws${AudioPeaks.secure ? "s" : ""}://`
+            + `${AudioPeaks.domain}:${AudioPeaks.port}/AudioPeaks`;
     }
 
     /**
@@ -4029,7 +3756,7 @@ class AudioPeaks {
                 this.__connecting = false;
                 this.connect();
                 this.__socket = null;
-                //required so we don't have two at once.
+                //Required so we don't have two at once.
             });
             this.__socket.close();
         } else {
@@ -4044,16 +3771,17 @@ class AudioPeaks {
         if (this.__connecting) {
             return;
         }
-        if (!this.enabled) {
+        if (!AudioPeaks.enabled) {
             return;
         }
         this.__connecting = true;
         this.__reconnect = false;
-        this.__socket = new WebSocket(this.url);
+        this.__socket = new WebSocket(AudioPeaks.url);
         this.__socket.addEventListener("open", () => this.__open());
         this.__socket.addEventListener("error", (e) => this.__error(e));
         this.__socket.addEventListener("close", () => this.__close());
-        this.__socket.addEventListener("message", (e) => this.__message(e));
+        this.__socket.addEventListener("message",
+            (e) => AudioPeaks.message(e));
     }
 
     /**
@@ -4069,7 +3797,7 @@ class AudioPeaks {
             this.__socket.addEventListener("close", () => {
                 this.__connecting = false;
                 this.__socket = null;
-                //required so we don't have two at once.
+                //Required so we don't have two at once.
             });
             this.__socket.close();
         } else {
@@ -4078,15 +3806,15 @@ class AudioPeaks {
     }
 }
 
-if (document.readyState !== "complete") {
-    window.addEventListener("load", () => Ani.__constructor());
-} else {
+if (document.readyState === "complete") {
     Ani.__constructor();
+} else {
+    window.addEventListener("load", () => Ani.__constructor());
 }
 
 /**
  * @todo Complete documentation.
- * @todo fix obsolete references in documentation.
+ * @todo fix obsolete references and other issues in documentation.
  * @todo Maybe add a "description" key to the keybind object so we can
  *       dynamically create the help keys (see two todos down).
  *       Add "group" key as well to dynamically group keybinds into categories
@@ -4100,10 +3828,6 @@ if (document.readyState !== "complete") {
  * @todo Implement the canvas resize code (and test it)
  * @todo add ability to modify keybindings (though I'm not sure why we would
  *       need this...)
- *
- * 80-char max regex: [^\n\r]{81,}
- * space-only line regex: ^(\x20+)[\r\n]*$
- * trailing space regex: (\x20+)[\r\n]*$
  *
  * REMEMBER: Document AT SINCE for all new properties and objects.
  */
