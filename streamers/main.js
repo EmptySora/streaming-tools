@@ -85,14 +85,14 @@ template-curly-spacing: 2, yield-star-spacing: 2
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.13
+ * @version 2.1.7.14
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.13";
+const VERSION = "2.1.7.14";
 
 /*
  * Animation consists of white dots travelling up at varying
@@ -1539,8 +1539,8 @@ class Dot {
      * Creates a new {@link Dot}.
      */
     constructor() {
-        const vpb = Dot.rand(Ani.opnLum, Ani.opxLum);
-        const vbpb = Dot.rand(Ani.opnwLine, Ani.opxwLine);
+        const vpb = Dot.rand(Ani.sObj.opnLum, Ani.sObj.opxLum);
+        const vbpb = Dot.rand(Ani.sObj.opnwLine, Ani.sObj.opxwLine);
 
         this.x = Dot.rand(0, Ani.size.width);
         this.y = Ani.size.height;
@@ -2234,8 +2234,8 @@ class Ani {
                 "type": "range.string",
                 "unit": ["", "seconds"],
                 "value": () => [
-                    Ani.opnLum.toFixed(2),
-                    Ani.opxLum.toFixed(2)
+                    Ani.sObj.opnLum.toFixed(2),
+                    Ani.sObj.opxLum.toFixed(2)
                 ]
             }, {
                 "name": "Amplitude",
@@ -2254,8 +2254,8 @@ class Ani {
                 "type": "range.string",
                 "unit": ["", "seconds"],
                 "value": () => [
-                    Ani.opnwLine.toFixed(2),
-                    Ani.opxwLine.toFixed(2)
+                    Ani.sObj.opnwLine.toFixed(2),
+                    Ani.sObj.opxwLine.toFixed(2)
                 ]
             }, {
                 "name": "Amplitude",
@@ -2484,8 +2484,8 @@ class Ani {
 
         //Create a timer to start the animation.
         Ani.threadCount = 2;
-        window.setTimeout(Ani.animate, Ani.iFrame);
-        window.setTimeout(Ani.addDots, Ani.iFrame);
+        window.setTimeout(Ani.animate, Ani.sObj.iFrame);
+        window.setTimeout(Ani.addDots, Ani.sObj.iFrame);
         Ani.status.update();
 
         try {
@@ -2527,7 +2527,7 @@ class Ani {
             console.error(e);
         }
         //Set a timer to rerun this, when we need to animate the next frame.
-        window.setTimeout(Ani.animate, Ani.iFrame);
+        window.setTimeout(Ani.animate, Ani.sObj.iFrame);
     }
     /**
      * Adds new dots to the animation.
@@ -2549,7 +2549,7 @@ class Ani {
         }
         window.setTimeout(
             Ani.addDots,
-            Math.round(Ani.iFrame * (1 / Ani.audioPeakMultiplier))
+            Math.round(Ani.sObj.iFrame * (1 / Ani.audioPeakMultiplier))
         );
     }
 
@@ -2767,9 +2767,8 @@ class Ani {
      * @param {boolean} leaveSettings
      *     A value that indicates whether or not the Settings objects should
      *     also be disposed of.
-     * @returns {?Promise<void>}
-     *     A promise that returns when the application has been stopped or null
-     *     if the application cannot be stopped right now.
+     * @returns {Promise<void>}
+     *     A promise that returns when the application has been stopped.
      */
     static stop(leaveSettings) {
         //Ugh, this was an ass to implement.
@@ -2850,26 +2849,11 @@ class Ani {
     }
 
     static get heTrail() {
-        return this.the;
+        return Ani.the;
     }
     static get hsTrail() {
-        return this.ths;
+        return Ani.ths;
     }
-    static get iFrame() {
-        return 1000 / Ani.sObj.fps;
-    } //NO SETTER
-    static get opnLum() {
-        return Ani.sObj.fps * Ani.sObj.opnfLum;
-    } //NO SETTER
-    static get opxLum() {
-        return Ani.sObj.fps * Ani.sObj.opxfLum;
-    } //NO SETTER
-    static get opnwLine() {
-        return Ani.sObj.fps * Ani.sObj.opnfwLine;
-    } //NO SETTER
-    static get opxwLine() {
-        return Ani.sObj.fps * Ani.sObj.opxfwLine;
-    } //NO SETTER
 
     static set heTrail(value) {
         let xvalue = value;
@@ -3390,6 +3374,21 @@ class Settings {
             ? this.__data.pvx
             : DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER;
     }
+    get opnLum() {
+        return this.fps * this.opnfLum;
+    } //NO SETTER
+    get opxLum() {
+        return this.fps * this.opxfLum;
+    } //NO SETTER
+    get opnwLine() {
+        return this.fps * this.opnfwLine;
+    } //NO SETTER
+    get opxwLine() {
+        return this.fps * this.opxfwLine;
+    } //NO SETTER
+    get iFrame() {
+        return 1000 / this.fps;
+    } //NO SETTER
 
     set cBackground(value) {
         this.__data.bg = value;
@@ -3575,6 +3574,8 @@ class Settings {
         this.__refreshKeys();
         this.save();
     }
+
+
     /*
      * Shorthands
      * a = amplitude, c = color, e = end, f = factor, h = height/hsl,
@@ -3614,7 +3615,7 @@ class AudioPeaks {
      * Creates a new {@see AudioPeaks} object.
      */
     constructor() {
-        if (AudioPeaks.enabled) {
+        if (Ani.sObj.ePeaks) {
             this.connect();
         }
     }
@@ -3634,10 +3635,9 @@ class AudioPeaks {
         console.error("Failed to connect to the audio peaks server: ", e);
         if (!this.__reconnect) {
             console.info(
-                `Retrying in ${AudioPeaks.errorReconnectWait / 1000}s.`
+                `Retrying in ${Ani.sObj.ewPeaks / 1000}s.`
             );
-            window.setTimeout(() => this.reconnect(),
-                AudioPeaks.errorReconnectWait);
+            window.setTimeout(() => this.reconnect(), Ani.sObj.ewPeaks);
             this.__reconnect = true;
         }
         Ani.audioPeakMultiplier = 1;
@@ -3648,9 +3648,8 @@ class AudioPeaks {
     __close() {
         console.info("Lost the connection to the audio peaks server.");
         if (!this.__reconnect) {
-            console.info(`Retrying in ${AudioPeaks.reconnectWait / 1000}s.`);
-            window.setTimeout(() => this.reconnect(),
-                AudioPeaks.reconnectWait);
+            console.info(`Retrying in ${Ani.sObj.wPeaks / 1000}s.`);
+            window.setTimeout(() => this.reconnect(), Ani.sObj.wPeaks);
             this.__reconnect = true;
         }
         Ani.audioPeakMultiplier = 1;
@@ -3685,57 +3684,12 @@ class AudioPeaks {
     }
 
     /**
-     * Gets the port of the AudioPeaks server.
-     * @type {number}
-     */
-    static get port() {
-        return Ani.sObj.pPeaks;
-    }
-    /**
-     * Gets the domain of the AudioPeaks server.
-     * @type {string}
-     */
-    static get domain() {
-        return Ani.sObj.dPeaks;
-    }
-    /**
-     * Gets whether or not to connect to the AudioPeaks server securely.
-     * @type {boolean}
-     */
-    static get secure() {
-        return Ani.sObj.sPeaks;
-    }
-    /**
-     * Gets whether or not the AudioPeaks subsystem is enabled.
-     * @type {boolean}
-     */
-    static get enabled() {
-        return Ani.sObj.ePeaks;
-    }
-    /**
-     * Gets the amount of time, in milliseconds, to wait before attempting
-     * to reconnect to the AudioPeaks server after an error.
-     * @type {number}
-     */
-    static get errorReconnectWait() {
-        return Ani.sObj.ewPeaks;
-    }
-    /**
-     * Gets the amount of time, in milliseconds, to wait before attempting
-     * to reconnect to the AudioPeaks server after the server closes the
-     * connection.
-     * @type {number}
-     */
-    static get reconnectWait() {
-        return Ani.sObj.wPeaks;
-    }
-    /**
      * Gets the full URL being connected to.
      * @type {string}
      */
     static get url() {
-        return `ws${AudioPeaks.secure ? "s" : ""}://`
-            + `${AudioPeaks.domain}:${AudioPeaks.port}/AudioPeaks`;
+        return `ws${Ani.sObj.sPeaks ? "s" : ""}://`
+            + `${Ani.sObj.dPeaks}:${Ani.sObj.pPeaks}/AudioPeaks`;
     }
 
     /**
@@ -3771,7 +3725,7 @@ class AudioPeaks {
         if (this.__connecting) {
             return;
         }
-        if (!AudioPeaks.enabled) {
+        if (!Ani.sObj.ePeaks) {
             return;
         }
         this.__connecting = true;
