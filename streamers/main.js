@@ -102,11 +102,6 @@ const VERSION = "2.1.7.16";
  * coordinates, and A color over the new coordinate,
  *
  * In between each frame we fill the canvas with C opacity bg color
- *
- *
- * The only other modification that I can think of is Collision detection,
- * ie: particles that bump other particles from behind randomly shift to the
- * left or right
  */
 
 
@@ -3658,6 +3653,10 @@ if (document.readyState === "complete") {
  *       averaging 29fps (which is really good given we have to do the
  *       calculations synchronously)
  *       See if there's any potential GC issues and fix them.
+ * @todo (Note below from top):
+ *       The only other modification that I can think of is Collision detection,
+ *       ie: particles that bump other particles from behind randomly shift to
+ *       the left or right
  *
  * REMEMBER: Document AT SINCE for all new properties and objects.
  */
