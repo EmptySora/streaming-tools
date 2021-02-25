@@ -3674,6 +3674,8 @@ if (document.readyState === "complete") {
  *       jittering)
  *       One last note, the acceleration change might be more tricky than just
  *       multiplying by the ratio of the BASE_FPS and FPS.
+ * @todo Move the eslint settings to the json file format thingie (
+ *       eslintrc.json or something...)
  *
  * REMEMBER: Document AT SINCE for all new properties and objects.
  */
