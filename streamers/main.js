@@ -3582,6 +3582,8 @@ if (document.readyState === "complete") {
  *       jittering)
  *       One last note, the acceleration change might be more tricky than just
  *       multiplying by the ratio of the BASE_FPS and FPS.
+ * @todo Move default variables to their own object (to reduce global scope
+ *       pollution among other things)
  * REMEMBER: Document AT SINCE for all new properties and objects.
  *
  * Unavailable eslint rules in my version of VisualStudio right now:
