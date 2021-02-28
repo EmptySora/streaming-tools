@@ -3953,8 +3953,6 @@ if (document.readyState === "complete") {
  *       jittering)
  *       One last note, the acceleration change might be more tricky than just
  *       multiplying by the ratio of the BASE_FPS and FPS.
- * @todo Shift the settings to an actual JSON file (use XHR)
- * @todo Convert to modules.
  * REMEMBER: Document AT SINCE for all new properties and objects.
  *
  * Unavailable eslint rules in my version of VisualStudio right now:
