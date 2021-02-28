@@ -1,81 +1,5 @@
 /* eslint-disable-next-line strict */
 "use strict";
-/* eslint-env browser, es2021 */
-/*
-eslint eqeqeq: 2, for-direction: 2, getter-return: 2, no-compare-neg-zero: 2,
-no-debugger: 2, no-dupe-args: 2, no-dupe-else-if: 2, no-dupe-keys: 2,
-no-duplicate-case: 2, no-empty: 1, no-empty-character-class: 2,
-no-ex-assign: 2, no-extra-boolean-cast: 2,
-no-extra-parens: [2,"all",{"nestedBinaryExpressions": true}],
-no-extra-semi: 2, no-func-assign: 2, no-import-assign: 2,
-no-inner-declarations: 2, no-invalid-regexp: 2, no-irregular-whitespace: 2,
-no-misleading-character-class: 2, no-obj-calls: 2, no-prototype-builtins: 2,
-no-regex-spaces: 2, no-setter-return: 2, no-sparse-arrays: 2,
-no-template-curly-in-string: 2, no-unexpected-multiline: 2, no-unreachable: 1,
-no-unsafe-finally: 2, no-unsafe-negation: 2, require-atomic-updates: 2,
-use-isnan: 2, valid-typeof: 2, array-callback-return: 2, block-scoped-var: 2,
-class-methods-use-this: 1, complexity: [2, 24], consistent-return: 2, curly: 2,
-default-param-last: 2, dot-location: [2, "property"], dot-notation: 2,
-no-alert: 2, no-caller: 2, no-case-declarations: 2, no-constructor-return: 2,
-no-div-regex: 2, no-else-return: 1, no-empty-function: 2,
-no-empty-pattern: 2, no-eq-null: 2, no-eval: 2, no-extend-native: 1,
-no-extra-bind: 2, no-extra-label: 2, no-fallthrough: 2,
-no-floating-decimal: 2, no-global-assign: 2, no-implicit-coercion: 2,
-no-implied-eval: 2, no-invalid-this: 2, no-iterator: 2, no-labels: 2,
-no-lone-blocks: 2, no-loop-func: 2, no-multi-spaces: 2, no-multi-str: 2,
-no-new: 2, no-new-func: 2, no-new-wrappers: 2, no-octal: 2, no-octal-escape: 2,
-no-param-reassign: [1, { "props": false }], no-proto: 2, no-redeclare: 2,
-no-return-assign: 2, no-return-await: 2, no-script-url: 2, no-self-assign: 2,
-no-self-compare: 2, no-sequences: 2, no-throw-literal: 2,
-no-unmodified-loop-condition: 2, no-unused-expressions: 2, no-unused-labels: 2,
-no-useless-call: 2, no-useless-catch: 2, no-useless-concat: 2, no-void: 2,
-no-warning-comments: 1, no-with: 2, prefer-named-capture-group: 2,
-prefer-regex-literals: 2, radix: [2, "as-needed"], require-await: 2,
-vars-on-top: 1, wrap-iife: [2, "inside"], yoda: 2, strict: [2, "global"],
-no-delete-var: 2, no-label-var: 2, no-shadow: 2, no-undef: 2, no-undef-init: 2,
-no-undefined: 2, no-unused-vars: 1, no-use-before-define:
-[2,{ "classes": false }],
-array-bracket-newline: [2, "consistent"], array-bracket-spacing: [2, "never"],
-array-element-newline: [2, "consistent"], block-spacing: 2, brace-style: 2,
-capitalized-comments: 1, comma-dangle: [2, "never"],
-comma-spacing: [2, { "before": false, "after": true }],
-comma-style: [2, "last"], computed-property-spacing: [2, "never"],
-consistent-this: [2, "self"], eol-last: [2, "never"],
-func-call-spacing: [2, "never"], func-name-matching: 2,
-func-style: [2, "declaration", { "allowArrowFunctions": true }],
-function-call-argument-newline: [2, "consistent"],
-function-paren-newline: [2, "consistent"],
-implicit-arrow-linebreak: [2, "beside"], indent: 2, key-spacing: 2,
-keyword-spacing: 2, max-len: [2, 80],
-max-statements-per-line: [2, { "max": 1 }]
-multiline-comment-style: [2, "starred-block"], new-cap: 2, new-parens: 2,
-no-array-constructor: 2, no-bitwise: 2, no-lonely-if: 2, no-mixed-operators: 2,
-no-mixed-spaces-and-tabs: 2, no-multi-assign: 1,
-no-multiple-empty-lines: 2, no-negated-condition: 2, no-nested-ternary: 1,
-no-new-object: 2, no-plusplus: 2, no-tabs: 2, no-trailing-spaces: 2,
-no-underscore-dangle: [2, {"allowAfterThis": true, "allow": ["__constructor",
-"__state","__db","__id","__data"]}],
-no-unneeded-ternary: 2,
-no-whitespace-before-property: 2,
-object-curly-newline: [2, { "consistent": true }], object-curly-spacing: 2,
-object-property-newline: [2, { "allowAllPropertiesOnSameLine": true }],
-operator-assignment: 2, operator-linebreak: [2, "before"],
-padded-blocks: [2, "never"], prefer-exponentiation-operator: 1,
-quote-props: [2, "consistent"],
-quotes: [2, "double", { "allowTemplateLiterals": true }], semi: 2,
-semi-spacing: 2, semi-style: 2, space-before-blocks: 2,
-space-before-function-paren: [2, {"anonymous": "always", "named": "never",
-"asyncArrow": "always"}], space-in-parens: 2, space-infix-ops: 2,
-space-unary-ops: 2, switch-colon-spacing: 2, unicode-bom: 2, wrap-regex: 2,
-arrow-body-style: [2, "as-needed"], arrow-parens: 2, arrow-spacing: 2,
-constructor-super: 2, generator-star-spacing: 2, no-class-assign: 2,
-no-confusing-arrow: 1, no-const-assign: 2, no-dupe-class-members: 2,
-no-new-symbol: 2, no-this-before-super: 2, no-useless-computed-key: 2,
-no-useless-constructor: 2, no-var: 2, object-shorthand: 1,
-prefer-arrow-callback: 1, prefer-const: 1, prefer-destructuring: 1,
-prefer-rest-params: 1, prefer-spread: 1, prefer-template: 1, require-yield: 2,
-template-curly-spacing: 2, yield-star-spacing: 2
-*/
 /*
  * Unavailable in my version of VisualStudio right now
  * no-loss-of-precision: 2, no-promise-executor-return: 2,
@@ -3674,8 +3598,5 @@ if (document.readyState === "complete") {
  *       jittering)
  *       One last note, the acceleration change might be more tricky than just
  *       multiplying by the ratio of the BASE_FPS and FPS.
- * @todo Move the eslint settings to the json file format thingie (
- *       eslintrc.json or something...)
- *
  * REMEMBER: Document AT SINCE for all new properties and objects.
  */
