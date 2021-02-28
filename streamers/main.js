@@ -1,391 +1,15 @@
-/* eslint-disable-next-line strict */
 "use strict";
-
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.18
+ * @version 2.1.7.19
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.18";
-
-/**
- * The default min luminosity oscillation period factor that is used to
- * determine the allowed oscillation period range based on the current FPS.
- * @default 0.5
- */
-const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR = 0.5;
-/**
- * The default max luminosity oscillation period factor that is used to
- * determine the allowed oscillation period range based on the current FPS.
- * @default 1
- */
-const DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR = 1;
-/**
- * The default min line width oscillation period factor that is used to
- * determine the allowed oscillation period range based on the current FPS.
- * @default 0.5
- */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR = 0.5;
-/**
- * The default max line width oscillation period factor that is used to
- * determine the allowed oscillation period range based on the current FPS.
- * @default 1
- */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR = 1;
-
-/**
- * The background color of the canvas.
- * @constant {ColorRGB}
- * @default [0,0,0]
- */
-const DEFAULT_BACKGROUND = [0, 0, 0];
-
-/**
- * A number ranging from 0.0 - 1.0 that represents the opacity of the trails
- * the dots leave.
- * @constant {Opacity}
- * @default 1.0
- */
-const DEFAULT_TRAIL_OPACITY = 1.0;
-
-/**
- * The minimum saturation allowed for trail components.
- * @see {@link DEFAULT_TRAIL_SATURATION_MAX}
- * @constant {Saturation}
- * @default 100.0
- */
-const DEFAULT_TRAIL_SATURATION_MIN = 100.0;
-
-/**
- * The maximum saturation allowed for trail components.
- * @see {@link DEFAULT_TRAIL_SATURATION_MIN}
- * @constant {Saturation}
- * @default 100.0
- */
-const DEFAULT_TRAIL_SATURATION_MAX = 100.0;
-
-/**
- * The minimum luminosity allowed for trail components.
- * @see {@link DEFAULT_TRAIL_LUMINOSITY_MAX}
- * @constant {Luminosity}
- * @default 25.0
- */
-const DEFAULT_TRAIL_LUMINOSITY_MIN = 25.0;
-
-/**
- * The maximum luminosity allowed for trail components.
- * @see {@link DEFAULT_TRAIL_LUMINOSITY_MIN}
- * @constant {Luminosity}
- * @default 75.0
- */
-const DEFAULT_TRAIL_LUMINOSITY_MAX = 75.0;
-
-/**
- * The rate at which the average hue of the dots shifts around the color wheel.
- * This value has a period of 360, meaning that if this value is over 360, it
- * will effectively shift it by "HSL_DRIFT MOD 360".
- * Eg: Setting this to 475 is the same as setting this to 115.
- * (since 475-360=115)
- * This value can also be negative.
- * @see {@link Hue}
- * @default 0.1
- */
-const DEFAULT_HSL_DRIFT = 0.1;
-
-/**
- * The minimum speed in pixels per frame the dots move.
- * To calculate the approximate minimum number of pixels per second, use the
- * following formula:
- * {@link DEFAULT_FPS} x {@link DEFAULT_MIN_SPEED}
- * @see {@linkDEFAULT_ MAX_SPEED}
- * @default 0.1
- */
-const DEFAULT_MIN_SPEED = 0.1;
-
-/**
- * The maximum speed in pixels per frame the dots move.
- * To calculate the approximate maximum number of pixels per second, use the
- * following formula:
- * {@link DEFAULT_FPS} x {@link DEFAULT_MAX_SPEED}
- * @see {@link DEFAULT_MIN_SPEED}
- * @default 2.0
- */
-const DEFAULT_MAX_SPEED = 2.0;
-
-/**
- * The minimum acceleration in pixels per frame the dots move.
- * To calculate the approximate minimum acceleration number of pixels per
- * second, use the following formula:
- * {@link DEFAULT_FPS} x {@link DEFAULT_MIN_ACCEL}
- * @see {@link DEFAULT_MAX_ACCEL}
- * @default 0.01
- */
-const DEFAULT_MIN_ACCEL = 0.01;
-
-/**
- * The maximum acceleration in pixels per frame the dots move.
- * To calculate the approximate maximum acceleration number of pixels per
- * second, use the following formula:
- * {@link DEFAULT_FPS} x {@link DEFAULT_MAX_ACCEL}
- * @see {@link DEFAULT_MIN_ACCEL}
- * @default 0.50
- */
-const DEFAULT_MAX_ACCEL = 0.50;
-
-/**
- * The maximum number of dots that can concurrently be active at one time.
- * If you set this to a high value, your processor and/or GPU might have trouble
- * keeping up with the physics of each particle.
- * @default 250
- */
-const DEFAULT_MAX_DOTS = 250;
-
-/**
- * The rate at which new dots are added to the simulation/animation. They are
- * effectively added at a rate of {@link DEFAULT_DOT_RATE} dots per frame.
- * Setting this value to a value higher than {@link DEFAULT_MAX_DOTS} will not
- * pose any issues.
- * @default 2
- */
-const DEFAULT_DOT_RATE = 2;
-
-/**
- * The opacity at which active trails are erased. A lower value here will make
- * longer trails, while a larger value produces shorter trails.
- * A small caveat of this method is that unless this is set to 1.0 (where
- * trails instantly vanish), the path the trails travel will never truly be set
- * to the background color ever again as the average of any numbers less than
- * 1.0 will always remain under 1.0. You might notice this effect as dots trail
- * accross the canvas. They seem to leave a persistent trail whose color is
- * very slightly brighter or darker than the background color.
- * @see {@link Opacity}
- * @default 2
- */
-const DEFAULT_FADE_OPACITY = 0.2;
-
-/**
- * The total number of frames to animate per second.
- * Recommended values: 20, 30
- * Values lower than 20 will result in stuttering.
- * Values greater than 30 will result in computational lag depending on other
- * settings.
- * @default 30
- */
-const DEFAULT_FPS = 30;
-
-/**
- * The minimum width of the trails the dots produce. This value is effectively
- * like the radius of a circle, meaning that the produced trail extends both to
- * the left and right {@link DEFAULT_LINE_WIDTH_MIN} pixels.
- * In other words, a value of 1.0 would actually take up 2-3 pixels.
- * @see {@link DEFAULT_LINE_WIDTH_MIN}
- * @default 0.5
- */
-const DEFAULT_LINE_WIDTH_MIN = 0.5;
-
-/**
- * The maximum width of the trails the dots produce. This value is effectively
- * like the radius of a circle, meaning that the produced trail extends both to
- * the left and right {@link DEFAULT_LINE_WIDTH_MAX} pixels.
- * In other words, a value of 1.0 would actually take up 2-3 pixels.
- * @see {@link DEFAULT_LINE_WIDTH_MIN}
- * @default 3.0
- */
-const DEFAULT_LINE_WIDTH_MAX = 3.0;
-
-/**
- * The minimum variation in luminosity the dot should oscillate to/from.
- * This value is relative to the luminosity of the dot.
- * @see {@link Sinusoid}
- * @see {@link DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX}
- * @see {@link Luminosity}
- * @default 0.1
- */
-const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN = 0.1;
-
-/**
- * The maximum variation in luminosity the dot should oscillate to/from.
- * This value is relative to the luminosity of the dot.
- * @see {@link Sinusoid}
- * @see {@link DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN}
- * @see {@link Luminosity}
- * @default 25
- */
-const DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX = 25;
-
-/**
- * The phase shift of the luminosity oscillation, relative to the start of the,
- * oscillation.
- * This value will likely be converted to a "MIN"/"MAX" so that it may be
- * randomized, as having this static does basically nothing.
- * @see {@link Sinusoid}
- * @see {@link Luminosity}
- * @default 0
- */
-const DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT = 0;
-
-/**
- * The minimum variation in line width the dot should oscillate to/from.
- * This value is relative to the line width of the dot.
- * @see {@link Sinusoid}
- * @see {@link DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX}
- * @default 0.1
- */
-const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN = 0.1;
-
-/**
- * The maximum variation in line width the dot should oscillate to/from.
- * This value is relative to the line width of the dot.
- * @see {@link Sinusoid}
- * @see {@link DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN}
- * @default 2.0
- */
-const DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX = 2.0;
-
-/**
- * The phase shift of the line width oscillation, relative to the start of the,
- * oscillation.
- * This value will likely be converted to a "MIN"/"MAX" so that it may be
- * randomized, as having this static does basically nothing.
- * @see {@link Sinusoid}
- * @default 0
- */
-const DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT = 0;
-
-/**
- * A flag that determines whether or not the canvas is resized whenever the
- * document or window is resized.
- * While the canvas *IS* stretched to the full size of the window, the actaul
- * size of the canvas itself, internally, is set when the page first loads.
- * It's set to the initial window size of the page. If you resize the window
- * after this point, the canvas is stretched or skewed to fit in the new bounds,
- * it's not actually resized.
- * Setting this to true will resize the canvas automatically when the page size
- * is changed.
- *
- * To see this effect, set this value to false, load the page with the window
- * really small, and then maximize the window, the contents of the canvas will
- * be stretched to the point that they blur really badly.
- * @default false
- */
-const DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE = false;
-
-/**
- * Represents the initial minimum hue of the dots that are created in degrees
- * rotated around the color wheel.
- * The larger the difference between {@link DEFAULT_TRAIL_HSL_START} and
- * {@link DEFAULT_TRAIL_HSL_END}, the more variation in color the dots will
- * display.
- * Setting the range to anything larger than or equal to 360 will effectively
- * Eliminate the cycling of color.
- * @see {@link Hue}
- * @see {@link DEFAULT_TRAIL_HSL_END}
- * @default 180.0
- */
-const DEFAULT_TRAIL_HSL_START = 180.0;
-
-/**
- * Represents the initial maximum hue of the dots that are created in degrees
- * rotated around the color wheel.
- * The larger the difference between {@link DEFAULT_TRAIL_HSL_START} and
- * {@link DEFAULT_TRAIL_HSL_END}, the more variation in color the dots will
- * display.
- * Setting the range to anything larger than or equal to 360 will effectively
- * Eliminate the cycling of color.
- * @see {@link Hue}
- * @see {@link DEFAULT_TRAIL_HSL_START}
- * @default 240.0
- */
-const DEFAULT_TRAIL_HSL_END = 240.0;
-
-/**
- * The port on the server running WinAudioLevels.exe that is listening
- * for WebSocket Connections.
- * @default 8069
- */
-const DEFAULT_PEAKS_APP_PORT = 8069;
-
-/**
- * The domain of the server running WinAudioLevels.exe. If you are selfhosting,
- * set this to one of: "127.0.0.1", "localhost", or "::1"
- * @default "localhost"
- */
-const DEFAULT_PEAKS_APP_DOMAIN = "localhost";
-
-/**
- * Whether or not the server running WinAudioLevels.exe only accepts secure
- * connections.
- * If you are selfhosting, most likely, this will be set to false. Otherwise,
- * this must be set to true due to JS security restrictions.
- * @default false
- */
-const DEFAULT_PEAKS_APP_SECURE = false;
-
-/**
- * Whether or not to try connection to the audio peaks server at all. Set this
- * to false if you are not running an audio peaks server.
- * @default true
- */
-const DEFAULT_PEAKS_APP_ENABLED = true;
-
-/**
- * How long to wait, in milliseconds, before attempting to reconnect to the
- * audio peaks server after an error occurs.
- * @default 30000
- */
-const DEFAULT_PEAKS_APP_ERROR_RECONNECT_WAIT = 30000;
-
-/**
- * How long to wait, in milliseconds, before attempting to reconnect to the
- * audio peaks server after a disconnection occurs.
- * @default 5000
- */
-const DEFAULT_PEAKS_APP_RECONNECT_WAIT = 5000;
-
-/**
- * The minimum multiplier the audio levels on the computer can affect the
- * animation by. This should be between 0.0 and 1.0.
- * A value of 0.0 would specify that dead silence would effectively halt
- * the animation, while a value of 1.0 would indicate that the audio peaks
- * would only be able to speed up the animation, if anything.
- *
- * The peak is converted to a percentage between 0% and 100%. Values less than
- * 50% will slow down the animation, while values above that will speed up the
- * animation.
- * So, the range between MIN and MAX is not evenly spread out. MIN to 1, and 1
- * to MAX are spread out evenly.
- * @default 0.125
- * @see {DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER}
- */
-const DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER = 0.125;
-
-/**
- * The maximum multiplier the audio levels on the computer can affect the
- * animation by. This should be greater than or equal to 1.0.
- * A value of 1.0 would indicate that the audio levels would only be able
- * to slow down the animation, if anything, while a value of anything higher
- * than that would indicate that the audio levels would speed things up.
- *
- * The peak is converted to a percentage between 0% and 100%. Values less than
- * 50% will slow down the animation, while values above that will speed up the
- * animation.
- * So, the range between MIN and MAX is not evenly spread out. MIN to 1, and 1
- * to MAX are spread out evenly.
- * @default 8.0
- * @see {DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER}
- */
-const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
-
-/*
- * ************************************************************************* *
- * ********************* END OF CONFIGURATION SETTINGS ********************* *
- * ************************************************************************* *
- */
+const VERSION = "2.1.7.19";
 
 /**
  * Represents a color using Red, Green, and Blue components in that order.
@@ -555,7 +179,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  */
 /**
  * Represents the properties of a particular status element.
- * @typedef {object} StatusElementProperties
+ * @typedef {Object} StatusElementProperties
  * @property {string} name
  *     The text that is displayed on the HUD for this StatusElement. This
  *     property is required.
@@ -618,7 +242,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  */
 /**
  * Represents the settings for a particular {@link StatusElementCollection}.
- * @typedef {object} StatusCollectionSettings
+ * @typedef {Object} StatusCollectionSettings
  * @property {string} [title]
  *     The text that is displayed as the title for the collection. EG:
  *     "Status".
@@ -645,10 +269,10 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
 /**
  * Represents the properties allowed to be passed to
  * {@link StatusElementCollection~createElement}.
- * @typedef {object} CreateElementProperties
+ * @typedef {Object} CreateElementProperties
  * @property {string[]} [classes]
  *     The list of classes to apply to the element.
- * @property {object} [attributes]
+ * @property {Object} [attributes]
  *     An object containing the named attributes to apply to the element.
  * @property {string} [text]
  *     The textual content to apply to the element.
@@ -691,8 +315,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  */
 /**
  * The object that represents the settings for a particular key-binding.
- * @typedef {object} KeyBinding
- * @since 2.1.7.18
+ * @typedef {Object} KeyBinding
  * @property {string} key
  *     The key code of the key required to activate this key-binding.
  *     This should match the value supplied by the
@@ -734,12 +357,12 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * @property {boolean} [display]
  *     A bolean value that indicates whether or not the key-binding is
  *     displayed on the Help overlay. Defaults to "true".
+ * @since 2.1.7.18
  */
 /**
  * The object that represents the additional constraints required to
  * trigger a key-binding.
- * @typedef {object} KeyBindingCondition
- * @since 2.1.7.18
+ * @typedef {Object} KeyBindingCondition
  * @property {boolean} ctrl
  *     If present, specifies the mandatory state of the Ctrl key during the
  *     key-press. (Omitting this will specify that the binding will activate
@@ -758,6 +381,7 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  *     regardless if the Meta key is held during the key-press).
  *     The "meta" key is the "Windows" key on Windows computers, and the
  *     "⌘" key on Macintosh computers.
+ * @since 2.1.7.18
  */
 /**
  * Represents the delegate that is called to invoke a particular
@@ -765,6 +389,439 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * @callback KeyBindingCallback
  * @since 2.1.7.18
  */
+/**
+ * The object that represents the settings for the application
+ * @typedef {Object} SettingsObject
+ * @property {SettingsTrailObject} trail
+ *     An object that describes the various settings related to the trail of
+ *     the individual dots in the animation.
+ * @property {SettingsSpeedObject} speed
+ *     An object that describes the minimum and maximum speed of the dots in
+ *     the animation.
+ * @property {SettingsAccelObject} accel
+ *     An object that describes the minimum and maximum acceleration of the
+ *     dots in the animation.
+ * @property {SettingsLumObject} luminosity
+ *     An object that describes the various settings related to the luminosity
+ *     of the individual dots in the animation.
+ * @property {SettingsBgObject} background
+ *     An object that describes the various settings related to the background
+ *     color and fade rate of the animation.
+ * @property {number} fps
+ *     A number that determines how many frames-per-second the animation runs
+ *     at. Values lower than 20 will generally cause stuttering while values
+ *     larger than 30 may result in computational lag depending on the other
+ *     settings.
+ *
+ *     DEFAULT: 30
+ *     RECOMMENDED: 20, 30, 60
+ * @property {SettingsLineWidthObject} lineWidth
+ *     An object that describes the various settings related to the line width
+ *     of the individual dots in the animation.
+ * @property {SettingsPeaksObject} peaks
+ *     An object that describes the various settings related to the AudioPeaks
+ *     subsystem of the animation.
+ * @property {SettingsDotsObject} dots
+ *     An object that describes the general settings related to the dots in the
+ *     animation.
+ * @property {boolean} resize
+ *     A boolean value that determines whether or not the canvas is
+ *     automatically resized whenever the window is resized.
+ *     While the canvas *is* stretched to the full size of the window, the
+ *     actual size of the canvas (internally) is set when the page first loads.
+ *     As a result, if you were to resize the window after the page loads, this
+ *     ends up causing the canvas to scale up or down to the new window size.
+ *     This is generally more noticable the more extreme the window size is
+ *     upon load and when changed.
+ *     Setting this to true causes the application to update the internal
+ *     canvas size whenever the window resizes.
+ *     To really see this issue, load the animation when the window is really
+ *     tiny and then reload, resizing the window to be very large.
+ *
+ *     DEFAULT: false
+ * @since 2.1.7.19
+ */
+/**
+ * An object that describes the various settings related to the trail of
+ * the individual dots in the animation.
+ * @typedef {Object} SettingsTrailObject
+ * @property {SettingsTrailSatObject} saturation
+ *     A collection of properties that describes the bounds for the saturation
+ *     of the trail of the individual dots.
+ * @property {SettingsTrailLumObject} luminosity
+ *     A collection of properties that describes the bounds for the luminosity
+ *     of the trail of the individual dots.
+ * @property {Opacity} opacity
+ *     A number ranging from 0.0 to 1.0 that represents the opacity of the
+ *     trails the dots leave.
+ *
+ *     DEFAULT: 1.0
+ * @property {SettingsTrailHueObject} hue
+ *     A collection of properties that describes the initial hue range of the
+ *     dots as well as how far that range drifts per dot.
+ * @since 2.1.7.19
+ */
+/**
+ * An object that describes the minimum and maximum speed of the dots in
+ * the animation.
+ * @typedef {Object} SettingsSpeedObject
+ * @property {number} min
+ *     The minimum speed in pixels-per-frame in which the dots move.
+ *
+ *     DEFAULT: 0.1
+ * @property {number} max
+ *     The maximum speed in pixels-per-frame in which the dots move.
+ *
+ *     DEFAULT: 2.0
+ * @since 2.1.7.19
+ */
+/**
+ * An object that describes the minimum and maximum acceleration of the
+ * dots in the animation.
+ * @typedef {Object} SettingsAccelObject
+ * @property {number} min
+ *     The minimum acceleration in pixels-per-frame-per-frame in which the dots
+ *     move.
+ *
+ *     DEFAULT: 0.01
+ * @property {number} max
+ *     The maximum acceleration in pixels-per-frame-per-frame in which the dots
+ *     move.
+ *
+ *     DEFAULT: 0.50
+ * @since 2.1.7.19
+ */
+/**
+ * An object that describes the various settings related to the luminosity
+ * of the individual dots in the animation.
+ * @typedef {Object} SettingsLumObject
+ * @property {SettingsLumOscObject} oscillation
+ *     A collection of properties that describes the parameters that oscillate
+ *     the luminosities of every individual dot in the animation.
+ * @since 2.1.7.19
+ */
+/**
+ * An object that describes the various settings related to the background
+ * color and fade rate of the animation.
+ * @typedef {Object} SettingsBgObject
+ * @property {ColorRGB} color
+ *     The background color of the canvas.
+ *
+ *     DEFAULT: [0, 0, 0]
+ * @property {Opacity} opacity
+ *     The opacity at which active trails are erased.
+ *     A lower value here will result in longer trails and vice versa.
+ *     As a side-effect of this method, whenever this value is not set to 1.0
+ *     (indicating that the trails instantly vanish), the path the trails will
+ *     travel will never truly be set to the background color ever again.
+ *     This is because the average of any number less than 1.0 will always
+ *     remain less than 1.0. You might notice this as the dots begin to trail
+ *     the canvas. They will seem to leave a persisten trail whose color is
+ *     very slightly brighter or darker than the background color.
+ *
+ *     DEFAULT: 0.2
+ * @since 2.1.7.19
+ */
+/**
+ * An object that describes the various settings related to the line width
+ * of the individual dots in the animation.
+ * @typedef {Object} SettingsLineWidthObject
+ * @property {number} min
+ *     The minimum width of the trails the dots produce. This is effectively
+ *     like the radius of a circle, meaning that the produced trail extends,
+ *     both, to the left and right by this many pixels.
+ *     IE: a value of 1.0 would actually take up 2-3 pixels, in reality.
+ *
+ *     DEFAULT: 0.5
+ * @property {number} max
+ *     The maximum width of the trails the dots produce. This is effectively
+ *     like the radius of a circle, meaning that the produced trail extends,
+ *     both, to the left and right by this many pixels.
+ *     IE: a value of 1.0 would actually take up 2-3 pixels, in reality.
+ *
+ *     DEFAULT: 3.0
+ * @property {SettingsLineWidthOscObject} oscillation
+ *     A collection of properties that describes the parameters that oscillate
+ *     the line widths of every individual dot in the animation.
+ * @since 2.1.7.19
+ */
+/**
+ * An object that describes the various settings related to the AudioPeaks
+ * subsystem of the animation.
+ * @typedef {Object} SettingsPeaksObject
+ * @property {number} port
+ *     The port on the server running WinAudioLevels.exe that is listening for
+ *     WebSocket connections.
+ *
+ *     DEFAULT: 8069
+ * @property {number} domain
+ *     The domain of the server running WinAudioLevels.exe. If you are
+ *     selfhosting, set this to one of: "127.0.0.1", "localhost", or "::1"
+ *
+ *     DEFAULT: "localhost"
+ * @property {number} secure
+ *     Whether or not the server running WinAudioLevels.exe only accepts secure
+ *     connections.
+ *     If you are selfhosting, most likely, this will be set to false.
+ *     Otherwise, this must be set to true due to JS security restrictions.
+ *
+ *     DEFAULT: false
+ * @property {number} enabled
+ *     Whether or not to try connection to the audio peaks server at all. Set
+ *     this to false if you are not running an audio peaks server.
+ *
+ *     DEFAULT: true
+ * @property {SettingsPeaksReconnObject} reconnect
+ *     The collection of properties that specify how long the application will
+ *     wait before reconnecting to the AudioPeaks server.
+ * @property {SettingsPeaksVarMulObject} varianceMultiplier
+ *     The collection of properties that specify how much the audio peaks
+ *     affect the animation.
+ * @since 2.1.7.19
+ */
+/**
+ * An object that describes the general settings related to the dots in the
+ * animation.
+ * @typedef {Object} SettingsDotsObject
+ * @property {number} rate
+ *     The rate at which new dots are added to the animation.
+ *     Setting this value to a value higher than
+ *     {@link SettingsObject.dots.max} will not pose any issues.
+ *
+ *     DEFAULT: 2
+ * @property {number} max
+ *     The maximum number of dots that can be concurrently active at any one
+ *     time during the animation. If you set this to a high value, your
+ *     processor and/or GPU might have trouble keeping up with the physics of
+ *     each particle.
+ *
+ *     DEFAULT: 250
+ * @since 2.1.7.19
+ */
+/**
+ * A collection of properties that describes the bounds for the saturation
+ * of the trail of the individual dots.
+ * @typedef {Object} SettingsTrailSatObject
+ * @property {Saturation} min
+ *     The minimum saturation allowed for trail components.
+ *
+ *     DEFAULT: 100.0
+ * @property {Saturation} max
+ *     The maximum saturation allowed for trail components.
+ *
+ *     DEFAULT: 100.0
+ * @since 2.1.7.19
+ */
+/**
+ * A collection of properties that describes the bounds for the luminosity
+ * of the trail of the individual dots.
+ * @typedef {Object} SettingsTrailLumObject
+ * @property {Luminosity} min
+ *     The minimum luminosity allowed for trail components.
+ *
+ *     DEFAULT: 25.0
+ * @property {Luminosity} max
+ *     The maximum luminosity allowed for trail components.
+ *
+ *     DEFAULT: 75.0
+ * @since 2.1.7.19
+ */
+/**
+ * A collection of properties that describes the initial hue range of the
+ * dots as well as how far that range drifts per dot.
+ * @typedef {Object} SettingsTrailHueObject
+ * @property {number} drift
+ *     The rate at which the average hue of the dots shifts around the color
+ *     wheel.
+ *     This value has a period of 360, meaning that, if the value is over 360,
+ *     it will effectively shift it by "trail.hue.drift MOD 360".
+ *     Eg: setting this to 475 is identical to setting this to 115.
+ *     (since 475 - 360 = 115)
+ *     This value *can* be negative (to indicate shifting color backwards).
+ *
+ *     DEFAULT: 0.1
+ * @property {Hue} start
+ *     Represents the initial minimum hue, in degrees, of the dots in the
+ *     animation as rotated around the color wheel.
+ *     The larger the difference between {@link SettingsObject.trail.hue.start}
+ *     and {@link SettingsObject.trail.hue.end}, the more variation in color
+ *     the dots will display.
+ *     Setting the range to anything larger than or equal to 360 will
+ *     effectively prevent the colors from cycling at all (and all hues will
+ *     be available.)
+ *
+ *     DEFAULT: 180.0
+ * @property {Hue} end
+ *     Represents the initial maximum hue, in degrees, of the dots in the
+ *     animation as rotated around the color wheel.
+ *     The larger the difference between {@link SettingsObject.trail.hue.start}
+ *     and {@link SettingsObject.trail.hue.end}, the more variation in color
+ *     the dots will display.
+ *     Setting the range to anything larger than or equal to 360 will
+ *     effectively prevent the colors from cycling at all (and all hues will
+ *     be available.)
+ *
+ *     DEFAULT: 240.0
+ * @since 2.1.7.19
+ */
+/**
+ * A collection of properties that describes the parameters that oscillate
+ * the luminosities of every individual dot in the animation.
+ * @typedef {Object} SettingsLumOscObject
+ * @property {SettingsLumOscAmpObject} amplitude
+ *     The collection of properties that specify the range in which the
+ *     amplitude of the luminosity oscillation can vary by.
+ * @property {number} phaseShift
+ *     The phase shift of the luminosity oscillation relative to the start of
+ *     the oscillation.
+ *     This value will likely be converted to a "MIN"/"MAX" so that it may be
+ *     randomized, as having this static does basically nothing.
+ *
+ *     DEFAULT: 0
+ * @property {SettingsLumOscPerFactObject} periodFactor
+ *     The collection of properties that specify the range in which the
+ *     period of the luminosity oscillation can vary by (in conjunction with
+ *     the current FPS).
+ * @since 2.1.7.19
+ */
+/**
+ * A collection of properties that describes the parameters that oscillate
+ * the line widths of every individual dot in the animation.
+ * @typedef {Object} SettingsLineWidthOscObject
+ * @property {SettingsLineWidthOscAmpObject} amplitude
+ *     The collection of properties that specify the range in which the
+ *     amplitude of the line width oscillation can vary by.
+ * @property {number} phaseShift
+ *     The phase shift of the line width oscillation relative to the start of
+ *     the oscillation.
+ *     This value will likely be converted to a "MIN"/"MAX" so that it may be
+ *     randomized, as having this static does basically nothing.
+ *
+ *     DEFAULT: 0
+ * @property {SettingsLineWidthOscPerFactObject} periodFactor
+ *     The collection of properties that specify the range in which the
+ *     period of the line width oscillation can vary by (in conjunction with
+ *     the current FPS).
+ * @since 2.1.7.19
+ */
+/**
+ * The collection of properties that specify how long the application will
+ * wait before reconnecting to the AudioPeaks server.
+ * @typedef {Object} SettingsPeaksReconnObject
+ * @property {number} normal
+ *     How long to wait, in milliseconds, before attempting to reconnect to the
+ *     audio peaks server after a disconnection occurs.
+ *
+ *     DEFAULT: 5000
+ * @property {number} error
+ *     How long to wait, in milliseconds, before attempting to reconnect to the
+ *     audio peaks server after an error occurs.
+ *
+ *     DEFAULT: 30000
+ * @since 2.1.7.19
+ */
+/**
+ * The collection of properties that specify how much the audio peaks
+ * affect the animation.
+ * @typedef {Object} SettingsPeaksVarMulObject
+ * @property {number} min
+ *     The minimum multiplier the audio levels on the computer can affect the
+ *     animation by. This should be between 0.0 and 1.0.
+ *     A value of 0.0 would specify that dead silence would effectively halt
+ *     the animation, while a value of 1.0 would indicate that the audio peaks
+ *     would only be able to speed up the animation, if anything.
+ *
+ *     The peak is converted to a percentage between 0% and 100%. Values less
+ *     than 50% will slow down the animation, while values above that will
+ *     speed up the animation.
+ *     So, the range between MIN and MAX is not evenly spread out. MIN to 1,
+ *     and 1 to MAX are spread out evenly.
+ *
+ *     DEFAULT: 0.125
+ * @property {number} max
+ *     The maximum multiplier the audio levels on the computer can affect the
+ *     animation by. This should be greater than or equal to 1.0.
+ *     A value of 1.0 would indicate that the audio levels would only be able
+ *     to slow down the animation, if anything, while a value of anything
+ *     higher than that would indicate that the audio levels would speed things
+ *     up.
+ *
+ *     The peak is converted to a percentage between 0% and 100%. Values less
+ *     than 50% will slow down the animation, while values above that will
+ *     speed up the animation.
+ *     So, the range between MIN and MAX is not evenly spread out. MIN to 1,
+ *     and 1 to MAX are spread out evenly.
+ *
+ *     DEFAULT: 8.000
+ * @since 2.1.7.19
+ */
+/**
+ * The collection of properties that specify the range in which the
+ * amplitude of the luminosity oscillation can vary by.
+ * @typedef {Object} SettingsLumOscAmpObject
+ * @property {number} min
+ *     The minimum variation in luminosity the dot should oscillate to/from.
+ *     This value is relative to the luminosity of the dot.
+ *
+ *     DEFAULT: 0.1
+ * @property {number} max
+ *     The maximum variation in luminosity the dot should oscillate to/from.
+ *     This value is relative to the luminosity of the dot.
+ *
+ *     DEFAULT: 25.0
+ * @since 2.1.7.19
+ */
+/**
+ * The collection of properties that specify the range in which the
+ * period of the luminosity oscillation can vary by (in conjunction with
+ * the current FPS).
+ * @typedef {Object} SettingsLumOscPerFactObject
+ * @property {number} min
+ *     The default min luminosity oscillation period factor that is used to
+ *     determine the allowed oscillation period range based on the current FPS.
+ *
+ *     DEFAULT: 0.5
+ * @property {number} max
+ *     The default max luminosity oscillation period factor that is used to
+ *     determine the allowed oscillation period range based on the current FPS.
+ *
+ *     DEFAULT: 1.0
+ * @since 2.1.7.19
+ */
+/**
+ * The collection of properties that specify the range in which the
+ * amplitude of the line width oscillation can vary by.
+ * @typedef {Object} SettingsLineWidthOscAmpObject
+ * @property {number} min
+ *     The minimum variation in line width the dot should oscillate to/from.
+ *     This value is relative to the line width of the dot.
+ *
+ *     DEFAULT: 0.1
+ * @property {number} max
+ *     The maximum variation in line width the dot should oscillate to/from.
+ *     This value is relative to the line width of the dot.
+ *
+ *     DEFAULT: 2.0
+ * @since 2.1.7.19
+ */
+/**
+ * The collection of properties that specify the range in which the
+ * period of the line width oscillation can vary by (in conjunction with
+ * the current FPS).
+ * @typedef {Object} SettingsLineWidthOscPerFactObject
+ * @property {number} min
+ *     The default min line width oscillation period factor that is used to
+ *     determine the allowed oscillation period range based on the current FPS.
+ *
+ *     DEFAULT: 0.5
+ * @property {number} max
+ *     The default max line width oscillation period factor that is used to
+ *     determine the allowed oscillation period range based on the current FPS.
+ *
+ *     DEFAULT: 1.0
+ * @since 2.1.7.19
+ */
+
 /**
  * Represents an individual settings element and provides methods and properties
  * for updating the HUD on such elements.
@@ -870,7 +927,7 @@ class StatusElement {
     }
     /**
      * Gets the value of the {@link StatusElement}.
-     * @returns {object} The value of the {@link StatusElement}.
+     * @returns {Object} The value of the {@link StatusElement}.
      */
     get value() {
         return this.isRange
@@ -1870,12 +1927,12 @@ class Ani {
      * @type {number}
      * @private
      */
-    static the = DEFAULT_TRAIL_HSL_END;
+    static the;
     /**
      * @type {number}
      * @private
      */
-    static ths = DEFAULT_TRAIL_HSL_START;
+    static ths;
     /**
      * The AudioPeaks client that retrieves the system audio peaks.
      * @type {AudioPeaks}
@@ -2027,8 +2084,8 @@ class Ani {
                 "name": "Default",
                 "type": "range.color.hue",
                 "value": () => [
-                    DEFAULT_TRAIL_HSL_START,
-                    DEFAULT_TRAIL_HSL_END
+                    Ani.defaults.trail.hue.start,
+                    Ani.defaults.trail.hue.end
                 ]
             }, {
                 "name": "Luma Oscillation",
@@ -2108,6 +2165,13 @@ class Ani {
         ],
         "customCSS": "top: 0; left: 0;"
     };
+    /**
+     * An object that contains the default settings for the application.
+     * @type {SettingsObject}
+     * @since 2.1.7.19
+     * @private
+     */
+    static defaults;
 
     /**
      * A static constructor of sorts that is run when starting the animation.
@@ -2132,6 +2196,8 @@ class Ani {
         Ani.statusHelp = new StatusElementCollection(
             Bindings.generateHelpSettings()
         );
+        Ani.the = Ani.defaults.trail.hue.end;
+        Ani.ths = Ani.defaults.trail.hue.start;
 
         Ani.frameCount = 0;
         //Retrieve the CANVAS element
@@ -2282,6 +2348,7 @@ class Ani {
      * @private
      */
     static loadSettings() {
+        Ani.defaults = Settings.loadSettingsFile();
         Ani.settingsFactory = new SettingsDB();
         Ani.settingsFactory.addEventListener("open", () => {
             Ani.settingsFactory.loadSettings().then((s) => {
@@ -2333,8 +2400,8 @@ class Ani {
         Ani.startTime = new Date().getTime();
         Ani.dots = [];
         Ani.frameCount = 0;
-        Ani.heTrail = DEFAULT_TRAIL_HSL_END;
-        Ani.hsTrail = DEFAULT_TRAIL_HSL_START;
+        Ani.heTrail = Ani.defaults.trail.hue.end;
+        Ani.hsTrail = Ani.defaults.trail.hue.start;
         //Clear all prior paths.
         Ani.context.beginPath();
 
@@ -2548,12 +2615,12 @@ class SettingsDB extends EventTarget {
     /**
      * Fired when the settings database is successfully opened.
      * @event SettingsDB#event:open
-     * @type {object}
+     * @type {Object}
      */
     /**
      * Fired when an error occurs while trying to open the settings database.
      * @event SettingsDB#event:error
-     * @type {object}
+     * @type {Object}
      */
     /**
      * @type {string}
@@ -2742,7 +2809,7 @@ class Settings {
      */
     __id;
     /**
-     * @type {object}
+     * @type {Object}
      * @private
      */
     __data;
@@ -2846,183 +2913,184 @@ class Settings {
     get cBackground() {
         return this.__keys.includes("bg")
             ? this.__data.bg
-            : DEFAULT_BACKGROUND;
+            : Ani.defaults.background.color;
     }
     get oTrail() {
         return this.__keys.includes("to")
             ? this.__data.to
-            : DEFAULT_TRAIL_OPACITY;
+            : Ani.defaults.trail.opacity;
     }
     get snTrail() {
         return this.__keys.includes("tsn")
             ? this.__data.tsn
-            : DEFAULT_TRAIL_SATURATION_MIN;
+            : Ani.defaults.trail.saturation.min;
     }
     get sxTrail() {
         return this.__keys.includes("tsx")
             ? this.__data.tsx
-            : DEFAULT_TRAIL_SATURATION_MAX;
+            : Ani.defaults.trail.saturation.max;
     }
     get lnTrail() {
         return this.__keys.includes("tln")
             ? this.__data.tln
-            : DEFAULT_TRAIL_LUMINOSITY_MIN;
+            : Ani.defaults.trail.luminosity.min;
     }
     get lxTrail() {
         return this.__keys.includes("tlx")
             ? this.__data.tlx
-            : DEFAULT_TRAIL_LUMINOSITY_MAX;
+            : Ani.defaults.trail.luminosity.max;
     }
     get hDrift() {
         return this.__keys.includes("hd")
             ? this.__data.hd
-            : DEFAULT_HSL_DRIFT;
+            : Ani.defaults.trail.hue.drift;
     }
     get nSpeed() {
         return this.__keys.includes("ns")
             ? this.__data.ns
-            : DEFAULT_MIN_SPEED;
+            : Ani.defaults.speed.min;
     }
     get xSpeed() {
         return this.__keys.includes("xs")
             ? this.__data.xs
-            : DEFAULT_MAX_SPEED;
+            : Ani.defaults.speed.max;
     }
     get nAccel() {
         return this.__keys.includes("na")
             ? this.__data.na
-            : DEFAULT_MIN_ACCEL;
+            : Ani.defaults.accel.min;
     }
     get xAccel() {
         return this.__keys.includes("xa")
             ? this.__data.xa
-            : DEFAULT_MAX_ACCEL;
+            : Ani.defaults.accel.max;
     }
     get xDots() {
         return this.__keys.includes("xd")
             ? this.__data.xd
-            : DEFAULT_MAX_DOTS;
+            : Ani.defaults.dots.max;
     }
     get rDot() {
         return this.__keys.includes("dr")
             ? this.__data.dr
-            : DEFAULT_DOT_RATE;
+            : Ani.defaults.dots.rate;
     }
     get oFade() {
         return this.__keys.includes("fo")
             ? this.__data.fo
-            : DEFAULT_FADE_OPACITY;
+            : Ani.defaults.background.opacity;
     }
     get fps() {
         return this.__keys.includes("f")
             ? this.__data.f
-            : DEFAULT_FPS;
+            : Ani.defaults.fps;
     }
     get wnLine() {
         return this.__keys.includes("lwn")
             ? this.__data.lwn
-            : DEFAULT_LINE_WIDTH_MIN;
+            : Ani.defaults.lineWidth.min;
     }
     get wxLine() {
         return this.__keys.includes("lwx")
             ? this.__data.lwx
-            : DEFAULT_LINE_WIDTH_MAX;
+            : Ani.defaults.lineWidth.max;
     }
     get oanLum() {
         return this.__keys.includes("loan")
             ? this.__data.loan
-            : DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MIN;
+            : Ani.defaults.luminosity.oscillation.amplitude.min;
     }
     get oaxLum() {
         return this.__keys.includes("loax")
             ? this.__data.loax
-            : DEFAULT_LUMINOSITY_OSCILLATION_AMPLITUDE_MAX;
+            : Ani.defaults.luminosity.oscillation.amplitude.max;
     }
     get opsLum() {
         return this.__keys.includes("lops")
             ? this.__data.lops
-            : DEFAULT_LUMINOSITY_OSCILLATION_PHASE_SHIFT;
+            : Ani.defaults.luminosity.oscillation.phaseShift;
     }
     get oanwLine() {
         return this.__keys.includes("lwoan")
             ? this.__data.lwoan
-            : DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MIN;
+            : Ani.defaults.lineWidth.oscillation.amplitude.min;
     }
     get oaxwLine() {
         return this.__keys.includes("lwoax")
             ? this.__data.lwoax
-            : DEFAULT_LINE_WIDTH_OSCILLATION_AMPLITUDE_MAX;
+            : Ani.defaults.lineWidth.oscillation.amplitude.max;
     }
     get opswLine() {
         return this.__keys.includes("lwops")
             ? this.__data.lwops
-            : DEFAULT_LINE_WIDTH_OSCILLATION_PHASE_SHIFT;
+            : Ani.defaults.lineWidth.oscillation.phaseShift;
     }
     get resize() {
         return this.__keys.includes("r")
             ? this.__data.r
-            : DEFAULT_RESIZE_CANVAS_ON_WINDOW_RESIZE;
+            : Ani.defaults.resize;
     }
     get opnfLum() {
         return this.__keys.includes("lopnf")
             ? this.__data.lopnf
-            : DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MIN_FACTOR;
+            : Ani.defaults.luminosity.oscillation.periodFactor.min;
     }
     get opxfLum() {
         return this.__keys.includes("lopxf")
             ? this.__data.lopxf
-            : DEFAULT_LUMINOSITY_OSCILLATION_PERIOD_MAX_FACTOR;
+            : Ani.defaults.luminosity.oscillation.periodFactor.max;
     }
     get opnfwLine() {
         return this.__keys.includes("lwopnf")
             ? this.__data.lwopnf
-            : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MIN_FACTOR;
+            : Ani.defaults.lineWidth.oscillation.periodFactor.min;
     }
     get opxfwLine() {
         return this.__keys.includes("lwopxf")
             ? this.__data.lwopxf
-            : DEFAULT_LINE_WIDTH_OSCILLATION_PERIOD_MAX_FACTOR;
+            : Ani.defaults.lineWidth.oscillation.periodFactor.max;
     }
     get pPeaks() {
         return this.__keys.includes("pp")
             ? this.__data.pp
-            : DEFAULT_PEAKS_APP_PORT;
+            : Ani.defaults.peaks.port;
     }
     get dPeaks() {
         return this.__keys.includes("pd")
             ? this.__data.pd
-            : DEFAULT_PEAKS_APP_DOMAIN;
+            : Ani.defaults.peaks.domain;
     }
     get sPeaks() {
         return this.__keys.includes("ps")
             ? this.__data.ps
-            : DEFAULT_PEAKS_APP_SECURE;
+            : Ani.defaults.peaks.secure;
     }
     get ePeaks() {
         return this.__keys.includes("pe")
             ? this.__data.pe
-            : DEFAULT_PEAKS_APP_ENABLED;
+            : Ani.defaults.peaks.enabled;
     }
     get ewPeaks() {
         return this.__keys.includes("pew")
             ? this.__data.pew
-            : DEFAULT_PEAKS_APP_ERROR_RECONNECT_WAIT;
+            : Ani.defaults.peaks.reconnect.error;
     }
     get wPeaks() {
         return this.__keys.includes("pw")
             ? this.__data.pw
-            : DEFAULT_PEAKS_APP_RECONNECT_WAIT;
+            : Ani.defaults.peaks.reconnect.normal;
     }
     get vnPeaks() {
         return this.__keys.includes("pvn")
             ? this.__data.pvn
-            : DEFAULT_AUDIO_PEAKS_MIN_VARIANCE_MULTIPLIER;
+            : Ani.defaults.peaks.varianceMultiplier.min;
     }
     get vxPeaks() {
         return this.__keys.includes("pvx")
             ? this.__data.pvx
-            : DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER;
+            : Ani.defaults.peaks.varianceMultiplier.max;
     }
+
     get opnLum() {
         return this.fps * this.opnfLum;
     } //NO SETTER
@@ -3224,7 +3292,110 @@ class Settings {
         this.save();
     }
 
-
+    /**
+     * A method that returns an object containing the default properties for
+     * the animation.
+     * @returns {SettingsObject}
+     *     An object that contains the default settings for the animation.
+     * @since 2.1.7.19
+     */
+    static loadSettingsFile() {
+        const defaultDefaultSettings = {
+            "trail": {
+                "saturation": {
+                    "min": 100.0,
+                    "max": 100.0
+                },
+                "luminosity": {
+                    "min": 25.0,
+                    "max": 75.0
+                },
+                "opacity": 1.0,
+                "hue": {
+                    "drift": 0.1,
+                    "start": 180.0,
+                    "end": 240.0
+                }
+            },
+            "speed": {
+                "min": 0.1,
+                "max": 2.0
+            },
+            "accel": {
+                "min": 0.01,
+                "max": 0.50
+            },
+            "luminosity": {
+                "oscillation": {
+                    "amplitude": {
+                        "min": 0.1,
+                        "max": 25
+                    },
+                    "phaseShift": 0,
+                    "periodFactor": {
+                        "min": 0.5,
+                        "max": 1.0
+                    }
+                }
+            },
+            "background": {
+                "color": [0, 0, 0],
+                "opacity": 0.2
+            },
+            "fps": 30,
+            "lineWidth": {
+                "min": 0.5,
+                "max": 3.0,
+                "oscillation": {
+                    "periodFactor": {
+                        "min": 0.5,
+                        "max": 1.0
+                    },
+                    "amplitude": {
+                        "min": 0.1,
+                        "max": 2.0
+                    },
+                    "phaseShift": 0
+                }
+            },
+            "peaks": {
+                "port": 8069,
+                "domain": "localhost",
+                "secure": false,
+                "enabled": true,
+                "reconnect": {
+                    "normal": 5000,
+                    "error": 30000
+                },
+                "varianceMultiplier": {
+                    "min": 0.125,
+                    "max": 8.000
+                }
+            },
+            "dots": {
+                "rate": 2,
+                "max": 250
+            },
+            "resize": false
+        };
+        try {
+            return Object.assign(
+                {},
+                defaultDefaultSettings,
+                /* eslint-disable-next-line no-undef */
+                DefaultSettings
+            );
+        } catch (e) {
+            console.error(
+                "ERROR WHILE LOADING SETTINGS",
+                e
+            );
+            return Object.assign(
+                {},
+                defaultDefaultSettings
+            );
+        }
+    }
     /*
      * Shorthands
      * a = amplitude, c = color, e = end, f = factor, h = height/hsl,
@@ -3752,8 +3923,10 @@ if (document.readyState === "complete") {
 }
 
 /**
- * @todo Complete documentation.
- * @todo fix obsolete references and other issues in documentation.
+ * @todo Fix obsolete references and other issues in documentation and also
+ *       complete documentation.
+ * @todo Check github commit history to retroactively add the at since tags for
+ *       all the objects missing them...
  * @todo Fix the buggy phaseshift code.
  * @todo Implement the canvas resize code (and test it)
  * @todo add ability to modify keybindings (though I'm not sure why we would
@@ -3780,8 +3953,8 @@ if (document.readyState === "complete") {
  *       jittering)
  *       One last note, the acceleration change might be more tricky than just
  *       multiplying by the ratio of the BASE_FPS and FPS.
- * @todo Move default variables to their own object (to reduce global scope
- *       pollution among other things)
+ * @todo Shift the settings to an actual JSON file (use XHR)
+ * @todo Convert to modules.
  * REMEMBER: Document AT SINCE for all new properties and objects.
  *
  * Unavailable eslint rules in my version of VisualStudio right now:
