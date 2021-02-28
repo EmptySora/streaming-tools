@@ -76,7 +76,7 @@ const DefaultSettings = {
         "rate": 2,
         "max": 250
     },
-    "resize": false
+    "resize": true
 };
 /*
  * Seriously...? CORS makes my life hell sometimes.

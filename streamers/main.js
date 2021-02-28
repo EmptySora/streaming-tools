@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.19
+ * @version 2.1.7.20
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.19";
+const VERSION = "2.1.7.20";
 
 /**
  * Represents a color using Red, Green, and Blue components in that order.
@@ -438,7 +438,7 @@ const VERSION = "2.1.7.19";
  *     To really see this issue, load the animation when the window is really
  *     tiny and then reload, resizing the window to be very large.
  *
- *     DEFAULT: false
+ *     DEFAULT: true
  * @since 2.1.7.19
  */
 /**
@@ -2311,6 +2311,15 @@ class Ani {
                     }
                 }
             }
+
+            //Set the fill and stroke styles to the bg color at full opacity.
+            Ani.context.fillStyle
+                = `rgba(${Ani.sObj.cBackground.join(",")},1)`;
+            Ani.context.strokeStyle
+                = `rgba(${Ani.sObj.cBackground.join(",")},1)`;
+
+            //Fill the entire canvas with the current fill style.
+            Ani.context.fillRect(0, 0, Ani.width, Ani.height);
         }
     }
     /**
@@ -3928,7 +3937,6 @@ if (document.readyState === "complete") {
  * @todo Check github commit history to retroactively add the at since tags for
  *       all the objects missing them...
  * @todo Fix the buggy phaseshift code.
- * @todo Implement the canvas resize code (and test it)
  * @todo add ability to modify keybindings (though I'm not sure why we would
  *       need this...)
  * @todo Open firefox and use the dev console to check GC for potential issues
@@ -3953,6 +3961,7 @@ if (document.readyState === "complete") {
  *       jittering)
  *       One last note, the acceleration change might be more tricky than just
  *       multiplying by the ratio of the BASE_FPS and FPS.
+ * @todo the "Q" (toggle animation) key-bind ultimately disables keybinds...
  * REMEMBER: Document AT SINCE for all new properties and objects.
  *
  * Unavailable eslint rules in my version of VisualStudio right now:
