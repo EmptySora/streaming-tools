@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.20
+ * @version 2.1.7.21
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.20";
+const VERSION = "2.1.7.21";
 
 /**
  * Represents a color using Red, Green, and Blue components in that order.
@@ -2278,7 +2278,6 @@ class Ani {
             Math.round(Ani.sObj.iFrame * (1 / Ani.apMul))
         );
     }
-
     /**
      * Updates the size of the canvas the animation is rendering to.
      * This would usually be called if the user resizes the window.
@@ -2552,6 +2551,7 @@ class Ani {
     static toggleAnimation() {
         if (Ani.started) {
             Ani.stop();
+            //Stop unbinds the event handlers...
         } else {
             Ani.__constructor();
         }
@@ -2566,13 +2566,20 @@ class Ani {
         console.log(JSON.stringify(settings));
     }
 
+    /**
+     * Gets the current maximum hue the next dot's trail can be.
+     * @type {number}
+     */
     static get heTrail() {
         return Ani.the;
     }
+    /**
+     * Gets the current minimum hue the next dot's trail can be.
+     * @type {number}
+     */
     static get hsTrail() {
         return Ani.ths;
     }
-
     /**
      * Gets the rounded width of the animation canvas.
      * @returns {number} The rounded width of the animation canvas.
@@ -2587,7 +2594,10 @@ class Ani {
     static get height() {
         return Math.round(Ani.size.height);
     }
-
+    /**
+     * Sets the current maximum hue the next dot's trail can be.
+     * @type {number}
+     */
     static set heTrail(value) {
         let xvalue = value;
         while (xvalue < 0) {
@@ -2596,6 +2606,10 @@ class Ani {
         xvalue %= 360;
         Ani.the = value;
     }
+    /**
+     * Sets the current minimum hue the next dot's trail can be.
+     * @type {number}
+     */
     static set hsTrail(value) {
         let xvalue = value;
         while (xvalue < 0) {
@@ -3933,7 +3947,7 @@ if (document.readyState === "complete") {
 
 /**
  * @todo Fix obsolete references and other issues in documentation and also
- *       complete documentation.
+ *       complete documentation. (WORKING ON)
  * @todo Check github commit history to retroactively add the at since tags for
  *       all the objects missing them...
  * @todo Fix the buggy phaseshift code.
