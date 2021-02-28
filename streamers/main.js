@@ -1,11 +1,6 @@
 /* eslint-disable-next-line strict */
 "use strict";
-/*
- * Unavailable in my version of VisualStudio right now
- * no-loss-of-precision: 2, no-promise-executor-return: 2,
- * no-unreachable-loop: 2, no-unsafe-optional-chaining: 2,
- * no-useless-backreference: 2, no-nonoctal-decimal-escape: 2,
- */
+
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
@@ -17,17 +12,6 @@
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
 const VERSION = "2.1.7.17";
-
-/*
- * Animation consists of white dots travelling up at varying
- * speeds and accelerations.
- *
- * When we draw the dots, we draw B color over the previous
- * coordinates, and A color over the new coordinate,
- *
- * In between each frame we fill the canvas with C opacity bg color
- */
-
 
 /**
  * The default min luminosity oscillation period factor that is used to
@@ -3599,4 +3583,12 @@ if (document.readyState === "complete") {
  *       One last note, the acceleration change might be more tricky than just
  *       multiplying by the ratio of the BASE_FPS and FPS.
  * REMEMBER: Document AT SINCE for all new properties and objects.
+ *
+ * Unavailable eslint rules in my version of VisualStudio right now:
+ *     no-loss-of-precision: 2
+ *     no-promise-executor-return: 2
+ *     no-unreachable-loop: 2
+ *     no-unsafe-optional-chaining: 2
+ *     no-useless-backreference: 2
+ *     no-nonoctal-decimal-escape: 2
  */
