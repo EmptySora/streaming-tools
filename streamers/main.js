@@ -4,14 +4,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.17
+ * @version 2.1.7.18
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.17";
+const VERSION = "2.1.7.18";
 
 /**
  * The default min luminosity oscillation period factor that is used to
@@ -688,6 +688,82 @@ const DEFAULT_AUDIO_PEAKS_MAX_VARIANCE_MULTIPLIER = 8.0;
  * @property {Number} min - The smallest audio peak detected.
  * @property {Number} avg -
  *     The average of all the audio peaks detected.
+ */
+/**
+ * The object that represents the settings for a particular key-binding.
+ * @typedef {object} KeyBinding
+ * @since 2.1.7.18
+ * @property {string} key
+ *     The key code of the key required to activate this key-binding.
+ *     This should match the value supplied by the
+ *     {@link KeyboardEvent#key} property. For typical keys, this will be
+ *     the value of the key if you pressed it under those conditions. Eg: for
+ *     the "A" key, this will be "a". and for the "7"/"&" key, this will be
+ *     "7".
+ *     To explicitly match "&" in the last example, you would specify the
+ *     key to be "&" and ensure all "condition" objects specified contain a
+ *     key that indicates that the shift-key is held down.
+ *     Go to the following link to see a list of all the special key code
+ *     values:
+ *     https://preview.tinyurl.com/s3kwy7fa (links to MDN)
+ *     (link was originally too long to fit on one line... sadface)
+ *
+ *     Here's a quick list (capitalization included):
+ *     Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp,
+ *     PageDown, Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause,
+ *     AudioVolumeMute, AudioVolumeDown, AudioVolumeUp, ContextMenu
+ * @property {boolean} [enabled]
+ *     A property that determines whether or not the key-binding is enabled
+ *     and can be used by the user. This property will default to "true" if
+ *     it is not present.
+ * @property {KeyBindingCallback} handler
+ *     A callback that is run if the conditions of this key-binding are
+ *     met.
+ * @property {KeyBindingCondition[]} [conditions]
+ *     The optional array of conditions to be additionally evaluated when
+ *     determining if this key-binding has been triggered. If present, and
+ *     there is at least one element, the application will evaluate each
+ *     element individually and, if at least one condition matches, then
+ *     the key-binding will be triggered.
+ *     IE: only one of the specified conditions needs to be met, not all.
+ * @property {string} [description]
+ *     A textual description shown on-screen in the Help overlay that describes
+ *     this key-binding.
+ * @property {string} [group]
+ *     A textual group used to categorize key-bindings on the Help overlay.
+ * @property {boolean} [display]
+ *     A bolean value that indicates whether or not the key-binding is
+ *     displayed on the Help overlay. Defaults to "true".
+ */
+/**
+ * The object that represents the additional constraints required to
+ * trigger a key-binding.
+ * @typedef {object} KeyBindingCondition
+ * @since 2.1.7.18
+ * @property {boolean} ctrl
+ *     If present, specifies the mandatory state of the Ctrl key during the
+ *     key-press. (Omitting this will specify that the binding will activate
+ *     regardless if the Ctrl key is held during the key-press).
+ * @property {boolean} alt
+ *     If present, specifies the mandatory state of the Alt key during the
+ *     key-press. (Omitting this will specify that the binding will activate
+ *     regardless if the Alt key is held during the key-press).
+ * @property {boolean} shift
+ *     If present, specifies the mandatory state of the Shift key during the
+ *     key-press. (Omitting this will specify that the binding will activate
+ *     regardless if the Shift key is held during the key-press).
+ * @property {boolean} meta
+ *     If present, specifies the mandatory state of the Meta key during the
+ *     key-press. (Omitting this will specify that the binding will activate
+ *     regardless if the Meta key is held during the key-press).
+ *     The "meta" key is the "Windows" key on Windows computers, and the
+ *     "⌘" key on Macintosh computers.
+ */
+/**
+ * Represents the delegate that is called to invoke a particular
+ * key-binding when its conditions are satisfied.
+ * @callback KeyBindingCallback
+ * @since 2.1.7.18
  */
 /**
  * Represents an individual settings element and provides methods and properties
@@ -1835,89 +1911,6 @@ class Ani {
      */
     static stopping = false;
     /**
-     * The timeout number that handles hiding the mouse.
-     * @type {number}
-     * @since 2.1.7.9
-     * @private
-     */
-    static timeout = null;
-    /**
-     * The list of keybindings for the application.
-     * @type {object[]}
-     * @since 2.1.7.9
-     * @private
-     * @todo Document the keybind object type and update type above
-     */
-    static keybinds = [
-        {
-            "key": "e",
-            "conditions": [{"ctrl": false}],
-            "handler": () => window.location.reload()
-        }, {
-            "key": "s",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.toggleStatus
-        }, {
-            "key": "v",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.toggleVerboseStatus
-        }, {
-            "key": "r",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.reset
-        }, {
-            "key": "h",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.toggleHelp
-        }, {
-            "key": "+",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.upFPS
-        }, {
-            "key": "-",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.downFPS
-        }, {
-            "key": "_",
-            "conditions": [{"ctrl": false, "shift": true}],
-            "handler": Ani.downFPS
-        }, {
-            "key": "=",
-            "conditions": [{"ctrl": false, "shift": false}],
-            "handler": Ani.upFPS
-        }, {
-            "key": "a",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.togglePeaks
-        }, {
-            "key": "q",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.toggleAnimation
-        }, {
-            "key": "t",
-            "conditions": [{"ctrl": false}],
-            "handler": Ani.resetDefaultSettings
-        }
-        /*
-         * Keybinds
-         * a - toggle peaks
-         * e - reload
-         * h - toggle help
-         * q - toggle animation
-         * r - reset
-         * s - toggle status
-         * t - reset default settings
-         * v - toggle verbose
-         * + - up fps
-         * - - down fps
-         */
-    ];
-    /*
-     * Shift, Control, OS, " ", Enter, Tab, F[1-12], Insert, Home, PageUp,
-     * PageDown, Delete, End, NumLock, CapsLock, Escape, ScrollLock, Pause,
-     * AudioVolumeMute, AudioVolumeDown, AudioVolumeUp, ContextMenu
-     */
-    /**
      * The status settings object.
      * @type {StatusCollectionSettings}
      * @since 2.1.7.9
@@ -2115,139 +2108,13 @@ class Ani {
         ],
         "customCSS": "top: 0; left: 0;"
     };
-    /**
-     * The help settings object.
-     * @type {StatusCollectionSettings}
-     * @since 2.1.7.9
-     * @private
-     */
-    static helpSettings = {
-        "title": "Key Bindings",
-        "itemText": "Command",
-        "valueText": "Explanation",
-        "enableUpdate": false,
-        "customCSS": "top: 0; right: 0",
-        "rows": [
-            {
-                "type": "header",
-                "name": "Overlays"
-            }, {
-                "type": "string",
-                "name": "(s)",
-                "value": () => "",
-                "unit": "Toggles the status overlay on/off."
-            }, {
-                "type": "string",
-                "name": "(v)",
-                "value": () => "",
-                "unit": "Toggles verbose info in status overlay."
-            }, {
-                "type": "string",
-                "name": "(h)",
-                "value": () => "",
-                "unit": "Toggles the help overlay on/off."
-            }, {
-                "type": "header",
-                "name": "Animation"
-            }, {
-                "type": "string",
-                "name": "(e)",
-                "value": () => "",
-                "unit": "Reloads the page."
-            }, {
-                "type": "string",
-                "name": "(r)",
-                "value": () => "",
-                "unit": "Resets the animation."
-            }, {
-                "type": "string",
-                "name": "(q)",
-                "value": () => "",
-                "unit": "Toggles the animation on/off."
-            }, {
-                "type": "string",
-                "name": "(t)",
-                "value": () => "",
-                "unit": "Resets default settings."
-            }, {
-                "type": "string",
-                "name": "(+)",
-                "value": () => "",
-                "unit": "Ups the FPS by 5."
-            }, {
-                "type": "string",
-                "name": "(-)",
-                "value": () => "",
-                "unit": "Downs the FPS by 5."
-            }, {
-                "type": "header",
-                "name": "Audio Peaks"
-            }, {
-                "type": "string",
-                "name": "(a)",
-                "value": () => "",
-                "unit": "Toggles the AudioPeaks subsystem."
-            }
-        ]
-    };
-
-    /**
-     * A function that handles the processing for keystrokes.
-     * @param {Event} e
-     *     The event data for the KeyUp event.
-     * @since 2.1.7.9
-     * @private
-     */
-    static keyhandle(e) {
-        if (Ani.stopping) {
-            return; //Stopping animation, do not process keystrokes.
-        }
-        if (!Ani.started) {
-            return; //Animation isn't loaded. do not process keystrokes.
-        }
-        const modifiers = ["ctrl", "alt", "shift", "meta"];
-        Ani.keybinds.forEach((binding) => {
-            if (binding.key !== e.key) {
-                return;
-            }
-            let keys = Object.keys(binding);
-            if (keys.indexOf("conditions") !== -1) {
-                if (binding.conditions.some((cond) => {
-                    keys = Object.keys(cond);
-                    return !modifiers.some((mod) => keys.indexOf(mod) !== -1
-                            && e[`${mod}Key`] === cond[mod]);
-                })) {
-                    return;
-                }
-            }
-
-            binding.handler(e);
-        });
-    }
-    /**
-     * A function that handles the processing for hiding the mouse.
-     * @since 2.1.7.9
-     * @private
-     */
-    static mousehandle() {
-        document.body.style.cursor = "default";
-        if (Ani.timeout !== null) {
-            window.clearTimeout(Ani.timeout);
-        }
-        Ani.timeout = window.setTimeout(() => {
-            Ani.timeout = null;
-            document.body.style.cursor = "none";
-        }, 1000);
-    }
 
     /**
      * A static constructor of sorts that is run when starting the animation.
      * @private
      */
     static __constructor() {
-        document.body.addEventListener("mousemove", Ani.mousehandle);
-        window.addEventListener("keyup", Ani.keyhandle);
-        window.addEventListener("resize", Ani.updateSize);
+        Bindings.bind();
         Ani.loadSettings();
     }
     /**
@@ -2262,7 +2129,9 @@ class Ani {
 
         //Load overlays.
         Ani.status = new StatusElementCollection(Ani.statusSettings);
-        Ani.statusHelp = new StatusElementCollection(Ani.helpSettings);
+        Ani.statusHelp = new StatusElementCollection(
+            Bindings.generateHelpSettings()
+        );
 
         Ani.frameCount = 0;
         //Retrieve the CANVAS element
@@ -2593,10 +2462,7 @@ class Ani {
                     Ani.sObj = null;
                     Ani.settingsFactory = null;
                 }
-                document.body
-                    .removeEventListener("mousemove", Ani.mousehandle);
-                window.removeEventListener("keyup", Ani.keyhandle);
-                window.removeEventListener("resize", Ani.updateSize);
+                Bindings.unbind();
                 Ani.stopping = false;
                 Ani.started = false;
                 resolve();
@@ -2613,6 +2479,15 @@ class Ani {
         } else {
             Ani.__constructor();
         }
+    }
+    /**
+     * A function that is run when the debugging keybind is pressed.
+     * This is used to perform various debuggging tasks with ease.
+     * @since 2.1.7.18
+     */
+    static debug() {
+        const settings = Bindings.generateHelpSettings();
+        console.log(JSON.stringify(settings));
     }
 
     static get heTrail() {
@@ -3538,6 +3413,338 @@ class AudioPeaks extends EventTarget {
     }
 }
 
+/**
+ * A static class that provides methods to bind and unbind event listeners
+ * the the document for the purposes of this animation.
+ * @since 2.1.7.18
+ */
+class Bindings {
+    /**
+     * The list of keybindings for the application.
+     * @type {KeyBinding[]}
+     * @since 2.1.7.18
+     * @private
+     */
+    static keybinds = [
+        {
+            "key": "e",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": () => window.location.reload(),
+            "description": "Reloads the page.",
+            "group": "Animation"
+        }, {
+            "key": "s",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.toggleStatus,
+            "description": "Toggles the status overlay on/off.",
+            "group": "Overlays"
+        }, {
+            "key": "v",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.toggleVerboseStatus,
+            "description": "Toggles verbose info in the status overlay.",
+            "group": "Overlays"
+        }, {
+            "key": "r",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.reset,
+            "description": "Resets the animation.",
+            "group": "Animation"
+        }, {
+            "key": "h",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.toggleHelp,
+            "description": "Toggles the help overlay on/off.",
+            "group": "Overlays"
+        }, {
+            "key": "+",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.upFPS,
+            "description": "Ups the FPS by 5.",
+            "group": "Animation"
+        }, {
+            "key": "-",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.downFPS,
+            "description": "Downs the FPS by 5.",
+            "group": "Animation"
+        }, {
+            "key": "_",
+            "conditions": [{
+                "ctrl": false,
+                "shift": true
+            }],
+            "handler": Ani.downFPS,
+            "display": false
+        }, {
+            "key": "=",
+            "conditions": [{
+                "ctrl": false,
+                "shift": false
+            }],
+            "handler": Ani.upFPS,
+            "display": false
+        }, {
+            "key": "a",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.togglePeaks,
+            "description": "Toggles the AudioPeaks subsystem.",
+            "group": "Audio Peaks"
+        }, {
+            "key": "q",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.toggleAnimation,
+            "description": "Toggles the animation on/off.",
+            "group": "Animation"
+        }, {
+            "key": "t",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.resetDefaultSettings,
+            "description": "Resets the default settings.",
+            "group": "Animation"
+        }, {
+            "key": "z",
+            "conditions": [{
+                "ctrl": false
+            }],
+            "handler": Ani.debug,
+            "display": false,
+            "enabled": false
+        }
+        /*
+         * Keybinds
+         * a - toggle peaks
+         * e - reload
+         * h - toggle help
+         * q - toggle animation
+         * r - reset
+         * s - toggle status
+         * t - reset default settings
+         * v - toggle verbose
+         * z - debug binding
+         * + - up fps
+         * - - down fps
+         */
+    ];
+    /**
+     * The timeout number that handles hiding the mouse.
+     * @type {number}
+     * @since 2.1.7.18
+     * @private
+     */
+    static timeout;
+    /**
+     * Whether or not the bindings have been bound to the document.
+     * @type {boolean}
+     * @since 2.1.7.18
+     * @private
+     */
+    static bound;
+
+    /**
+     * A function that handles the processing for keystrokes.
+     * @param {Event} e
+     *     The event data for the KeyUp event.
+     * @since 2.1.7.18
+     * @private
+     */
+    static keyhandle(e) {
+        if (Ani.stopping) {
+            return; //Stopping animation, do not process keystrokes.
+        }
+        if (!Ani.started) {
+            return; //Animation isn't loaded. do not process keystrokes.
+        }
+        const modifiers = ["ctrl", "alt", "shift", "meta"];
+        Bindings.keybinds.forEach((binding) => {
+            if (binding.key !== e.key) {
+                return;
+            }
+            let keys = Object.keys(binding);
+            if (keys.includes("enabled") && !binding.enabled) {
+                return;
+            }
+            if (keys.includes("conditions") && binding.conditions.length > 0) {
+                if (binding.conditions.some((cond) => {
+                    keys = Object.keys(cond);
+                    return !modifiers.some((mod) => keys.indexOf(mod) !== -1
+                        && e[`${mod}Key`] === cond[mod]);
+                })) {
+                    return;
+                }
+            }
+
+            binding.handler(e);
+        });
+    }
+    /**
+     * A function that handles the processing for hiding the mouse.
+     * @since 2.1.7.18
+     * @private
+     */
+    static mousehandle() {
+        document.body.style.cursor = "default";
+        if (!Bindings.timeout) {
+            window.clearTimeout(Bindings.timeout);
+        }
+        Bindings.timeout = window.setTimeout(() => {
+            Bindings.timeout = null;
+            document.body.style.cursor = "none";
+        }, 1000);
+    }
+
+    /**
+     * Attaches the event listeners necessary to run the animation to their
+     * targets.
+     * @since 2.1.7.18
+     */
+    static bind() {
+        if (Bindings.bound) {
+            return;
+        }
+        Bindings.bound = true;
+        document.body.addEventListener(
+            "mousemove",
+            Bindings.mousehandle
+        );
+        window.addEventListener(
+            "keyup",
+            Bindings.keyhandle
+        );
+        window.addEventListener(
+            "resize",
+            Ani.updateSize
+        );
+    }
+    /**
+     * Detaches the event listeners necessary to run the animation to their
+     * targets.
+     * @since 2.1.7.18
+     */
+    static unbind() {
+        if (!Bindings.bound) {
+            return;
+        }
+        Bindings.bound = false;
+        document.body.removeEventListener(
+            "mousemove",
+            Bindings.mousehandle
+        );
+        window.removeEventListener(
+            "keyup",
+            Bindings.keyhandle
+        );
+        window.removeEventListener(
+            "resize",
+            Ani.updateSize
+        );
+    }
+
+    /**
+     * Generates a {@link StatusCollectionSettings} object from the
+     * currently registered key-bindings.
+     * @since 2.1.7.18
+     * @returns {StatusCollectionSettings}
+     *     The collection of settings that can be used to create a new Help
+     *     overlay to detail the list of key-bindings in use by the
+     *     application.
+     */
+    static generateHelpSettings() {
+        const settings = {
+            "title": "Key Bindings",
+            "itemText": "Command",
+            "valueText": "Explanation",
+            "enableUpdate": false,
+            "customCSS": "top: 0; right: 0",
+            "rows": []
+        };
+        const groups = {};
+        const noGroup = [];
+        const groupList = [];
+        Bindings.keybinds.forEach((obj) => {
+            const keys = Object.keys(obj);
+            if (keys.includes("display") && !obj.display) {
+                return;
+            }
+            const row = {
+                "type": "string",
+                "value": () => ""
+            };
+            if (keys.includes("conditions") && obj.conditions.length > 0) {
+                const cmap = obj.conditions.map((cond) => {
+                    let str = Object
+                        .keys(cond)
+                    /* eslint-disable-next-line no-extra-parens */
+                        .map((key) => (cond[key]
+                            ? key.substring(0, 1).toUpperCase()
+                            + key.substring(1).toLowerCase()
+                            : null))
+                        .filter((value) => value !== null)
+                        .join(" + ");
+                    if (str.length > 0) {
+                        str += " + ";
+                    }
+                    return `${str}${obj.key}`;
+                });
+                row.name = cmap.length > 0
+                    ? `(${cmap.join(",")})`
+                    : `(${obj.key})`;
+            } else {
+                row.name = `(${obj.key})`;
+            }
+            if (
+                keys.includes("description")
+                && obj.description.trim().length > 0) {
+                row.unit = obj.description.trim();
+            }
+            //Evaluate and generate object
+            if (keys.includes("group") && obj.group.trim().length > 0) {
+                if (!groupList.includes(obj.group.trim())) {
+                    groupList.push(obj.group.trim());
+                    groups[obj.group.trim()] = [];
+                }
+                groups[obj.group.trim()].push(row);
+            } else {
+                noGroup.push(row);
+            }
+        });
+
+        noGroup.forEach((row) => {
+            settings.rows.push(row);
+        });
+        groupList.forEach((group) => {
+            settings.rows.push({
+                "type": "header",
+                "name": group
+            });
+            groups[group].forEach((row) => {
+                settings.rows.push(row);
+            });
+        });
+        return settings;
+    }
+}
+
 if (document.readyState === "complete") {
     Ani.__constructor();
 } else {
@@ -3547,15 +3754,6 @@ if (document.readyState === "complete") {
 /**
  * @todo Complete documentation.
  * @todo fix obsolete references and other issues in documentation.
- * @todo Maybe add a "description" key to the keybind object so we can
- *       dynamically create the help keys (see two todos down).
- *       Add "group" key as well to dynamically group keybinds into categories
- *       We also need to add a "name" property as well.
- * @todo Move Keybindings to its own class (and document the object props)
- * @todo Since Keybindings is going to be moved to its own class, we should
- *       probably shift the generation of the help overlay to a dynamic
- *       creation method as described in the todo two back.
- * @todo use "at borrows" to avoid double documenting the setting shorthands
  * @todo Fix the buggy phaseshift code.
  * @todo Implement the canvas resize code (and test it)
  * @todo add ability to modify keybindings (though I'm not sure why we would
