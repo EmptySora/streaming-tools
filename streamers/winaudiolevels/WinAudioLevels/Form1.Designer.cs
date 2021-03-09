@@ -34,6 +34,7 @@
             this.testCaptureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testOBSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -95,6 +96,7 @@
             this.newBrowserToolStripMenuItem,
             this.refreshToolStripMenuItem,
             this.testCaptureToolStripMenuItem,
+            this.testOBSToolStripMenuItem,
             this.toolStripSeparator1,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -137,6 +139,13 @@
             this.quitToolStripMenuItem.Text = "&Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
+            // testOBSToolStripMenuItem
+            // 
+            this.testOBSToolStripMenuItem.Name = "testOBSToolStripMenuItem";
+            this.testOBSToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.testOBSToolStripMenuItem.Text = "Test OBS";
+            this.testOBSToolStripMenuItem.Click += new System.EventHandler(this.TestOBSToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -170,6 +179,7 @@
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newBrowserToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testCaptureToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem testOBSToolStripMenuItem;
     }
 }
 

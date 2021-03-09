@@ -175,10 +175,32 @@ namespace WinAudioLevels {
         private const float FPS = 60;
         private const float SLEEP_TIME = 1000 / FPS;
         private static readonly List<AudioPeaksBehavior> BEHAVIORS = new List<AudioPeaksBehavior>();
-
+        internal static ApplicationSettings _settings = ApplicationSettings.GetDefaultSettings();
+        private static bool _started = false;
         static AudioPeaksBehavior() {
+            _settings.Settings.Devices = new ApplicationSettings.SettingsV0.AudioDeviceSettings[] {
+                new ApplicationSettings.SettingsV0.AudioDeviceSettings() {
+                     ObsName = "T1A2c7yAjELCRqciAMIfqA" //Headphones Output
+                },
+                new ApplicationSettings.SettingsV0.AudioDeviceSettings() {
+                     ObsName = "WW2S6OP8F0/rpBP2bGp2jA" //Speaker Audio Output
+                },
+                new ApplicationSettings.SettingsV0.AudioDeviceSettings() {
+                     ObsName = "Jrk68psf0AM9uuGgh7Vg3Q" //Audio Cap
+                },
+                new ApplicationSettings.SettingsV0.AudioDeviceSettings() {
+                     ObsName = "jbRrAIQ/VUEePKlSv4Ou/A" //Microphone Input
+                }
+            };
             Thread t = new Thread(PingMain) { Name = "WebSocketServer Pinger" };
             t.Start();
+        }
+        public static void StartPing() {
+            if (_started) {
+                return;
+            }
+            _started = true;
+            
         }
         private static void PingMain() {
             JsonSerializerSettings settings = new JsonSerializerSettings() {
@@ -187,7 +209,7 @@ namespace WinAudioLevels {
                 NullValueHandling = NullValueHandling.Ignore,
                 StringEscapeHandling = StringEscapeHandling.EscapeNonAscii,
             };
-            AudioCapture capture = AudioCapture.GetOutputCapture();
+            AudioCapture capture = AudioCapture.GetOutputPlusSettingsCapture(_settings.Settings);
             capture.Start(); //START THE CAPTURE, MORON.
             while (true) {
                 Thread.Sleep(TimeSpan.FromMilliseconds(SLEEP_TIME)); //SLEEP_TIME (25/1.5= ~17 milliseconds)

@@ -116,6 +116,17 @@ namespace WinAudioLevels {
             return new AudioCapture(GetOutputAudioCaptures());
         }
 
+        public static AudioCapture GetOutputPlusSettingsCapture(ApplicationSettings.SettingsV0 settings) {
+            List<IAudioCapture> clients = new List<IAudioCapture>();
+            clients.AddRange(GetOutputAudioCaptures());
+            foreach(ApplicationSettings.SettingsV0.AudioDeviceSettings dev in settings.Devices) {
+                if (!string.IsNullOrWhiteSpace(dev.ObsName)) {
+                    clients.Add(new OBSAudioCapture(dev.ObsName));
+                }
+            }
+            return new AudioCapture(clients.ToArray());
+        }
+
     }
 
 

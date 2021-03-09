@@ -103,6 +103,10 @@ namespace WinAudioLevels {
             WebServer server = new WebServer(serverSettings);
             server.Start();
         }
+
+        private void TestOBSToolStripMenuItem_Click(object sender, EventArgs e) {
+            new ObsTest().Show();
+        }
     }
 
 }

@@ -1,4 +1,4 @@
-﻿using IronOcr;
+﻿//using IronOcr;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,25 +11,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Management;
+using System.Collections;
+using System.Security.Cryptography;
 
 namespace WinAudioLevels {
     public static class OBSCapture {
 
         #region Imports
-        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", SetLastError = false, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool EnumChildWindows(
             IntPtr hWndParent,
             [MarshalAs(UnmanagedType.FunctionPtr)]WNDENUMPROC lpEnumFunc, //callback
             IntPtr lParam); //set lParam to IntPtr.zero
-        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern int GetWindowTextW(
-            IntPtr hWnd,
-            IntPtr lpString, //pass in a buffer.
-            int nMaxCount);
-        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern int GetWindowTextLengthW(
-            IntPtr hWnd);
         [return: MarshalAs(UnmanagedType.Bool)]
         private delegate bool WNDENUMPROC(
             [In]IntPtr hwnd,
@@ -49,7 +43,67 @@ namespace WinAudioLevels {
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetWindowRect(
             IntPtr hWnd,
-            [MarshalAs(UnmanagedType.LPStruct)]out RECT lpRect);
+            out RECT lpRect);
+
+
+        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(
+            IntPtr hWnd,
+            uint Msg,
+            IntPtr wParam,
+            IntPtr lParam);
+        const int WM_GETTEXT = 0x000D;
+        const int WM_GETTEXTLENGTH = 0x000E;
+        [DllImport("user32.dll", EntryPoint = "SendMessage", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern bool SendMessage(
+            IntPtr hWnd, 
+            uint Msg, 
+            int wParam,
+            StringBuilder lParam);
+        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern uint GetWindowThreadProcessId(
+            IntPtr hWnd,
+            out uint lpdwProcessId); //return value is the thread id, FYI
+        /*
+        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int GetWindowTextW(
+            IntPtr hWnd,
+            IntPtr lpString, //pass in a buffer.
+            int nMaxCount);
+        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int GetWindowTextLengthW(
+            IntPtr hWnd);
+        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int GetClassNameW(
+            IntPtr hWnd,
+            StringBuilder lpClassName,
+            int nMaxCount);
+        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int GetWindowLongW(
+            IntPtr hWnd,
+            int nIndex);
+        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int GetWindowLongPtrW(
+            IntPtr hWnd,
+            int nIndex);
+        const int GWL_STYLE = -16;
+        const int GWL_HINSTANCE = -6;
+        const int SS_ICON = 0x00000003;
+        [DllImport("user32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int GetWindowModuleFileNameW(
+            IntPtr hWnd,
+            StringBuilder pszFileName,
+            int cchFileNameMax);
+        [DllImport("Oleacc.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern IntPtr GetProcessHandleFromHwnd(
+            IntPtr hWnd);
+        [DllImport("kernel32.dll", PreserveSig = true, SetLastError = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CloseHandle(
+            IntPtr hObject);
+        */
+
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         struct RECT {
             public int left;
@@ -69,7 +123,9 @@ namespace WinAudioLevels {
         public static event EventHandler OBSNotFoundError;
         public static event EventHandler AudioMixerWindowNotFoundError;
         public static event EventHandler OBSErrorFixed;
+        public static event EventHandler AudioMixerOcrStarting;
         internal static event EventHandler<Image> AudioMixerWindowCaptured;
+        internal static event EventHandler<Tuple<Rectangle,int>> AudioMixerOcrAttempt; //read region, meter
         private static bool _errored = false;
         private static int _listener_count = 0;
         private static Size _window_size;
@@ -81,7 +137,7 @@ namespace WinAudioLevels {
             THREAD.Name = "OBS Capture Thread";
             THREAD.Start();
         }
-        private static readonly IronTesseract TESSERACT = new IronTesseract();
+        private static readonly MD5CryptoServiceProvider HASHER = new MD5CryptoServiceProvider();
         //key is the theme's name. value is array of colors: ggyyrr (first is light, second is dark)
         private static readonly Dictionary<string, Color[]> METER_COLORS = new Dictionary<string, Color[]>() {
             {
@@ -92,6 +148,7 @@ namespace WinAudioLevels {
                     Color.FromArgb(127,127,38), //YELLOW: INACTIVE
                     Color.FromArgb(255,76,76), //RED: ACTIVE
                     Color.FromArgb(127,38,38), //RED: INACTIVE
+                    Color.FromArgb(0,0,0), //Dark thingie
                 }
             },
             {
@@ -102,6 +159,7 @@ namespace WinAudioLevels {
                     Color.FromArgb(152,143,15), //YELLOW: INACTIVE
                     Color.FromArgb(215,65,22), //RED: ACTIVE
                     Color.FromArgb(128,32,4), //RED: INACTIVE
+                    Color.FromArgb(49,54,59), //Dark thingie
                 }
             },
             {
@@ -112,6 +170,7 @@ namespace WinAudioLevels {
                     Color.FromArgb(128,57,0), //YELLOW: INACTIVE
                     Color.FromArgb(255,89,76), //RED: ACTIVE
                     Color.FromArgb(128,9,0), //RED: INACTIVE
+                    Color.FromArgb(49,54,59), //Dark thingie
                 }
             },
             {
@@ -122,6 +181,7 @@ namespace WinAudioLevels {
                     Color.FromArgb(100,100,15), //YELLOW: INACTIVE
                     Color.FromArgb(200,50,50), //RED: ACTIVE
                     Color.FromArgb(100,15,15), //RED: INACTIVE
+                    Color.FromArgb(0,0,0), //Dark thingie
                 }
             }
         };
@@ -130,6 +190,12 @@ namespace WinAudioLevels {
             { "Acri", Color.FromArgb(239,240,241) },
             { "Rachni", Color.FromArgb(239,240,241) },
             { "System", Color.FromArgb(0,0,0) }
+        };
+        private static readonly Dictionary<string, Color[]> BACKGROUND_COLORS = new Dictionary<string, Color[]>() {
+            { "Dark", new Color[]{ Color.FromArgb(31,30,31) } },
+            { "Acri", new Color[]{Color.FromArgb(24,24,25) } },
+            { "Rachni", new Color[]{Color.FromArgb(49,54,59), Color.FromArgb(118, 121, 124) } },
+            { "System", new Color[]{ Color.FromArgb(240, 240, 240), Color.FromArgb(130,135,144) } }
         };
         private static readonly Color[] ALL_METER_COLORS = METER_COLORS["Dark"]
             .Union(METER_COLORS["Acri"])
@@ -141,72 +207,69 @@ namespace WinAudioLevels {
         private static readonly object LOCK = new object();
         private static readonly Dictionary<string, double> METER_LEVELS = new Dictionary<string, double>();
         private static readonly List<double> METER_LEVELS_SEQ = new List<double>();
+        private static string GetControlText(IntPtr hWnd) {
+            int size = SendMessage(hWnd, WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero).ToInt32();
+            if(size == 0) {
+                return null;
+            }
+            StringBuilder builder = new StringBuilder(size + 1);
+            SendMessage(hWnd, WM_GETTEXT, builder.Capacity, builder);
+            return builder.ToString();
+        }
         private static int GetAudioMixer(out IntPtr hAudioMixer) {
+            IntPtr handle = IntPtr.Zero;
             Process obs = null;
             hAudioMixer = IntPtr.Zero;
-            foreach (Process proc in Process.GetProcesses()) {
-                string path = proc.MainModule.FileName;
-                string[] dirs = Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar);
-                string file = Path.GetFileNameWithoutExtension(path).ToLower();
-                IEnumerable<Process> children;
-                if (file == "obs32" || file == "obs64") {
-                    children = proc.GetChildProcesses();
-                    if (children.Any(child => {
-                        return Path
-                        .GetFileNameWithoutExtension(child.MainModule.FileName)
-                        .ToLower() == "obs-browser-page";
-                    })) {
-                        //DEFINITELY the right one.
-                        obs = proc;
-                        break;
-                    } else {
-                        continue;
-                        //we continue here because they *should* have at least one browser control
-                        //How do we know that? Because this app is used in conjunction with my background
-                        //animation (which plays in a browser control).
-                        //sooo... it's a safe bet that the user has a browser control and, thus, OBS has
-                        //at least one "obs-browser-page.exe" subprocess.
+            bool EnumCallback(IntPtr hWnd, IntPtr lParam) {
+                try {
+                    if ("Audio Mixer" == GetControlText(hWnd)) {
+                        GetWindowThreadProcessId(hWnd, out uint procID);
+                        if (procID != obs.Id) {
+                            return true; //WRONG "Audio Mixer" window, dammit!
+                        }
+                        handle = hWnd;
+                        return false;
+                        //we have what we came for.
+                        //let's get gone.
                     }
+                } finally { }
+                return true;
+            }
+            foreach (Process proc in Process.GetProcesses()) {
+                try {
+                    string path = proc.MainModule.FileName;
+                    string[] dirs = Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar);
+                    string file = Path.GetFileNameWithoutExtension(path).ToLower();
+                    IEnumerable<Process> children;
+                    if (file == "obs32" || file == "obs64") {
+                        children = proc.GetChildProcesses();
+                        if (children.Any(child => Path
+                            .GetFileNameWithoutExtension(child.MainModule.FileName)
+                            .ToLower() == "obs-browser-page")) {
+                            //DEFINITELY the right one.
+                            obs = proc;
+                            break;
+                        } else {
+                            continue;
+                            //we continue here because they *should* have at least one browser control
+                            //How do we know that? Because this app is used in conjunction with my background
+                            //animation (which plays in a browser control).
+                            //sooo... it's a safe bet that the user has a browser control and, thus, OBS has
+                            //at least one "obs-browser-page.exe" subprocess.
+                        }
+                    }
+                    //obs-browser-page.exe
+                    //obs32.exe / obs64.exe
+                }catch(Exception e) {
+                    Console.WriteLine("Error during proc lookup: {0}", e.Message);
                 }
-                //obs-browser-page.exe
-                //obs32.exe / obs64.exe
             }
             if (obs == null) {
                 return -1; //could not find obs... :(
             }
-            IntPtr pHandle = obs.Handle;
-            IntPtr mwHandle = obs.MainWindowHandle;
-            IntPtr handle = IntPtr.Zero;
-            bool EnumCallback(IntPtr hWnd, IntPtr lParam) {
-                IntPtr nameBuffer = IntPtr.Zero;
-                const string expectedTitle = "Audio Mixer";
-                try {
-                    nameBuffer = Marshal.AllocHGlobal(512 * 2);
-                    int chars = GetWindowTextW(hWnd, nameBuffer, 512); //length less null term
-                    if (chars == 0) {
-                        throw new Win32Exception();
-                    }
-                    if (chars == expectedTitle.Length) {
-                        string name = Marshal.PtrToStringUni(nameBuffer, chars);
-                        if (expectedTitle == name) {
-                            handle = hWnd;
-                            return false;
-                            //we have what we came for.
-                            //let's get gone.
-                        }
-                    }
-                    //2b null term
-
-                } finally {
-                    if (IntPtr.Zero != nameBuffer) {
-                        Marshal.FreeHGlobal(nameBuffer);
-                    }
-                }
-                return true;
-            }
-            //LOOK FOR Qt5QWindowIcon[Text: "Audio Mixer"]
-            //
-            EnumChildWindows(mwHandle, EnumCallback, IntPtr.Zero); //return value unused.
+            //for some reason, using the mainwindowhandle value for this doesn't work...
+            //since we still need the OBS process to do this right, we still need the above process logic.
+            EnumChildWindows(IntPtr.Zero, EnumCallback, IntPtr.Zero); //return value unused.
             hAudioMixer = handle;
 
             if (hAudioMixer == IntPtr.Zero) {
@@ -241,10 +304,12 @@ namespace WinAudioLevels {
                     Console.WriteLine("Could not find obs64.exe/obs32.exe! Waiting {0} seconds...", errorWait.TotalSeconds);
                     OBSNotFoundError?.Invoke(null, new EventArgs());
                     _errored = true;
+                    Thread.Sleep(errorWait);
                 } catch (EntryPointNotFoundException) {
                     Console.WriteLine("Could not find Audio Mixer window! Waiting {0} seconds...", errorWait.TotalSeconds);
                     AudioMixerWindowNotFoundError?.Invoke(null, new EventArgs());
                     _errored = true;
+                    Thread.Sleep(errorWait);
                 } catch (Exception e) {
                     Console.WriteLine("ERROR IN OBS CAPTURE LOOP:\n{0}", e);
                     Thread.Sleep(errorWait);
@@ -276,6 +341,8 @@ namespace WinAudioLevels {
                 }
             }
             //check window size.
+            //FYI, this is scuffed. I think this might include the window border which is explicitly excluded from being captured...
+            //At least, I think so based on the behavior of resizing the ObsTest window...
             Size currentSize = GetWindowSize(_h_audio_mixer);
             //if window size changed, we need to get new drawing buffers.
             if (currentSize != _window_size) {
@@ -291,11 +358,31 @@ namespace WinAudioLevels {
             }
             _window_size = currentSize;
             //capture OBS window. (PW_CLIENTONLY specifies not to capture the window border.)
-            if (!PrintWindow(_h_audio_mixer, _graphics.GetHdc(), PW_CLIENTONLY)) {
-                throw new Win32Exception();
+            try {
+                if (!PrintWindow(_h_audio_mixer, _graphics.GetHdc(), PW_CLIENTONLY)) {
+                    throw new Win32Exception();
+                }
+            } catch {
+                throw;
+            } finally {
+                _graphics.ReleaseHdc();
+            }
+            if(AudioMixerWindowCaptured != null) {
+                Bitmap img = new Bitmap(currentSize.Width, currentSize.Height);
+                Graphics gfx = Graphics.FromImage(img);
+                try {
+                    if (!PrintWindow(_h_audio_mixer, gfx.GetHdc(), PW_CLIENTONLY)) {
+                        throw new Win32Exception();
+                    }
+                } catch {
+                    throw;
+                } finally {
+                    gfx.ReleaseHdc();
+                }
+                //separate print window call to avoid locking up the bitmap
+                AudioMixerWindowCaptured.Invoke(null, img);
             }
             //send this to the debuggin context.
-            AudioMixerWindowCaptured?.Invoke(null, (Image)_bitmap.Clone());
             //for debugging
             //this will allow me to create a form to "see" the OBS Audio Mixer and make sure this is working.
 
@@ -310,23 +397,33 @@ namespace WinAudioLevels {
                 }
                 UpdateMeters();
                 lock (LOCK) {
-                    METERS.ForEach(a => {
-                        METER_LEVELS[a.MeterName] = -60;
-                        METER_LEVELS_SEQ.Add(-60);
-                    });
+                    if (METERS.Count > 0) {
+                        METERS.ForEach(a => {
+                            METER_LEVELS[a.MeterId] = -60;
+                            METER_LEVELS_SEQ.Add(-60);
+                        });
+                    }
                 }
             }
             int index = 0;
-            METERS.ForEach(a => {
-                double level = GetMeterLevel(a);
-                lock (LOCK) {
-                    METER_LEVELS[a.MeterName] = level;
-                    METER_LEVELS_SEQ[index++] = level;
-                    //update the meter levels.
-                }
-            });
+            if (METERS.Count > 0) {
+                METERS.ForEach(a => {
+                    double level = GetMeterLevel(a);
+                    lock (LOCK) {
+                        METER_LEVELS[a.MeterId] = level;
+                        METER_LEVELS_SEQ[index++] = level;
+                        //update the meter levels.
+                    }
+                });
+            }
+            UpdateConsoleShowing();
 #warning We are currently not checking to see if the Audio Mixer is Vertical or Horizontal...
             //OH MY GOD, THERE'S A VERTICAL LAYOUT... FUCK ME
+        }
+        private static void UpdateConsoleShowing() {
+            Console.Title = string.Format(
+                "METER LEVELS: {0}",
+                string.Join(", ", METER_LEVELS_SEQ));
         }
         private static double GetMeterLevel(ObsAudioMixerMeter meter) {
             double levelA = double.MinValue;
@@ -338,6 +435,10 @@ namespace WinAudioLevels {
                 for (int x = meter.MeterChannelBottom.X; x < meter.MeterChannelBottom.Right; x++) {
                     if (colors.Contains(_bitmap.GetPixel(x, meter.MeterChannelBottom.Y))) {
                         maxX = x;
+                    } else if (maxX != meter.MeterChannelBottom.X) {
+                        break; //avoid catching the dot thingies
+                    } else {
+                        break;
                     }
                 }
                 levelB = ((maxX - meter.MeterChannelBottom.X) / meter.MeterChannelBottom.Width * 60) - 60;
@@ -347,6 +448,10 @@ namespace WinAudioLevels {
                 for (int x = meter.MeterChannelTop.X; x < meter.MeterChannelTop.Right; x++) {
                     if (colors.Contains(_bitmap.GetPixel(x, meter.MeterChannelTop.Y))) {
                         maxX = x;
+                    } else if (maxX != meter.MeterChannelBottom.X) {
+                        break; //avoid catching the dot thingies
+                    } else {
+                        break;
                     }
                 }
                 levelA = ((maxX - meter.MeterChannelTop.X) / meter.MeterChannelTop.Width * 60) - 60;
@@ -375,6 +480,7 @@ namespace WinAudioLevels {
                     pAfter = 0;
                 } else if (anyMeter) {
                     pAfter++;
+                    meter = false;
                 }
             }
             return count;
@@ -429,6 +535,7 @@ namespace WinAudioLevels {
                     } else if (!meter && (pAfter < ObsAudioMixerMeter.MAX_PIXELS_BETWEEN_CHANNELS)) {
                         //new channel
                         yStartB = y;
+                        startedB = true;
                     }
                     anyMeter = meter = true;
                     pAfter = 0;
@@ -440,8 +547,8 @@ namespace WinAudioLevels {
                             yEndA = y;
                         }
                     }
+                    meter = false;
                     pAfter++;
-
                 }
             }
             if (anyMeter && yStartA > 0) {
@@ -474,6 +581,8 @@ namespace WinAudioLevels {
                 }
                 int xSize = firstX - lastX;
                 METERS.Clear();
+                int mIndex = 0;
+                AudioMixerOcrStarting?.Invoke(null, new EventArgs());
                 foreach (Tuple<Point, Point> coordinate in coords) {
                     ObsAudioMixerMeter oMeter = new ObsAudioMixerMeter() {
                         MeterChannelTop = new Rectangle(
@@ -486,21 +595,16 @@ namespace WinAudioLevels {
                                  new Size(xSize, coordinate.Item2.Y - coordinate.Item2.X)),
                         Theme = theme
                     };
-                    Rectangle nameRect = default;
-                    try {
-                        nameRect = new Rectangle(
-                            0,
-                            oMeter.MeterChannelTop.Y - 26,
-                            oMeter.MeterChannelTop.Width + oMeter.MeterChannelTop.X - 70,
-                            25);
-                    } catch {
-                        return; //window too small :(
-                    }
-                    using (OcrInput input = new OcrInput(_bitmap, nameRect)) {
-                        oMeter.MeterName = TESSERACT.Read(input).Text;
-                        //OcrInput and IronOcr are like: "It's finally my time to shine..."
-                    }
+                    Rectangle nameRect = new Rectangle(
+                        0,
+                        Math.Max(oMeter.MeterChannelTop.Y - 26, 0),
+                        Math.Min(oMeter.MeterChannelTop.Width + oMeter.MeterChannelTop.X - 70, _bitmap.Width),
+                        Math.Min(25 + Math.Min(oMeter.MeterChannelTop.Y - 26, 0), _bitmap.Height));
+                    AudioMixerOcrAttempt?.Invoke(null, new Tuple<Rectangle, int>(nameRect, mIndex));
+                    oMeter.MeterId = GetMeterId(oMeter, _bitmap, nameRect);
+                    Console.WriteLine("Found Meter (id): {0}", oMeter.MeterId);
                     METERS.Add(oMeter);
+                    mIndex++;
                 }
                 //55 pixels off rectangle end.
                 //2 pixels above meter
@@ -510,6 +614,52 @@ namespace WinAudioLevels {
             //scan pixel below bottom meter
 
         }
+        private static string GetMeterId(ObsAudioMixerMeter meterBase, Bitmap bmp, Rectangle rect) {
+            List<List<bool>> bits = new List<List<bool>>();
+            Color[] bgColors = BACKGROUND_COLORS[meterBase.Theme];
+            //step 1: convert the OCR region to bool[][] where false=bg, true=!bg
+            for (int x = rect.X,i=0; x < Math.Min(rect.Right,bmp.Width); x++,i++) {
+                bits.Add(new List<bool>());
+                for (int y = rect.Y; y < Math.Min(rect.Bottom, bmp.Height); y++) {
+                    bits[i].Add(!bgColors.Contains(bmp.GetPixel(x, y)));
+                }
+            }
+            //step 2: trim the top all false rows and the right all false columns.
+            bool check = true;
+            while (check) {
+                check = false;
+                //x,y
+                if(bits[bits.Count - 1].All(a => !a)) {
+                    bits.RemoveAt(bits.Count - 1);
+                    check = true;
+                    continue;
+                }
+                if(bits.All(a => !a[0])) {
+                    bits.ForEach(a => a.RemoveAt(0));
+                    check = true;
+                    continue;
+                }
+            }
+            //step 3: compute hash.
+            List<bool> tmp = new List<bool>();
+            bits.ForEach(a => tmp.AddRange(a));
+            BitArray bitArray = new BitArray(tmp.ToArray());
+            byte[] bytes = new byte[(bitArray.Length - 1) / 8 + 1];
+            bitArray.CopyTo(bytes, 0);
+            string hashString = string.Format(
+                "{1}.{2}.{0}",
+                Convert.ToBase64String(bytes),
+                bits.Count,
+                bits.Count == 0 ? 0 : bits[0].Count);
+            byte[] hash = HASHER.ComputeHash(Encoding.UTF8.GetBytes(hashString));
+            //128-bit, so 16-bytes
+            //hex would be 2ch/byte = 32 characters.
+            //base64 would be 4ch/3bytes = 24 characters.
+            //ehhhhh good enough
+            string ret = Convert.ToBase64String(hash).Replace("=", "");
+            return ret;
+        }
+
 
         public static double? GetAudioMeterLevel(string meterName) {
             return !METER_LEVELS.ContainsKey(meterName)
@@ -551,6 +701,7 @@ namespace WinAudioLevels {
             }
             return ret;
         }
+        /*
         public static IEnumerable<ObsAudioMixerMeter> GetObsAudioMeters(object token, EventHandler<Image> cbCapturedImage = null) {
             Bitmap _bitmap;
             Graphics _graphics;
@@ -728,16 +879,40 @@ namespace WinAudioLevels {
             }
             yield break;
         }
+        */
     }
 
     public struct ObsAudioMixerMeter {
         public const int MAX_PIXELS_BETWEEN_CHANNELS = 10;
         public string Theme { get; set; }
         public string MeterName { get; set; }
+        public string MeterId { get; set; }
         public Rectangle MeterChannelTop { get; set; }
         public Rectangle MeterChannelBottom { get; set; }
         public bool HasDualMeter => this.MeterChannelBottom != default;
     }
 }
-#warning Need to hook into the events from this class in MainForm so that we can tell the user when they goof the OBS requirements.
+//Need to hook into the events from this class in MainForm so that we can tell the user when they goof the OBS requirements.
 //we should add an ability to detach those event handlers temporarily so that the AddDeviceForm can hook into and detect when the goof occurs.
+/*
+ * Slight issue: OCR isn't working. I already checked, and I know for a fact that it should be.
+ * The input rectangles are all correct (I checked them visually through ObsTest. They all highlighted the right region...)
+ * 
+ * What we may end up having to do is partially serialize the pixels of the text and use THAT as an ID instead.
+ * Also, removing Iron might be good because of the fact that there's probably licensing issues.
+ * 
+ * Removed Iron in favor of original Tesseract library (which has an Apache license :) )
+ * Still doesn't work...
+ * 
+ * Might switch to using the pixels... We would have to assume the minimum height of all the rects is the proper height (and offset vertical by difference)
+ * All the rects must have same number of pixels.
+ * We should record the background colors for each theme
+ * We then scan each pixel in the OCR area to see the max pixel that isn't that background color.
+ *     The OCR area has a hard-coded offset to account for the decibels text. (which is why we use that rect.)
+ * Convert each pixel in that subregion to a bool value: true if not bgcolor, false if bgcolor
+ *     We could also do this before the subregion and then trim off all columns/rows on the top/right that are all false
+ *         cannot trim bottom/left because that's our reference start. (because then it would be ambiguous as to whether the top or bottom was lopped off. eg: if it were possible to have "a" at the top of the line, lopping off both sides would say the normal and top-line "a" are the same.
+ * Pack the boolean values into a byte array...
+ * Convert the byte array to base64 and prepend "{width}.{height}." (so "{w}.{h}.{base64}"
+ * Then hash it! The hash is the ID! (and can easily be worked into a number)
+ */

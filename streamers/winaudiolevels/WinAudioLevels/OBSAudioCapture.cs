@@ -10,7 +10,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Drawing;
-using IronOcr;
 
 namespace WinAudioLevels {
     class OBSAudioCapture : IAudioCapture, IDisposable  {

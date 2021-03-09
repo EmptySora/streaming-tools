@@ -488,7 +488,7 @@ namespace WinAudioLevels {
             Version sVersion = settings.Version;
             Type sType = settings.InnerSettings.GetType();
             SettingsVersionAttribute sva = sType.GetCustomAttribute<SettingsVersionAttribute>();
-            SettingsVersionAttribute svaPrevious = null;
+            SettingsVersionAttribute svaPrevious;
             Version aVersion = Version.Parse(AssemblyDetails.ASSEMBLY_FILE_VERSION);
             if (sVersion < sva.SettingsVersion) {
                 //invalid? eg: SettingsV0 says 0.1.5.0, but we're at 0.1.4.27.
@@ -800,6 +800,12 @@ namespace WinAudioLevels {
                 [JsonProperty(PropertyName = "obsName")]
                 public string ObsName { get; set; } = null;
                 /// <summary>
+                /// Gets or sets the zero-based index of the OBS audio mixer slider that is being
+                /// tracked. (Only present for <see cref="DeviceType.ScreenCaptureInput"/> or <see cref="DeviceType.ScreenCaptureOutput"/>.)
+                /// </summary>
+                [JsonProperty(PropertyName = "obsIndex")]
+                public int ObsIndex { get; set; } = 0;
+                /// <summary>
                 /// Gets or sets a user supplied string that will be used in the UI to identify this device.
                 /// </summary>
                 [JsonProperty(PropertyName = "name")]
@@ -827,9 +833,13 @@ namespace WinAudioLevels {
                 public enum DeviceType : uint {
                     GenericInput = 0x00000000,
                     GenericOutput = 0x80000000,
+                    ScreenCapture = 0x40000000,
                     DeviceNumberMask = 0x3FFFFFFF,
-                    ScreenCaptureInput = GenericInput | 0x40000000,
-                    ScreenCaptureOutput = GenericOutput | 0x40000000,
+                    DeviceFlagMask = 0x3FFFFFFF,
+
+                    ScreenCaptureInput = GenericInput | ScreenCapture,
+                    ScreenCaptureOutput = GenericOutput | ScreenCapture,
+
                     Microphone = GenericInput | 1,
                     CaptureCard = ScreenCaptureInput | 2,
                     WebCam = ScreenCaptureInput | 3,
@@ -857,3 +867,58 @@ namespace WinAudioLevels {
 //honestly, I can't wait until I end up having to straight up copy and paste the entire SettingsV0 class
 //to create SettingsV1
 //The fact that this actually works as intended first try is astonishing to me.
+
+/* SETTINGS FILE STRUCTURE:
+ * {
+ *     "version": "0.1.4.25",
+ *     "settings": {
+ *         "addDeviceForm.native.enabledColumns": [ "columnID", "columnID" ],
+ *         "devices": [
+ *             {
+ *                 "id": "device ID",
+ *                 "obsName": "name of meter in OBS",
+ *                 "obsIndex": 0, //zero-based index of the meter
+ *                 "name": "display name",
+ *                 "notes": "user specified notes about the device",
+ *                 "capture": true, //whether or not to capture this device and relay it
+ *                 "type": 0,
+ *                 //FLAGS:
+ *                 //             Input = 0b00000000000000000000000000000000
+ *                 //            Output = 0b10000000000000000000000000000000
+ *                 //     ScreenCapture = 0b01000000000000000000000000000000
+ *                 //     DevNumberMask = 0b00111111111111111111111111111111
+ *                 //VALUES:
+ *                 //        Microphone = 0b00000000000000000000000000000001
+ *                 //       CaptureCard = 0b01000000000000000000000000000010
+ *                 //            WebCam = 0b01000000000000000000000000000011
+ *                 //          Speakers = 0b10000000000000000000000000000001
+ *                 //        Headphones = 0b10000000000000000000000000000010
+ *             }
+ *         ],
+ *         "servers": [
+ *             {
+ *                 "port": 8069,
+ *                 "secure": false,
+ *                 "uri": "localhost",
+ *                 "sslRequireClientCert": false,
+ *                 "sslCheckCertRecovation": true,
+ *                 "sslServerCertPath": "domain.crt",
+ *                 "enabled": true,
+ *                 "sslEnabledProtocols": 0,
+ *                 //FLAGS:
+ *                 //              Ssl2 = 0b00000000000000000000000000001100 12
+ *                 //              Ssl3 = 0b00000000000000000000000000110000 48
+ *                 //               Tls = 0b00000000000000000000000011000000 192
+ *                 //             Tls11 = 0b00000000000000000000001100000000 768
+ *                 //             Tls12 = 0b00000000000000000000110000000000 3072
+ *                 //             Tls13 = 0b00000000000000000011000000000000 12288
+ *                 //VALUES:
+ *                 //              None = 0b00000000000000000000000000000000
+ *                 //           Default = 0b00000000000000000000000011110000 240 (Tls + Ssl3...)
+ *                 //I really only have two questions... why are the bits doubled up, and why are the first two skipped...?
+ *             }
+ *         ]
+ *     }
+ * }
+ * 
+ */

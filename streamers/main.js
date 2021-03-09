@@ -2,14 +2,14 @@
 /**
  * @file Produces an animation that vaguely resembles rain falling upwards.
  * @author EmptySora_
- * @version 2.1.7.21
+ * @version 2.1.7.22
  * @license CC-BY 4.0
  * This work is licensed under the Creative Commons Attribution 4.0
  * International License. To view a copy of this license, visit
  * http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative
  * Commons, PO Box 1866, Mountain View, CA 94042, USA.
  */
-const VERSION = "2.1.7.21";
+const VERSION = "2.1.7.22";
 
 /**
  * Represents a color using Red, Green, and Blue components in that order.
@@ -3523,6 +3523,9 @@ class AudioPeaks extends EventTarget {
                     /* eslint-disable-next-line no-extra-parens */
                     = 1 + ((peak - 0.5) * 2 * (Ani.sObj.vxPeaks - 1));
             }
+            /* eslint-disable-next-line no-extra-parens */
+            Ani.apMul = ((Ani.sObj.vxPeaks - Ani.sObj.vnPeaks) * peak)
+                + Ani.sObj.vnPeaks;
             break;
         case "Error":
             console.error("AudioPeaks Error: ", message.data);
