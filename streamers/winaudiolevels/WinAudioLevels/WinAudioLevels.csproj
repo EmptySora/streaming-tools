@@ -230,6 +230,12 @@
     <Compile Include="ObsTest.Designer.cs">
       <DependentUpon>ObsTest.cs</DependentUpon>
     </Compile>
+    <Compile Include="ObsTestTheme.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ObsTestTheme.Designer.cs">
+      <DependentUpon>ObsTestTheme.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Prompt.cs">
       <SubType>Form</SubType>
@@ -265,6 +271,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ObsTestTheme.resx">
+      <DependentUpon>ObsTestTheme.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App.config" />
     <None Include="app.manifest" />

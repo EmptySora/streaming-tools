@@ -800,6 +800,12 @@ namespace WinAudioLevels {
                 [JsonProperty(PropertyName = "obsName")]
                 public string ObsName { get; set; } = null;
                 /// <summary>
+                /// Gets or sets the string of characters the OCR will use to detect which OBS audio mixer slider is being
+                /// tracked. (Only present for <see cref="DeviceType.ScreenCaptureInput"/> or <see cref="DeviceType.ScreenCaptureOutput"/>.)
+                /// </summary>
+                [JsonProperty(PropertyName = "obsId")]
+                public string ObsId { get; set; } = null;
+                /// <summary>
                 /// Gets or sets the zero-based index of the OBS audio mixer slider that is being
                 /// tracked. (Only present for <see cref="DeviceType.ScreenCaptureInput"/> or <see cref="DeviceType.ScreenCaptureOutput"/>.)
                 /// </summary>

@@ -180,16 +180,20 @@ namespace WinAudioLevels {
         static AudioPeaksBehavior() {
             _settings.Settings.Devices = new ApplicationSettings.SettingsV0.AudioDeviceSettings[] {
                 new ApplicationSettings.SettingsV0.AudioDeviceSettings() {
-                     ObsName = "T1A2c7yAjELCRqciAMIfqA" //Headphones Output
+                     ObsId = "T1A2c7yAjELCRqciAMIfqA", //Headphones Output
+                     ObsName = "Headphones Output",
                 },
                 new ApplicationSettings.SettingsV0.AudioDeviceSettings() {
-                     ObsName = "WW2S6OP8F0/rpBP2bGp2jA" //Speaker Audio Output
+                     ObsId = "WW2S6OP8F0/rpBP2bGp2jA", //Speaker Audio Output
+                     ObsName = "Speaker Audio Output",
                 },
                 new ApplicationSettings.SettingsV0.AudioDeviceSettings() {
-                     ObsName = "Jrk68psf0AM9uuGgh7Vg3Q" //Audio Cap
+                     ObsId = "Jrk68psf0AM9uuGgh7Vg3Q", //Audio Cap
+                     ObsName = "Audio Cap",
                 },
                 new ApplicationSettings.SettingsV0.AudioDeviceSettings() {
-                     ObsName = "jbRrAIQ/VUEePKlSv4Ou/A" //Microphone Input
+                     ObsId = "jbRrAIQ/VUEePKlSv4Ou/A", //Microphone Input
+                     ObsName = "Microphone Input"
                 }
             };
             Thread t = new Thread(PingMain) { Name = "WebSocketServer Pinger" };

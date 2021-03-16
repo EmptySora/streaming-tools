@@ -216,6 +216,27 @@ namespace WinAudioLevels {
             SendMessage(hWnd, WM_GETTEXT, builder.Capacity, builder);
             return builder.ToString();
         }
+        public static ObsTheme? GetCurrentObsTheme() {
+            if (METERS.Count > 0) {
+                switch (METERS[0].Theme) {
+                case "Acri":
+                    return ObsTheme.ACRI;
+                case "System":
+                    return ObsTheme.SYSTEM;
+                case "Dark":
+                    return ObsTheme.DARK;
+                case "Rachni":
+                    return ObsTheme.RACHNI;
+                }
+            }
+            return null;
+        }
+        public static string GetCurrentObsThemeName() {
+            if (METERS.Count > 0) {
+                return METERS[0].Theme;
+            }
+            return null;
+        }
         private static int GetAudioMixer(out IntPtr hAudioMixer) {
             IntPtr handle = IntPtr.Zero;
             Process obs = null;
@@ -261,7 +282,7 @@ namespace WinAudioLevels {
                     //obs-browser-page.exe
                     //obs32.exe / obs64.exe
                 }catch(Exception e) {
-                    Console.WriteLine("Error during proc lookup: {0}", e.Message);
+                    //Console.WriteLine("Error during proc lookup: {0}", e.Message);
                 }
             }
             if (obs == null) {
@@ -600,6 +621,7 @@ namespace WinAudioLevels {
                         Math.Max(oMeter.MeterChannelTop.Y - 26, 0),
                         Math.Min(oMeter.MeterChannelTop.Width + oMeter.MeterChannelTop.X - 70, _bitmap.Width),
                         Math.Min(25 + Math.Min(oMeter.MeterChannelTop.Y - 26, 0), _bitmap.Height));
+                    //ocr rect: {0, max(0, top.Y - 26)} width = min(bmp.width, top.Width + top.X - 70), height = min(bmp.height, 25 + min(0, top.Y - 26))
                     AudioMixerOcrAttempt?.Invoke(null, new Tuple<Rectangle, int>(nameRect, mIndex));
                     oMeter.MeterId = GetMeterId(oMeter, _bitmap, nameRect);
                     Console.WriteLine("Found Meter (id): {0}", oMeter.MeterId);
@@ -651,6 +673,55 @@ namespace WinAudioLevels {
                 Convert.ToBase64String(bytes),
                 bits.Count,
                 bits.Count == 0 ? 0 : bits[0].Count);
+            //Console.WriteLine("Hash String: \"{0}\"", hashString);
+            byte[] hash = HASHER.ComputeHash(Encoding.UTF8.GetBytes(hashString));
+            //128-bit, so 16-bytes
+            //hex would be 2ch/byte = 32 characters.
+            //base64 would be 4ch/3bytes = 24 characters.
+            //ehhhhh good enough
+            string ret = Convert.ToBase64String(hash).Replace("=", "");
+            return ret;
+        }
+        internal static string GetMeterId(ObsTheme theme, string name) {
+            List<List<bool>> bits = new List<List<bool>>();
+            Color[] bgColors = BACKGROUND_COLORS[theme.name];
+            Bitmap bmp = theme.RenderText(name);
+            Rectangle rect = new Rectangle(default, bmp.Size);
+            //step 1: convert the OCR region to bool[][] where false=bg, true=!bg
+            for (int x = rect.X, i = 0; x < Math.Min(rect.Right, bmp.Width); x++, i++) {
+                bits.Add(new List<bool>());
+                for (int y = rect.Y; y < Math.Min(rect.Bottom, bmp.Height); y++) {
+                    bits[i].Add(!bgColors.Contains(bmp.GetPixel(x, y)));
+                }
+            }
+            //step 2: trim the top all false rows and the right all false columns.
+            bool check = true;
+            while (check) {
+                check = false;
+                //x,y
+                if (bits[bits.Count - 1].All(a => !a)) {
+                    bits.RemoveAt(bits.Count - 1);
+                    check = true;
+                    continue;
+                }
+                if (bits.All(a => !a[0])) {
+                    bits.ForEach(a => a.RemoveAt(0));
+                    check = true;
+                    continue;
+                }
+            }
+            //step 3: compute hash.
+            List<bool> tmp = new List<bool>();
+            bits.ForEach(a => tmp.AddRange(a));
+            BitArray bitArray = new BitArray(tmp.ToArray());
+            byte[] bytes = new byte[(bitArray.Length - 1) / 8 + 1];
+            bitArray.CopyTo(bytes, 0);
+            string hashString = string.Format(
+                "{1}.{2}.{0}",
+                Convert.ToBase64String(bytes),
+                bits.Count,
+                bits.Count == 0 ? 0 : bits[0].Count);
+            //Console.WriteLine("Hash String: \"{0}\"", hashString);
             byte[] hash = HASHER.ComputeHash(Encoding.UTF8.GetBytes(hashString));
             //128-bit, so 16-bytes
             //hex would be 2ch/byte = 32 characters.

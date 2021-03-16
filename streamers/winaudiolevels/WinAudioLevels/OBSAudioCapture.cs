@@ -20,6 +20,8 @@ namespace WinAudioLevels {
         private readonly bool _type = false; //false = name, true = index
         private readonly int _index = -1;
         private readonly string _name = null;
+        private readonly string _id = null;
+        private TimeSpan _wait;
 
         public long LastSample => this.LastSamples.Max();
 
@@ -90,35 +92,61 @@ namespace WinAudioLevels {
             OBSCapture.UnregisterCapture();
         }
         private void CaptureMain() {
-            TimeSpan wait = TimeSpan.FromMilliseconds(1000F / OBSCapture.FPS);
-            while (true) {
-                try {
-                    double? level = this._type
-                        ? OBSCapture.GetAudioMeterLevel(this._index) 
-                        : OBSCapture.GetAudioMeterLevel(this._name);
-                    if (!level.HasValue) {
-                        lock (this._lock) {
-                            this._last_levels = new double[0];
+            this._wait = TimeSpan.FromMilliseconds(1000F / OBSCapture.FPS);
+            if (this._type) {
+                while (true) {
+                    try {
+                        this.CaptureMain_Post(OBSCapture.GetAudioMeterLevel(this._index));
+                    } catch (ThreadAbortException) {
+                        throw; //rethrow
+                    } catch { }
+                }
+            } else if(!(this._id is null)) {
+                while (true) {
+                    try {
+                        this.CaptureMain_Post(OBSCapture.GetAudioMeterLevel(this._id));
+                    } catch (ThreadAbortException) {
+                        throw; //rethrow
+                    } catch { }
+                }
+            } else {
+                string themeName = OBSCapture.GetCurrentObsThemeName();
+                string name = null;
+                while (true) {
+                    try {
+                        string cThemeName = OBSCapture.GetCurrentObsThemeName();
+                        if (themeName != cThemeName) {
+                            themeName = cThemeName;
+                            name = (OBSCapture.GetCurrentObsTheme() ?? ObsTheme.ACRI).GetId(this._name);
                         }
-                        this.Valid = level.HasValue;
-                        Thread.Sleep(wait);
-                        continue;
-                    }
-
-                    lock (this._lock) {
-                        this._last_levels = new double[] { level.Value };
-                    }
-                    this.Valid = level.HasValue;
-                    Thread.Sleep(wait);
-                } catch (ThreadAbortException) {
-                    throw; //rethrow
-                } catch { }
+                        this.CaptureMain_Post(OBSCapture.GetAudioMeterLevel(name));
+                    } catch (ThreadAbortException) {
+                        throw; //rethrow
+                    } catch { }
+                }
             }
         }
+        private void CaptureMain_Post(double? level) {
+            if (!level.HasValue) {
+                lock (this._lock) {
+                    this._last_levels = new double[0];
+                }
+                this.Valid = level.HasValue;
+                Thread.Sleep(this._wait);
+                return;
+            }
 
-        public OBSAudioCapture(string name) {
+            lock (this._lock) {
+                this._last_levels = new double[] { level.Value };
+            }
+            this.Valid = level.HasValue;
+            Thread.Sleep(this._wait);
+        }
+
+        public OBSAudioCapture(string name, string id = null) {
             this._type = false;
             this._name = name;
+            this._id = id;
             //start capturing the OBS Audio Mixer window here.
             //the result will be in dB, so we need to do logbc=a b^a=c ((10^(dB/20))*2^(31)=sample)
             //the 20log_10(amplitude) ignores sign. so, the perceived sample is always positive.

@@ -32,9 +32,11 @@
             this.newBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testCaptureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testOBSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testOBSFontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testOBSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testOBSNameGenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -97,6 +99,8 @@
             this.refreshToolStripMenuItem,
             this.testCaptureToolStripMenuItem,
             this.testOBSToolStripMenuItem,
+            this.testOBSFontToolStripMenuItem,
+            this.testOBSNameGenToolStripMenuItem,
             this.toolStripSeparator1,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -126,6 +130,20 @@
             this.testCaptureToolStripMenuItem.Text = "Test Capture";
             this.testCaptureToolStripMenuItem.Click += new System.EventHandler(this.TestCaptureToolStripMenuItem_Click);
             // 
+            // testOBSToolStripMenuItem
+            // 
+            this.testOBSToolStripMenuItem.Name = "testOBSToolStripMenuItem";
+            this.testOBSToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.testOBSToolStripMenuItem.Text = "Test OBS";
+            this.testOBSToolStripMenuItem.Click += new System.EventHandler(this.TestOBSToolStripMenuItem_Click);
+            // 
+            // testOBSFontToolStripMenuItem
+            // 
+            this.testOBSFontToolStripMenuItem.Name = "testOBSFontToolStripMenuItem";
+            this.testOBSFontToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.testOBSFontToolStripMenuItem.Text = "Test OBS Font";
+            this.testOBSFontToolStripMenuItem.Click += new System.EventHandler(this.TestOBSFontToolStripMenuItem_Click);
+            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
@@ -139,12 +157,12 @@
             this.quitToolStripMenuItem.Text = "&Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
-            // testOBSToolStripMenuItem
+            // testOBSNameGenToolStripMenuItem
             // 
-            this.testOBSToolStripMenuItem.Name = "testOBSToolStripMenuItem";
-            this.testOBSToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.testOBSToolStripMenuItem.Text = "Test OBS";
-            this.testOBSToolStripMenuItem.Click += new System.EventHandler(this.TestOBSToolStripMenuItem_Click);
+            this.testOBSNameGenToolStripMenuItem.Name = "testOBSNameGenToolStripMenuItem";
+            this.testOBSNameGenToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.testOBSNameGenToolStripMenuItem.Text = "Test OBS Name Gen";
+            this.testOBSNameGenToolStripMenuItem.Click += new System.EventHandler(this.TestOBSNameGenToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -180,6 +198,8 @@
         private System.Windows.Forms.ToolStripMenuItem newBrowserToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testCaptureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testOBSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem testOBSFontToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem testOBSNameGenToolStripMenuItem;
     }
 }
 

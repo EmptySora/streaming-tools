@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NAudio;
@@ -106,6 +107,53 @@ namespace WinAudioLevels {
 
         private void TestOBSToolStripMenuItem_Click(object sender, EventArgs e) {
             new ObsTest().Show();
+        }
+
+        private void TestOBSFontToolStripMenuItem_Click(object sender, EventArgs e) {
+            new ObsTestTheme().Show();
+        }
+
+        private void TestOBSNameGenToolStripMenuItem_Click(object sender, EventArgs e) {
+            string expectedID = "Jrk68psf0AM9uuGgh7Vg3Q";
+            string name = "Audio Cap";
+            Console.WriteLine("Checking to see if the name detection actually works...");
+            Console.WriteLine("In the Acri theme, a meter named \"{0}\" should have an id of \"{1}\"", name, expectedID);
+            Console.WriteLine("We have to go this way because OCR was a bust. (using IDs, I mean)");
+            Console.WriteLine("However, if we know and recreate the exact method in which OBS draws the meter labels...");
+            Console.WriteLine("We can just render the label the same way to get the ID.");
+            string trueID = ObsTheme.ACRI.GetId(name);
+            Console.WriteLine("Alright... we just detected the ID... but does it match...?");
+            Thread.Sleep(1000);
+            Console.WriteLine("Insert dramatic pause...");
+            Thread.Sleep(3000);
+            Console.WriteLine("Andddddddd...");
+            Thread.Sleep(3000);
+            if(trueID == expectedID) {
+                Console.WriteLine("THE IDS ACTUALLY MATCH! FUCK YES!");
+            } else {
+                Console.WriteLine("And... seems I still have more work to do... so much for acing it the first try...");
+            }
+            Console.WriteLine("EXPECTED: {0}\nTRUE:     {1}", expectedID, trueID);
+
+            Console.WriteLine();
+            Console.WriteLine("Testing others...");
+            Console.WriteLine();
+            this.TestID("Headphones Output", "T1A2c7yAjELCRqciAMIfqA");
+            Console.WriteLine();
+            this.TestID("Speaker Audio Output", "WW2S6OP8F0/rpBP2bGp2jA");
+            Console.WriteLine();
+            this.TestID("Audio Cap", "Jrk68psf0AM9uuGgh7Vg3Q");
+            Console.WriteLine();
+            this.TestID("Microphone Input", "jbRrAIQ/VUEePKlSv4Ou/A");
+        }
+        private void TestID(string name,string expectedID) {
+            string trueID = ObsTheme.ACRI.GetId(name);
+            if (trueID == expectedID) {
+                Console.WriteLine("IDs Match");
+            } else {
+                Console.WriteLine("IDs Don't match");
+            }
+            Console.WriteLine("EXPECTED, TRUE: \"{0}\" \"{1}\" ({2})", expectedID, trueID, name);
         }
     }
 
