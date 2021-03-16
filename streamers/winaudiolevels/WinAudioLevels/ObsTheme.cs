@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -58,14 +59,6 @@ namespace WinAudioLevels {
         public Color meterTickColor;
         public Color[] meterBackgroundColors;
         public Font Font => GetFontFromList(this.fontSizeUnit, this.fontSizeValue, this.fontFamily);
-        /*
-        */
-        public static readonly Color[] ALL_METER_COLORS = DARK.meterColors
-            .Union(ACRI.meterColors)
-            .Union(RACHNI.meterColors)
-            .Union(SYSTEM.meterColors)
-            .Distinct()
-            .ToArray();
         public static readonly ObsTheme ACRI = new ObsTheme() {
             backgroundColor = Color.FromArgb(24, 24, 25),
             textColor = Color.FromArgb(225, 224, 225),
@@ -172,6 +165,12 @@ namespace WinAudioLevels {
                 Color.FromArgb(118, 121, 124) 
             },
         };
+        public static readonly Color[] ALL_METER_COLORS = DARK.meterColors
+            .Union(ACRI.meterColors)
+            .Union(RACHNI.meterColors)
+            .Union(SYSTEM.meterColors)
+            .Distinct()
+            .ToArray();
         public static readonly ObsTheme[] THEMES = new ObsTheme[] {
             ACRI,
             DARK,
@@ -220,10 +219,6 @@ namespace WinAudioLevels {
             return box;
         }
 
-        public string GetId(string meterName) {
-            return OBSCapture.GetMeterId(this, meterName);
-        }
-
         public static ObsTheme GetThemeByName(string name) {
             switch (name.ToLower()) {
             case "acri":
@@ -244,9 +239,68 @@ namespace WinAudioLevels {
                 return default;
             }
         }
+        public string GetMeterId(string name) {
+            List<List<bool>> bits = new List<List<bool>>();
+            Color[] bgColors = this.meterBackgroundColors;
+            Bitmap bmp = this.RenderText(name);
+            Rectangle rect = new Rectangle(default, bmp.Size);
+            //step 1: convert the OCR region to bool[][] where false=bg, true=!bg
+            for (int x = rect.X, i = 0; x < Math.Min(rect.Right, bmp.Width); x++, i++) {
+                bits.Add(new List<bool>());
+                for (int y = rect.Y; y < Math.Min(rect.Bottom, bmp.Height); y++) {
+                    bits[i].Add(!bgColors.Contains(bmp.GetPixel(x, y)));
+                }
+            }
+            //step 2: trim the top all false rows and the right all false columns.
+            bool check = true;
+            while (check) {
+                check = false;
+                //x,y
+                if (bits[bits.Count - 1].All(a => !a)) {
+                    bits.RemoveAt(bits.Count - 1);
+                    check = true;
+                    continue;
+                }
+                if (bits.All(a => !a[0])) {
+                    bits.ForEach(a => a.RemoveAt(0));
+                    check = true;
+                    continue;
+                }
+            }
+            //step 3: compute hash.
+            List<bool> tmp = new List<bool>();
+            bits.ForEach(a => tmp.AddRange(a));
+            BitArray bitArray = new BitArray(tmp.ToArray());
+            byte[] bytes = new byte[(bitArray.Length - 1) / 8 + 1];
+            bitArray.CopyTo(bytes, 0);
+            string hashString = string.Format(
+                "{1}.{2}.{0}",
+                Convert.ToBase64String(bytes),
+                bits.Count,
+                bits.Count == 0 ? 0 : bits[0].Count);
+            //Console.WriteLine("Hash String: \"{0}\"", hashString);
+            byte[] hash = ObsAudioMixerMeter.HASHER.ComputeHash(Encoding.UTF8.GetBytes(hashString));
+            //128-bit, so 16-bytes
+            //hex would be 2ch/byte = 32 characters.
+            //base64 would be 4ch/3bytes = 24 characters.
+            //ehhhhh good enough
+            string ret = Convert.ToBase64String(hash).Replace("=", "");
+            return ret;
+        }
     }
 }
-
+/*
+ERROR IN OBS CAPTURE LOOP:
+System.TypeInitializationException: The type initializer for 'WinAudioLevels.ObsTheme' threw an exception. ---> System.ArgumentNullException: Value cannot be null.
+Parameter name: first
+   at System.Linq.Enumerable.Union[TSource](IEnumerable`1 first, IEnumerable`1 second)
+   at WinAudioLevels.ObsTheme..cctor() in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\ObsTheme.cs:line 64
+   --- End of inner exception stack trace ---
+   at WinAudioLevels.ObsAudioMixerMeter.get_MeterCount() in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\ObsAudioMixerMeter.cs:line 132
+   at WinAudioLevels.ObsAudioMixerMeter.RefreshMeterLists() in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\ObsAudioMixerMeter.cs:line 312
+   at WinAudioLevels.OBSCapture.CaptureMain() in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\OBSCapture.cs:line 263
+   at WinAudioLevels.OBSCapture.CaptureLoop() in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\OBSCapture.cs:line 226
+*/
 /*
 Font match: Tahoma
 Hash String: "116.13.AAAAAAAA4D/8h/8AASDAf/gP/wEO8Af+QBJ4Am/ABcSBPJAF/sAf8AM+4A/8gSD+x//4H/gP/+E/BIE/8Ac8+B//438gAPyBP+AHfMAf+ANB4A/8AR/wB/7AHwgAf+AP+AEO8Af+QBJ4Am/ABbiBN/AE9sAegAAAAAAAgA/4g/8wGALCYPgP/oAP8AP+wB8AAn/gD/zhD/yH/0AQCAL/4T/8hyDwB/6AB/gBf+APAIE/8Af+8Af+w38gCAQB"

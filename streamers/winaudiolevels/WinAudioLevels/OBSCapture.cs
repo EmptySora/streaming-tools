@@ -116,33 +116,27 @@ namespace WinAudioLevels {
         // 0: Found "Audio Mixer" window.
         //-1: Could not find process
         //-2: Could not find "Audio Mixer" window.
-        private static IntPtr _h_audio_mixer = IntPtr.Zero;
+        internal static IntPtr _h_audio_mixer = IntPtr.Zero;
 
         //use these to hook into the error and display a warning to the user
         //BE SURE TO ONLY SHOW A MESSAGE ONCE UNTIL ERRORFIXED is HIT
         public static event EventHandler OBSNotFoundError;
         public static event EventHandler AudioMixerWindowNotFoundError;
         public static event EventHandler OBSErrorFixed;
-        public static event EventHandler AudioMixerOcrStarting;
         internal static event EventHandler<Image> AudioMixerWindowCaptured;
-        internal static event EventHandler<Tuple<Rectangle,int>> AudioMixerOcrAttempt; //read region, meter
-        private static bool _errored = false;
-        private static int _listener_count = 0;
-        private static Size _window_size;
-        private static Graphics _graphics;
-        private static Bitmap _bitmap;
+
+        internal static bool _errored = false;
+        internal static int _listener_count = 0;
+        internal static Size _window_size;
+        internal static Graphics _graphics;
+        internal static Bitmap _bitmap;
         public const int FPS = 30;
         private static readonly Thread THREAD = new Thread(CaptureLoop);
         static OBSCapture() {
             THREAD.Name = "OBS Capture Thread";
             THREAD.Start();
         }
-        private static readonly MD5CryptoServiceProvider HASHER = new MD5CryptoServiceProvider();
-        //key is the theme's name. value is array of colors: ggyyrr (first is light, second is dark)
-        private static readonly List<ObsAudioMixerMeter> METERS = new List<ObsAudioMixerMeter>();
-        private static readonly object LOCK = new object();
-        private static readonly Dictionary<string, double> METER_LEVELS = new Dictionary<string, double>();
-        private static readonly List<double> METER_LEVELS_SEQ = new List<double>();
+
         private static string GetControlText(IntPtr hWnd) {
             int size = SendMessage(hWnd, WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero).ToInt32();
             if(size == 0) {
@@ -151,30 +145,6 @@ namespace WinAudioLevels {
             StringBuilder builder = new StringBuilder(size + 1);
             SendMessage(hWnd, WM_GETTEXT, builder.Capacity, builder);
             return builder.ToString();
-        }
-        public static ObsTheme? GetCurrentObsTheme() {
-            if (METERS.Count > 0) {
-                return METERS[0].Theme;
-                /*
-                switch (METERS[0].ThemeName) {
-                case "Acri":
-                    return ObsTheme.ACRI;
-                case "System":
-                    return ObsTheme.SYSTEM;
-                case "Dark":
-                    return ObsTheme.DARK;
-                case "Rachni":
-                    return ObsTheme.RACHNI;
-                }
-                */
-            }
-            return null;
-        }
-        public static string GetCurrentObsThemeName() {
-            if (METERS.Count > 0) {
-                return METERS[0].ThemeName;
-            }
-            return null;
         }
         private static int GetAudioMixer(out IntPtr hAudioMixer) {
             IntPtr handle = IntPtr.Zero;
@@ -277,11 +247,43 @@ namespace WinAudioLevels {
             }
         }
         private static void CaptureMain() {
+            CheckWindow();
+            RefreshWindowSize();
+            CaptureWindow(_graphics);
+            if(AudioMixerWindowCaptured != null) {
+                Bitmap img = new Bitmap(_window_size.Width, _window_size.Height);
+                using(Graphics gfx = Graphics.FromImage(img)) {
+                    CaptureWindow(gfx);
+                    //separate print window call to avoid locking up the bitmap
+                }
+                AudioMixerWindowCaptured.Invoke(null, img);
+                //do not dispose of img. clients may still be using it...
+            }
+
+            ObsAudioMixerMeter.RefreshMeterLists();
+            UpdateConsoleShowing();
+#warning We are currently not checking to see if the Audio Mixer is Vertical or Horizontal...
+            //OH MY GOD, THERE'S A VERTICAL LAYOUT... FUCK ME
+        }
+        private static void RefreshWindowSize() {
+            //check window size.
+            //FYI, this is scuffed. I think this might include the window border which is explicitly excluded from being captured...
+            //At least, I think so based on the behavior of resizing the ObsTest window...
+            //if window size changed, we need to get new drawing buffers.
+            if (_window_size != (_window_size = GetWindowSize(_h_audio_mixer))) {
+                _graphics?.Dispose();
+                _bitmap?.Dispose();
+                ObsAudioMixerMeter.ResetMeters();
+                _bitmap = new Bitmap(_window_size.Width, _window_size.Height);
+                _graphics = Graphics.FromImage(_bitmap);
+            }
+        }
+        private static void CheckWindow() {
             //check if window was closed.
             if (!(_h_audio_mixer == IntPtr.Zero || IsWindow(_h_audio_mixer))) {
                 _h_audio_mixer = IntPtr.Zero;
                 _window_size = default;
-                METERS.Clear();
+                ObsAudioMixerMeter.ResetMeters();
                 //hAudioMixer was closed...
                 //this should work on everything but 16-bit windows.
                 //windows uses the upper 16-bits of hwnd to handle duplicate window handles.
@@ -300,388 +302,25 @@ namespace WinAudioLevels {
                     OBSErrorFixed?.Invoke(null, new EventArgs());
                 }
             }
-            //check window size.
-            //FYI, this is scuffed. I think this might include the window border which is explicitly excluded from being captured...
-            //At least, I think so based on the behavior of resizing the ObsTest window...
-            Size currentSize = GetWindowSize(_h_audio_mixer);
-            //if window size changed, we need to get new drawing buffers.
-            if (currentSize != _window_size) {
-                if (!(_graphics is null)) {
-                    _graphics.Dispose();
-                }
-                if (!(_bitmap is null)) {
-                    _bitmap.Dispose();
-                }
-                METERS.Clear();
-                _bitmap = new Bitmap(currentSize.Width, currentSize.Height);
-                _graphics = Graphics.FromImage(_bitmap);
-            }
-            _window_size = currentSize;
-            //capture OBS window. (PW_CLIENTONLY specifies not to capture the window border.)
+        }
+        private static void CaptureWindow(Graphics g) {
             try {
-                if (!PrintWindow(_h_audio_mixer, _graphics.GetHdc(), PW_CLIENTONLY)) {
+                //capture OBS window. (PW_CLIENTONLY specifies not to capture the window border.)
+                if (!PrintWindow(_h_audio_mixer, g.GetHdc(), PW_CLIENTONLY)) {
                     throw new Win32Exception();
                 }
             } catch {
                 throw;
             } finally {
-                _graphics.ReleaseHdc();
+                g.ReleaseHdc();
             }
-            if(AudioMixerWindowCaptured != null) {
-                Bitmap img = new Bitmap(currentSize.Width, currentSize.Height);
-                Graphics gfx = Graphics.FromImage(img);
-                try {
-                    if (!PrintWindow(_h_audio_mixer, gfx.GetHdc(), PW_CLIENTONLY)) {
-                        throw new Win32Exception();
-                    }
-                } catch {
-                    throw;
-                } finally {
-                    gfx.ReleaseHdc();
-                }
-                //separate print window call to avoid locking up the bitmap
-                AudioMixerWindowCaptured.Invoke(null, img);
-            }
-            //send this to the debuggin context.
-            //for debugging
-            //this will allow me to create a form to "see" the OBS Audio Mixer and make sure this is working.
-
-            //the bitmap should now have the full Audio Mixer window (excluding the borders and top bar)
-            //to detect the meters, we 
-
-            if (GetMeterCount() != METERS.Count()) {
-                METERS.Clear();
-                lock (LOCK) {
-                    METER_LEVELS.Clear();
-                    METER_LEVELS_SEQ.Clear();
-                }
-                UpdateMeters();
-                lock (LOCK) {
-                    if (METERS.Count > 0) {
-                        METERS.ForEach(a => {
-                            METER_LEVELS[a.MeterId] = -60;
-                            METER_LEVELS_SEQ.Add(-60);
-                        });
-                    }
-                }
-            }
-            int index = 0;
-            if (METERS.Count > 0) {
-                METERS.ForEach(a => {
-                    double level = GetMeterLevel(a);
-                    lock (LOCK) {
-                        METER_LEVELS[a.MeterId] = level;
-                        METER_LEVELS_SEQ[index++] = level;
-                        //update the meter levels.
-                    }
-                });
-            }
-            UpdateConsoleShowing();
-#warning We are currently not checking to see if the Audio Mixer is Vertical or Horizontal...
-            //OH MY GOD, THERE'S A VERTICAL LAYOUT... FUCK ME
         }
         private static void UpdateConsoleShowing() {
             Console.Title = string.Format(
                 "METER LEVELS: {0}",
-                string.Join(", ", METER_LEVELS_SEQ));
+                string.Join(", ", ObsAudioMixerMeter.GetAllAudioMeterLevel()));
         }
-        private static double GetMeterLevel(ObsAudioMixerMeter meter) {
-            double levelA = double.MinValue;
-            double levelB = double.MinValue;
-            bool bTemp = false;
-            Color[] colors = meter.Theme.meterColors.Where(a => bTemp = !bTemp).ToArray();
-            if (meter.HasDualMeter) {
-                double maxX = meter.MeterChannelBottom.X;
-                for (int x = meter.MeterChannelBottom.X; x < meter.MeterChannelBottom.Right; x++) {
-                    if (colors.Contains(_bitmap.GetPixel(x, meter.MeterChannelBottom.Y))) {
-                        maxX = x;
-                    } else if (maxX != meter.MeterChannelBottom.X) {
-                        break; //avoid catching the dot thingies
-                    } else {
-                        break;
-                    }
-                }
-                levelB = ((maxX - meter.MeterChannelBottom.X) / meter.MeterChannelBottom.Width * 60) - 60;
-            }
-            {
-                double maxX = meter.MeterChannelTop.X;
-                for (int x = meter.MeterChannelTop.X; x < meter.MeterChannelTop.Right; x++) {
-                    if (colors.Contains(_bitmap.GetPixel(x, meter.MeterChannelTop.Y))) {
-                        maxX = x;
-                    } else if (maxX != meter.MeterChannelBottom.X) {
-                        break; //avoid catching the dot thingies
-                    } else {
-                        break;
-                    }
-                }
-                levelA = ((maxX - meter.MeterChannelTop.X) / meter.MeterChannelTop.Width * 60) - 60;
-            }
-            return Math.Max(levelA, levelB);
-        }
-        private static int GetMeterCount() {
-            int scanLineA = (_bitmap.Width / 2) + 10; //search 20 apart
-            int scanLineB = (_bitmap.Width / 2) - 10; //we do this because OBS displays two peaks. The second interrupts the usual color of the meter
-            int height = _bitmap.Height;
-            if (scanLineA < 0) {
-                return 0; //window is too thin... :(
-            }
-            int count = 0;
-            bool anyMeter = false;
-            bool meter = false;
-            int pAfter = 0;
-            for (int y = 0; y < height; y++) {
-                Color a = _bitmap.GetPixel(scanLineA, y);
-                Color b = _bitmap.GetPixel(scanLineB, y);
-                if (ObsTheme.ALL_METER_COLORS.Contains(a) || ObsTheme.ALL_METER_COLORS.Contains(b)) {
-                    if (!meter && (pAfter > ObsAudioMixerMeter.MAX_PIXELS_BETWEEN_CHANNELS || !anyMeter)) {
-                        count++;
-                    }
-                    anyMeter = meter = true;
-                    pAfter = 0;
-                } else if (anyMeter) {
-                    pAfter++;
-                    meter = false;
-                }
-            }
-            return count;
-        }
-        private static void UpdateMeters() {
-            //ObsAudioMixerMeter
-            int scanLineA = (_bitmap.Width / 2) + 10; //search 20 apart
-            int scanLineB = (_bitmap.Width / 2) - 10; //we do this because OBS displays two peaks. The second interrupts the usual color of the meter
-            int height = _bitmap.Height;
-            if (scanLineA < 0) {
-                return; //window is too thin... :(
-            }
-            int count = 0;
-            bool anyMeter = false;
-            bool meter = false;
-            int pAfter = 0;
-            bool startedB = false;
-
-            int yStartA = 0;
-            int yEndA = 0;
-            int yStartB = 0;
-            int yEndB = 0;
-            ObsTheme theme = default;
-            Color[] match_colors = ObsTheme.ALL_METER_COLORS;
-            Color tick_color = default;
-            List<Tuple<Point, Point>> coords = new List<Tuple<Point, Point>>();
-            //a:start,end; b:start,end
-            for (int y = 0; y < height; y++) {
-                Color a = _bitmap.GetPixel(scanLineA, y);
-                Color b = _bitmap.GetPixel(scanLineB, y);
-                if (match_colors.Contains(a) || match_colors.Contains(b)) {
-                    theme = ObsTheme.GetThemeByMeterColor(a, b);
-                    if (ReferenceEquals(match_colors, ObsTheme.ALL_METER_COLORS)) {
-                        //ReferenceEquals because it's quicker and we don't want to check sequences.
-                        //we just care if we're checking all meter colors or not.
-                        match_colors = theme.meterColors;
-                        tick_color = theme.meterTickColor;
-                    }
-                    if (!meter && (pAfter > ObsAudioMixerMeter.MAX_PIXELS_BETWEEN_CHANNELS || !anyMeter)) {
-                        if (anyMeter) {
-                            coords.Add(new Tuple<Point, Point>(
-                                new Point(yStartA, yEndA),
-                                new Point(yStartB, yEndB)));
-                            yStartA =
-                                yStartB =
-                                yEndA =
-                                yEndB = 0;
-                        }
-                        count++; //new meter
-                        yStartA = y;
-                        startedB = false;
-                    } else if (!meter && (pAfter < ObsAudioMixerMeter.MAX_PIXELS_BETWEEN_CHANNELS)) {
-                        //new channel
-                        yStartB = y;
-                        startedB = true;
-                    }
-                    anyMeter = meter = true;
-                    pAfter = 0;
-                } else if (anyMeter) {
-                    if (pAfter == 0) {
-                        if (startedB) {
-                            yEndB = y;
-                        } else {
-                            yEndA = y;
-                        }
-                    }
-                    meter = false;
-                    pAfter++;
-                }
-            }
-            if (anyMeter && yStartA > 0) {
-                coords.Add(new Tuple<Point, Point>(
-                    new Point(yStartA, yEndA),
-                    new Point(yStartB, yEndB)));
-            }
-
-            if (coords.Count == 0) {
-                return; //found no meters... :(
-            }
-            {
-                Tuple<Point, Point> coord = coords[0];
-                int y = coord.Item2.X == 0
-                    ? coord.Item1.Y + 1
-                    : coord.Item2.Y + 1;
-                int lastX = -1;
-                int firstX = -1;
-                for (int x = _bitmap.Width - 1; x >= 0; x--) {
-                    if (_bitmap.GetPixel(x, y) == tick_color) {
-                        lastX = x;
-                        if (firstX == -1) {
-                            firstX = x;
-                        }
-                    }
-                }
-                if (lastX == -1) {
-                    return;
-                    //could not find ticks somehow...? :(
-                }
-                int xSize = firstX - lastX;
-                METERS.Clear();
-                int mIndex = 0;
-                AudioMixerOcrStarting?.Invoke(null, new EventArgs());
-                foreach (Tuple<Point, Point> coordinate in coords) {
-                    ObsAudioMixerMeter oMeter = new ObsAudioMixerMeter() {
-                        MeterChannelTop = new Rectangle(
-                             new Point(lastX, coordinate.Item1.X),
-                             new Size(xSize, coordinate.Item1.Y - coordinate.Item1.X)),
-                        MeterChannelBottom = coord.Item2.X == 0
-                            ? default
-                            : new Rectangle(
-                                 new Point(lastX, coordinate.Item2.X),
-                                 new Size(xSize, coordinate.Item2.Y - coordinate.Item2.X)),
-                        Theme = theme
-                    };
-                    Rectangle nameRect = new Rectangle(
-                        0,
-                        Math.Max(oMeter.MeterChannelTop.Y - 26, 0),
-                        Math.Min(oMeter.MeterChannelTop.Width + oMeter.MeterChannelTop.X - 70, _bitmap.Width),
-                        Math.Min(25 + Math.Min(oMeter.MeterChannelTop.Y - 26, 0), _bitmap.Height));
-                    //ocr rect: {0, max(0, top.Y - 26)} width = min(bmp.width, top.Width + top.X - 70), height = min(bmp.height, 25 + min(0, top.Y - 26))
-                    AudioMixerOcrAttempt?.Invoke(null, new Tuple<Rectangle, int>(nameRect, mIndex));
-                    oMeter.MeterId = GetMeterId(oMeter, _bitmap, nameRect);
-                    Console.WriteLine("Found Meter (id): {0}", oMeter.MeterId);
-                    METERS.Add(oMeter);
-                    mIndex++;
-                }
-                //55 pixels off rectangle end.
-                //2 pixels above meter
-                //25 pixels high
-            }
-
-            //scan pixel below bottom meter
-
-        }
-        private static string GetMeterId(ObsAudioMixerMeter meterBase, Bitmap bmp, Rectangle rect) {
-            List<List<bool>> bits = new List<List<bool>>();
-            Color[] bgColors = meterBase.Theme.meterBackgroundColors;
-            //step 1: convert the OCR region to bool[][] where false=bg, true=!bg
-            for (int x = rect.X,i=0; x < Math.Min(rect.Right,bmp.Width); x++,i++) {
-                bits.Add(new List<bool>());
-                for (int y = rect.Y; y < Math.Min(rect.Bottom, bmp.Height); y++) {
-                    bits[i].Add(!bgColors.Contains(bmp.GetPixel(x, y)));
-                }
-            }
-            //step 2: trim the top all false rows and the right all false columns.
-            bool check = true;
-            while (check) {
-                check = false;
-                //x,y
-                if(bits[bits.Count - 1].All(a => !a)) {
-                    bits.RemoveAt(bits.Count - 1);
-                    check = true;
-                    continue;
-                }
-                if(bits.All(a => !a[0])) {
-                    bits.ForEach(a => a.RemoveAt(0));
-                    check = true;
-                    continue;
-                }
-            }
-            //step 3: compute hash.
-            List<bool> tmp = new List<bool>();
-            bits.ForEach(a => tmp.AddRange(a));
-            BitArray bitArray = new BitArray(tmp.ToArray());
-            byte[] bytes = new byte[(bitArray.Length - 1) / 8 + 1];
-            bitArray.CopyTo(bytes, 0);
-            string hashString = string.Format(
-                "{1}.{2}.{0}",
-                Convert.ToBase64String(bytes),
-                bits.Count,
-                bits.Count == 0 ? 0 : bits[0].Count);
-            //Console.WriteLine("Hash String: \"{0}\"", hashString);
-            byte[] hash = HASHER.ComputeHash(Encoding.UTF8.GetBytes(hashString));
-            //128-bit, so 16-bytes
-            //hex would be 2ch/byte = 32 characters.
-            //base64 would be 4ch/3bytes = 24 characters.
-            //ehhhhh good enough
-            string ret = Convert.ToBase64String(hash).Replace("=", "");
-            return ret;
-        }
-        internal static string GetMeterId(ObsTheme theme, string name) {
-            List<List<bool>> bits = new List<List<bool>>();
-            Color[] bgColors = theme.meterBackgroundColors;
-            Bitmap bmp = theme.RenderText(name);
-            Rectangle rect = new Rectangle(default, bmp.Size);
-            //step 1: convert the OCR region to bool[][] where false=bg, true=!bg
-            for (int x = rect.X, i = 0; x < Math.Min(rect.Right, bmp.Width); x++, i++) {
-                bits.Add(new List<bool>());
-                for (int y = rect.Y; y < Math.Min(rect.Bottom, bmp.Height); y++) {
-                    bits[i].Add(!bgColors.Contains(bmp.GetPixel(x, y)));
-                }
-            }
-            //step 2: trim the top all false rows and the right all false columns.
-            bool check = true;
-            while (check) {
-                check = false;
-                //x,y
-                if (bits[bits.Count - 1].All(a => !a)) {
-                    bits.RemoveAt(bits.Count - 1);
-                    check = true;
-                    continue;
-                }
-                if (bits.All(a => !a[0])) {
-                    bits.ForEach(a => a.RemoveAt(0));
-                    check = true;
-                    continue;
-                }
-            }
-            //step 3: compute hash.
-            List<bool> tmp = new List<bool>();
-            bits.ForEach(a => tmp.AddRange(a));
-            BitArray bitArray = new BitArray(tmp.ToArray());
-            byte[] bytes = new byte[(bitArray.Length - 1) / 8 + 1];
-            bitArray.CopyTo(bytes, 0);
-            string hashString = string.Format(
-                "{1}.{2}.{0}",
-                Convert.ToBase64String(bytes),
-                bits.Count,
-                bits.Count == 0 ? 0 : bits[0].Count);
-            //Console.WriteLine("Hash String: \"{0}\"", hashString);
-            byte[] hash = HASHER.ComputeHash(Encoding.UTF8.GetBytes(hashString));
-            //128-bit, so 16-bytes
-            //hex would be 2ch/byte = 32 characters.
-            //base64 would be 4ch/3bytes = 24 characters.
-            //ehhhhh good enough
-            string ret = Convert.ToBase64String(hash).Replace("=", "");
-            return ret;
-        }
-
-
-        public static double? GetAudioMeterLevel(string meterName) {
-            return !METER_LEVELS.ContainsKey(meterName)
-                ? null
-                : (double?)METER_LEVELS[meterName];
-        }
-        public static double? GetAudioMeterLevel(int index) {
-            return METER_LEVELS_SEQ.Count > index
-                ? (double?)METER_LEVELS_SEQ[index]
-                : null;
-        }
-
+        
         internal static void RegisterCapture() {
             _listener_count++;
         }
@@ -689,28 +328,6 @@ namespace WinAudioLevels {
             _listener_count--;
         }
 
-        private static readonly Dictionary<object, ObsAudioMeterStatus> STATUSES = new Dictionary<object, ObsAudioMeterStatus>();
-        private static readonly object STATUSES_LOCK = new object();
-
-        public enum ObsAudioMeterStatus {
-            Success,
-            WindowTooThin,
-            NoMetersFound,
-            TicksNotFound,
-            CouldNotFindObsProcess,
-            CouldNotFindAudioMixerWindow,
-            FailedToCaptureAudioMixerWindow
-        }
-        public static ObsAudioMeterStatus? GetStatus(object token) {
-            if (!STATUSES.ContainsKey(token)) {
-                return null;
-            }
-            ObsAudioMeterStatus ret = STATUSES[token];
-            lock (STATUSES_LOCK) {
-                STATUSES.Remove(ret);
-            }
-            return ret;
-        }
         /*
         public static IEnumerable<ObsAudioMixerMeter> GetObsAudioMeters(object token, EventHandler<Image> cbCapturedImage = null) {
             Bitmap _bitmap;

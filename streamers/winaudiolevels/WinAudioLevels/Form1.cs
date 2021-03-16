@@ -121,7 +121,7 @@ namespace WinAudioLevels {
             Console.WriteLine("We have to go this way because OCR was a bust. (using IDs, I mean)");
             Console.WriteLine("However, if we know and recreate the exact method in which OBS draws the meter labels...");
             Console.WriteLine("We can just render the label the same way to get the ID.");
-            string trueID = ObsTheme.ACRI.GetId(name);
+            string trueID = ObsTheme.ACRI.GetMeterId(name);
             Console.WriteLine("Alright... we just detected the ID... but does it match...?");
             Thread.Sleep(1000);
             Console.WriteLine("Insert dramatic pause...");
@@ -147,7 +147,7 @@ namespace WinAudioLevels {
             this.TestID("Microphone Input", "jbRrAIQ/VUEePKlSv4Ou/A");
         }
         private void TestID(string name,string expectedID) {
-            string trueID = ObsTheme.ACRI.GetId(name);
+            string trueID = ObsTheme.ACRI.GetMeterId(name);
             if (trueID == expectedID) {
                 Console.WriteLine("IDs Match");
             } else {

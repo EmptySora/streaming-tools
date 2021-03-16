@@ -112,8 +112,8 @@ namespace WinAudioLevels {
             OBSCapture.AudioMixerWindowNotFoundError += this.OBSCapture_AudioMixerWindowNotFoundError;
             OBSCapture.OBSErrorFixed += this.OBSCapture_OBSErrorFixed;
             OBSCapture.OBSNotFoundError += this.OBSCapture_OBSNotFoundError;
-            OBSCapture.AudioMixerOcrAttempt += this.OBSCapture_AudioMixerOcrAttempt;
-            OBSCapture.AudioMixerOcrStarting += this.OBSCapture_AudioMixerOcrStarting;
+            ObsAudioMixerMeter.AudioMixerOcrAttempt += this.OBSCapture_AudioMixerOcrAttempt;
+            ObsAudioMixerMeter.AudioMixerOcrStarting += this.OBSCapture_AudioMixerOcrStarting;
             OBSCapture.RegisterCapture();
             //#warning Check to see if the elevated permissions are actually necessary. Always better to not require them. (Especially since this isn't signed)
             //spoilers: they ARE required

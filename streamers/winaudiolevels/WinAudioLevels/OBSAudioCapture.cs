@@ -96,7 +96,7 @@ namespace WinAudioLevels {
             if (this._type) {
                 while (true) {
                     try {
-                        this.CaptureMain_Post(OBSCapture.GetAudioMeterLevel(this._index));
+                        this.CaptureMain_Post(ObsAudioMixerMeter.GetAudioMeterLevel(this._index));
                     } catch (ThreadAbortException) {
                         throw; //rethrow
                     } catch { }
@@ -104,22 +104,22 @@ namespace WinAudioLevels {
             } else if(!(this._id is null)) {
                 while (true) {
                     try {
-                        this.CaptureMain_Post(OBSCapture.GetAudioMeterLevel(this._id));
+                        this.CaptureMain_Post(ObsAudioMixerMeter.GetAudioMeterLevel(this._id));
                     } catch (ThreadAbortException) {
                         throw; //rethrow
                     } catch { }
                 }
             } else {
-                string themeName = OBSCapture.GetCurrentObsThemeName();
+                string themeName = ObsAudioMixerMeter.CurrentObsThemeName;
                 string name = null;
                 while (true) {
                     try {
-                        string cThemeName = OBSCapture.GetCurrentObsThemeName();
+                        string cThemeName = ObsAudioMixerMeter.CurrentObsThemeName;
                         if (themeName != cThemeName) {
                             themeName = cThemeName;
-                            name = (OBSCapture.GetCurrentObsTheme() ?? ObsTheme.ACRI).GetId(this._name);
+                            name = (ObsAudioMixerMeter.CurrentObsTheme ?? ObsTheme.ACRI).GetMeterId(this._name);
                         }
-                        this.CaptureMain_Post(OBSCapture.GetAudioMeterLevel(name));
+                        this.CaptureMain_Post(ObsAudioMixerMeter.GetAudioMeterLevel(name));
                     } catch (ThreadAbortException) {
                         throw; //rethrow
                     } catch { }
