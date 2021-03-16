@@ -31,6 +31,8 @@ GOTO :BuildCommon
 
 :BuildCommon
 ECHO.
+ECHO ^>^>^> Moving CefSharp files...
+CALL :MoveCefSharp
 ECHO ^>^>^> Creating Archive...
 CALL :CreateArchive
 ECHO ^>^>^> Done Creating Archive.
@@ -41,7 +43,8 @@ GOTO :EOF
 :---------------------------------------------------------------
 :DeleteReleaseFiles
 SETLOCAL
-CALL :DeleteFile "WinAudioLevels.exe.config"
+:-- DO NOT DELETE CONFIG FILE :(
+:-- CALL :DeleteFile "WinAudioLevels.exe.config" 
 CALL :DeleteFile "WinAudioLevels.pdb"
 CALL :DeleteFile "CefSharp.Core.pdb"
 CALL :DeleteFile "CefSharp.Core.Runtime.pdb"
@@ -79,6 +82,11 @@ CALL :DeleteFile "x86\README.txt"
 
 GOTO :EOF
 
+
+
+
+
+
 :-----------------------------------------------
 :-- DeleteFile - Deletes the specified file.  --
 :-- @param {string} file - The file to delete --
@@ -106,5 +114,45 @@ SETLOCAL
 IF EXIST "WinAudioLevels.7z" (
     DEL "WinAudioLevels.7z"
 )
-"C:\Program Files\7-Zip\7z.exe" a -y WinAudioLevels.7z -x!settings.json -x!*.log -x!domain.* -x!WinAudioLevels.7z "*.*" >nul
+"C:\Program Files\7-Zip\7z.exe" a -y WinAudioLevels.7z -x!settings.json -x!*.log -x!domain.* -x!WinAudioLevels.7z "*.*" "*\*.*" "*\*\*.*" "*\*\*\*.*"  >nul
+GOTO :EOF
+
+
+:---------------------------------------------------------------
+:-- Move CefSharp - Moves CefSharp files to a subfolder       --
+:---------------------------------------------------------------
+:MoveCefSharp
+SETLOCAL
+MKDIR "cef" >nul
+MKDIR "cef\locales" >nul
+MKDIR "cef\swiftshader" >nul
+DEL "cef\locales\*.*" >nul
+DEL "cef\swiftshader\*.*" >nul
+DEL "cef\*.*" >nul
+MOVE "cef.pak" "cef" >nul
+MOVE "cef_100_percent.pak" "cef" >nul
+MOVE "cef_200_percent.pak" "cef" >nul
+MOVE "cef_extensions.pak" "cef" >nul
+MOVE "CefSharp.BrowserSubprocess.Core.*" "cef" >nul
+MOVE "CefSharp.BrowserSubprocess.*" "cef" >nul
+MOVE "CefSharp.Core.Runtime.*" "cef" >nul
+MOVE "CefSharp.Core.*" "cef" >nul
+MOVE "CefSharp.WinForms.*" "cef" >nul
+MOVE "CefSharp.*" "cef" >nul
+MOVE "chrome_elf.dll" "cef" >nul
+MOVE "d3dcompiler_47.dll" "cef" >nul
+MOVE "devtools_resources.pak" "cef" >nul
+MOVE "icudtl.dat" "cef" >nul
+MOVE "libcef.dll" "cef" >nul
+MOVE "libEGL.dll" "cef" >nul
+MOVE "libGLESv2.dll" "cef" >nul
+MOVE "LICENSE.txt" "cef" >nul
+MOVE "README.txt" "cef" >nul
+MOVE "snapshot_blob.bin" "cef" >nul
+MOVE "v8_context_snapshot.bin" "cef" >nul
+MOVE "locales\*.*" "cef\locales" >nul
+MOVE "swiftshader\*.*" "cef\swiftshader" >nul
+RMDIR "locales" >nul
+RMDIR "swiftshader" >nul
+
 GOTO :EOF
