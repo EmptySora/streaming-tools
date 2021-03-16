@@ -55,7 +55,7 @@ namespace WinAudioLevels {
         public double LastAmplitudePercent => this.LastAmplitudePercents.Count() > 1
                    ? this.LastAmplitudePercents.Max()
                    : (this.LastAmplitudePercents.Any() ? this.LastAmplitudePercents.First() : double.NaN);
-
+#warning cannot use linq enum functions here. Won't go well.
 
         public bool Valid => this._captures.Any(a => a.Valid);
 
