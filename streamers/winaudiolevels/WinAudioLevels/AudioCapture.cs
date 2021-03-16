@@ -48,13 +48,13 @@ namespace WinAudioLevels {
 
         public double LastAudioLevel => this.LastAudioLevels.Count() > 1
                     ? this.LastAudioLevels.Max()
-                    : double.NaN;
+                    : (this.LastAudioLevels.Any() ? this.LastAudioLevels.First() : double.NaN);
         public long LastSample => this.LastSamples.Count() > 1
                     ? this.LastSamples.Max()
-                    : 0;
+                    : this.LastSamples.FirstOrDefault();
         public double LastAmplitudePercent => this.LastAmplitudePercents.Count() > 1
                    ? this.LastAmplitudePercents.Max()
-                   : double.NaN;
+                   : (this.LastAmplitudePercents.Any() ? this.LastAmplitudePercents.First() : double.NaN);
 
 
         public bool Valid => this._captures.Any(a => a.Valid);

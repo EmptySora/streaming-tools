@@ -28,13 +28,9 @@ namespace WinAudioLevels {
             this._device_id = deviceId;
         }
 
-        public long LastSample {
-            get {
-                return this._last_samples.Count() > 1
+        public long LastSample => this._last_samples.Count() > 1
                     ? this._last_samples.Max()
-                    : 0;
-            }
-        }
+                    : this._last_samples.FirstOrDefault();
         //largest sample out of every channel.
         public IEnumerable<long> LastSamples {
             get {
