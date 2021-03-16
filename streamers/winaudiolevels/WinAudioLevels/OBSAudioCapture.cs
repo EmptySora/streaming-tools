@@ -131,7 +131,7 @@ namespace WinAudioLevels {
                 lock (this._lock) {
                     this._last_levels = new double[0];
                 }
-                this.Valid = level.HasValue;
+                this.Valid = level.HasValue && level.Value != -60;
                 Thread.Sleep(this._wait);
                 return;
             }
@@ -139,7 +139,7 @@ namespace WinAudioLevels {
             lock (this._lock) {
                 this._last_levels = new double[] { level.Value };
             }
-            this.Valid = level.HasValue;
+            this.Valid = level.HasValue && level.Value != -60;
             Thread.Sleep(this._wait);
         }
 

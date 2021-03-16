@@ -103,13 +103,7 @@ namespace WinAudioLevels {
             return captures.ToArray();
         }
         public static IAudioCapture[] GetOutputAudioCaptures() {
-            List<IAudioCapture> captures = new List<IAudioCapture>() {
-                //new OBSAudioCapture()
-            };
-            captures.AddRange(SoundAudioCapture.CaptureAllOutputAudio());
-            //add in OBS capture.
-            //captures.ForEach(capture => capture.Start());
-            return captures.ToArray();
+            return SoundAudioCapture.CaptureAllOutputAudio();
         }
 
         public static AudioCapture GetOutputCapture() {
