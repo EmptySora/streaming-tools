@@ -30,7 +30,9 @@ namespace WinAudioLevels {
 
         public long LastSample {
             get {
-                try { return this._last_samples.Max(); } catch { return 0; }
+                return this._last_samples.Count() > 1
+                    ? this._last_samples.Max()
+                    : 0;
             }
         }
         //largest sample out of every channel.
@@ -148,7 +150,6 @@ namespace WinAudioLevels {
             WaveBuffer buff = new WaveBuffer((byte[])buffer.Clone());
             switch (encoding) {
             case WaveFormatEncoding.Pcm:
-
                 //sampleSize-byte PCM samples (what we want.)
                 switch (sampleSize) {
                 case 1:
@@ -164,8 +165,11 @@ namespace WinAudioLevels {
             case WaveFormatEncoding.IeeeFloat:
                 double pow = Math.Pow(2, 31);
                 return buff.FloatBuffer.Select(sample => {
-                    try { return Math.Abs((long)(sample * pow)); } catch {
+                    try { 
+                        return Math.Abs((long)(sample * pow)); 
+                    } catch {
                         return long.MaxValue;
+#warning naked catch
                     }
                 }).Take(buffer.Length / sampleSize).ToArray();
             default:

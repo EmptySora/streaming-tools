@@ -99,7 +99,9 @@ namespace WinAudioLevels {
                         this.CaptureMain_Post(ObsAudioMixerMeter.GetAudioMeterLevel(this._index));
                     } catch (ThreadAbortException) {
                         throw; //rethrow
-                    } catch { }
+                    } catch (Exception e) {
+                        Console.WriteLine("ERROR in obs audio capture loop: {0}", e);
+                    }
                 }
             } else if(!(this._id is null)) {
                 while (true) {
@@ -107,7 +109,9 @@ namespace WinAudioLevels {
                         this.CaptureMain_Post(ObsAudioMixerMeter.GetAudioMeterLevel(this._id));
                     } catch (ThreadAbortException) {
                         throw; //rethrow
-                    } catch { }
+                    } catch (Exception e) {
+                        Console.WriteLine("ERROR in obs audio capture loop: {0}", e);
+                    }
                 }
             } else {
                 string themeName = ObsAudioMixerMeter.CurrentObsThemeName;
@@ -119,10 +123,14 @@ namespace WinAudioLevels {
                             themeName = cThemeName;
                             name = (ObsAudioMixerMeter.CurrentObsTheme ?? ObsTheme.ACRI).GetMeterId(this._name);
                         }
-                        this.CaptureMain_Post(ObsAudioMixerMeter.GetAudioMeterLevel(name));
+                        if(!(name is null)) {
+                            this.CaptureMain_Post(ObsAudioMixerMeter.GetAudioMeterLevel(name));
+                        }
                     } catch (ThreadAbortException) {
                         throw; //rethrow
-                    } catch { }
+                    } catch (Exception e) {
+                        Console.WriteLine("ERROR in obs audio capture loop: {0}", e);
+                    }
                 }
             }
         }

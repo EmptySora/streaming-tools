@@ -87,7 +87,7 @@ namespace WinAudioLevels {
                 if (this.HasDualMeter) {
                     double maxX = this.MeterChannelBottom.X;
                     for (int x = this.MeterChannelBottom.X; x < this.MeterChannelBottom.Right; x++) {
-                        if (colors.Contains(OBSCapture._bitmap.GetPixel(x, this.MeterChannelBottom.Y))) {
+                        if (colors.Contains(OBSCapture.Bitmap.GetPixel(x, this.MeterChannelBottom.Y))) {
                             maxX = x;
                         } else if (maxX != this.MeterChannelBottom.X) {
                             break; //avoid catching the dot thingies
@@ -100,7 +100,7 @@ namespace WinAudioLevels {
                 {
                     double maxX = this.MeterChannelTop.X;
                     for (int x = this.MeterChannelTop.X; x < this.MeterChannelTop.Right; x++) {
-                        if (colors.Contains(OBSCapture._bitmap.GetPixel(x, this.MeterChannelTop.Y))) {
+                        if (colors.Contains(OBSCapture.Bitmap.GetPixel(x, this.MeterChannelTop.Y))) {
                             maxX = x;
                         } else if (maxX != this.MeterChannelBottom.X) {
                             break; //avoid catching the dot thingies
@@ -116,9 +116,9 @@ namespace WinAudioLevels {
 
         public static int MeterCount {
             get {
-                int scanLineA = (OBSCapture._bitmap.Width / 2) + 10; //search 20 apart
-                int scanLineB = (OBSCapture._bitmap.Width / 2) - 10; //we do this because OBS displays two peaks. The second interrupts the usual color of the meter
-                int height = OBSCapture._bitmap.Height;
+                int scanLineA = (OBSCapture.Bitmap.Width / 2) + 10; //search 20 apart
+                int scanLineB = (OBSCapture.Bitmap.Width / 2) - 10; //we do this because OBS displays two peaks. The second interrupts the usual color of the meter
+                int height = OBSCapture.Bitmap.Height;
                 if (scanLineA < 0) {
                     return 0; //window is too thin... :(
                 }
@@ -127,8 +127,8 @@ namespace WinAudioLevels {
                 bool meter = false;
                 int pAfter = 0;
                 for (int y = 0; y < height; y++) {
-                    Color a = OBSCapture._bitmap.GetPixel(scanLineA, y);
-                    Color b = OBSCapture._bitmap.GetPixel(scanLineB, y);
+                    Color a = OBSCapture.Bitmap.GetPixel(scanLineA, y);
+                    Color b = OBSCapture.Bitmap.GetPixel(scanLineB, y);
                     if (ObsTheme.ALL_METER_COLORS.Contains(a) || ObsTheme.ALL_METER_COLORS.Contains(b)) {
                         if (!meter && (pAfter > MAX_PIXELS_BETWEEN_CHANNELS || !anyMeter)) {
                             count++;
@@ -146,9 +146,9 @@ namespace WinAudioLevels {
 
         internal static void UpdateMeters() {
             //ObsAudioMixerMeter
-            int scanLineA = (OBSCapture._bitmap.Width / 2) + 10; //search 20 apart
-            int scanLineB = (OBSCapture._bitmap.Width / 2) - 10; //we do this because OBS displays two peaks. The second interrupts the usual color of the meter
-            int height = OBSCapture._bitmap.Height;
+            int scanLineA = (OBSCapture.Bitmap.Width / 2) + 10; //search 20 apart
+            int scanLineB = (OBSCapture.Bitmap.Width / 2) - 10; //we do this because OBS displays two peaks. The second interrupts the usual color of the meter
+            int height = OBSCapture.Bitmap.Height;
             if (scanLineA < 0) {
                 return; //window is too thin... :(
             }
@@ -168,8 +168,8 @@ namespace WinAudioLevels {
             List<Tuple<Point, Point>> coords = new List<Tuple<Point, Point>>();
             //a:start,end; b:start,end
             for (int y = 0; y < height; y++) {
-                Color a = OBSCapture._bitmap.GetPixel(scanLineA, y);
-                Color b = OBSCapture._bitmap.GetPixel(scanLineB, y);
+                Color a = OBSCapture.Bitmap.GetPixel(scanLineA, y);
+                Color b = OBSCapture.Bitmap.GetPixel(scanLineB, y);
                 if (match_colors.Contains(a) || match_colors.Contains(b)) {
                     theme = ObsTheme.GetThemeByMeterColor(a, b);
                     if (ReferenceEquals(match_colors, ObsTheme.ALL_METER_COLORS)) {
@@ -226,8 +226,8 @@ namespace WinAudioLevels {
                     : coord.Item2.Y + 1;
                 int lastX = -1;
                 int firstX = -1;
-                for (int x = OBSCapture._bitmap.Width - 1; x >= 0; x--) {
-                    if (OBSCapture._bitmap.GetPixel(x, y) == tick_color) {
+                for (int x = OBSCapture.Bitmap.Width - 1; x >= 0; x--) {
+                    if (OBSCapture.Bitmap.GetPixel(x, y) == tick_color) {
                         lastX = x;
                         if (firstX == -1) {
                             firstX = x;
@@ -259,11 +259,11 @@ namespace WinAudioLevels {
                     Rectangle nameRect = new Rectangle(
                         0,
                         Math.Max(oMeter.MeterChannelTop.Y - 26, 0),
-                        Math.Min(oMeter.MeterChannelTop.Width + oMeter.MeterChannelTop.X - 70, OBSCapture._bitmap.Width),
-                        Math.Min(25 + Math.Min(oMeter.MeterChannelTop.Y - 26, 0), OBSCapture._bitmap.Height));
+                        Math.Min(oMeter.MeterChannelTop.Width + oMeter.MeterChannelTop.X - 70, OBSCapture.Bitmap.Width),
+                        Math.Min(25 + Math.Min(oMeter.MeterChannelTop.Y - 26, 0), OBSCapture.Bitmap.Height));
                     //ocr rect: {0, max(0, top.Y - 26)} width = min(bmp.width, top.Width + top.X - 70), height = min(bmp.height, 25 + min(0, top.Y - 26))
                     AudioMixerOcrAttempt?.Invoke(null, new Tuple<Rectangle, int>(nameRect, mIndex)); //cannot call event handler outside of declaring class :(
-                    oMeter.MeterId = oMeter.GetMeterId(OBSCapture._bitmap, nameRect);
+                    oMeter.MeterId = oMeter.GetMeterId(OBSCapture.Bitmap, nameRect);
                     Console.WriteLine("Found Meter (id): {0}", oMeter.MeterId);
                     lock (METERS_LOCK) {
                         METERS.Add(oMeter);

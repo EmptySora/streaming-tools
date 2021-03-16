@@ -27,10 +27,6 @@ namespace WinAudioLevels {
         }
 
         static void Testing() {
-            /*
-            VarTest();
-            return;
-            */
             //ApplicationSettings.LoadOrDefault();
             /*
             Console.WriteLine("DOES FILE.EXIST CARE ABOUT RESOURCE PATHS?\n" +
@@ -43,33 +39,6 @@ namespace WinAudioLevels {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
-        }
-        static void VarTest() {
-            int a = 1;
-            int b = 2;
-            Console.WriteLine("Testing if a!=(a=b) works");
-            if(a!=(a = b)) {
-                if (a == b) {
-                    Console.WriteLine("It works as is.");
-                } else {
-                    Console.WriteLine("For some reason, a wasn't set to b");
-                }
-            } else {
-                Console.WriteLine("a!=(a=b) doesn't work. trying (a=b)!=a");
-                a = 1;
-                b = 2;
-                if ((a = b) != a) {
-                    if (a == b) {
-                        Console.WriteLine("It works.");
-                    } else {
-                        Console.WriteLine("For some reason, a wasn't set to b");
-                    }
-                } else {
-                    Console.WriteLine("It does not work");
-                }
-            }
-
-            Console.ReadLine();
         }
     }
 }

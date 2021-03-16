@@ -116,7 +116,6 @@ namespace WinAudioLevels {
         // 0: Found "Audio Mixer" window.
         //-1: Could not find process
         //-2: Could not find "Audio Mixer" window.
-        internal static IntPtr _h_audio_mixer = IntPtr.Zero;
 
         //use these to hook into the error and display a warning to the user
         //BE SURE TO ONLY SHOW A MESSAGE ONCE UNTIL ERRORFIXED is HIT
@@ -124,16 +123,21 @@ namespace WinAudioLevels {
         public static event EventHandler AudioMixerWindowNotFoundError;
         public static event EventHandler OBSErrorFixed;
         internal static event EventHandler<Image> AudioMixerWindowCaptured;
-
-        internal static bool _errored = false;
-        internal static int _listener_count = 0;
-        internal static Size _window_size;
-        internal static Graphics _graphics;
-        internal static Bitmap _bitmap;
+        private static readonly TimeSpan ERROR_WAIT = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan IDLE_WAIT = TimeSpan.FromSeconds(2);
+        private static readonly TimeSpan ACTIVE_WAIT = TimeSpan.FromMilliseconds(1000F / FPS);
+        internal static Bitmap Bitmap { get; private set; }
+        private static readonly Thread THREAD = new Thread(CaptureLoop) {
+            Name = "OBS Capture Thread"
+        };
         public const int FPS = 30;
-        private static readonly Thread THREAD = new Thread(CaptureLoop);
+
+        private static bool _errored = false;
+        private static int _listener_count = 0;
+        private static Size _window_size;
+        private static Graphics _graphics;
+        private static IntPtr _h_audio_mixer = IntPtr.Zero;
         static OBSCapture() {
-            THREAD.Name = "OBS Capture Thread";
             THREAD.Start();
         }
 
@@ -167,15 +171,9 @@ namespace WinAudioLevels {
             }
             foreach (Process proc in Process.GetProcesses()) {
                 try {
-                    string path = proc.MainModule.FileName;
-                    string[] dirs = Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar);
-                    string file = Path.GetFileNameWithoutExtension(path).ToLower();
-                    IEnumerable<Process> children;
+                    string file = Path.GetFileNameWithoutExtension(proc.MainModule.FileName).ToLower();
                     if (file == "obs32" || file == "obs64") {
-                        children = proc.GetChildProcesses();
-                        if (children.Any(child => Path
-                            .GetFileNameWithoutExtension(child.MainModule.FileName)
-                            .ToLower() == "obs-browser-page")) {
+                        if (proc.GetChildProcesses().Any(child => Path.GetFileNameWithoutExtension(child.MainModule.FileName).ToLower() == "obs-browser-page")) {
                             //DEFINITELY the right one.
                             obs = proc;
                             break;
@@ -190,19 +188,18 @@ namespace WinAudioLevels {
                     }
                     //obs-browser-page.exe
                     //obs32.exe / obs64.exe
-                }catch(Exception e) {
-                    //Console.WriteLine("Error during proc lookup: {0}", e.Message);
+                }catch (Exception e) {
+                    Console.WriteLine("Error during proc lookup: {0}", e.Message);
                 }
             }
-            if (obs == null) {
+            if (obs is null) {
                 return -1; //could not find obs... :(
             }
             //for some reason, using the mainwindowhandle value for this doesn't work...
             //since we still need the OBS process to do this right, we still need the above process logic.
             EnumChildWindows(IntPtr.Zero, EnumCallback, IntPtr.Zero); //return value unused.
-            hAudioMixer = handle;
 
-            if (hAudioMixer == IntPtr.Zero) {
+            if ((hAudioMixer = handle) == IntPtr.Zero) {
                 return -2; //Audio Mixer window wasn't found... :(
             }
 
@@ -217,68 +214,33 @@ namespace WinAudioLevels {
             return new Size(rect.right - rect.left, rect.bottom - rect.top);
         }
         private static void CaptureLoop() {
-            TimeSpan errorWait = TimeSpan.FromSeconds(30);
-            TimeSpan idleWait = TimeSpan.FromSeconds(2);
-            TimeSpan activeWait = TimeSpan.FromMilliseconds(1000F / FPS);
             while (true) {
+               TimeSpan wait = ERROR_WAIT;
                 try {
                     if (_listener_count > 0) {
                         CaptureMain();
-                        Thread.Sleep(activeWait); //wait to capture next frame.
-                    } else {
-                        Thread.Sleep(idleWait);
                     }
+                    wait = _listener_count > 0 
+                        ? ACTIVE_WAIT 
+                        : IDLE_WAIT;
                 } catch (ThreadAbortException) {
                     throw; //rethrow to allow abort to work.
                 } catch (FileNotFoundException) {
-                    Console.WriteLine("Could not find obs64.exe/obs32.exe! Waiting {0} seconds...", errorWait.TotalSeconds);
+                    Console.WriteLine("Could not find obs64.exe/obs32.exe! Waiting {0} seconds...", wait.TotalSeconds);
                     OBSNotFoundError?.Invoke(null, new EventArgs());
                     _errored = true;
-                    Thread.Sleep(errorWait);
                 } catch (EntryPointNotFoundException) {
-                    Console.WriteLine("Could not find Audio Mixer window! Waiting {0} seconds...", errorWait.TotalSeconds);
+                    Console.WriteLine("Could not find Audio Mixer window! Waiting {0} seconds...", wait.TotalSeconds);
                     AudioMixerWindowNotFoundError?.Invoke(null, new EventArgs());
                     _errored = true;
-                    Thread.Sleep(errorWait);
                 } catch (Exception e) {
                     Console.WriteLine("ERROR IN OBS CAPTURE LOOP:\n{0}", e);
-                    Thread.Sleep(errorWait);
+                } finally {
+                    Thread.Sleep(wait);
                 }
             }
         }
         private static void CaptureMain() {
-            CheckWindow();
-            RefreshWindowSize();
-            CaptureWindow(_graphics);
-            if(AudioMixerWindowCaptured != null) {
-                Bitmap img = new Bitmap(_window_size.Width, _window_size.Height);
-                using(Graphics gfx = Graphics.FromImage(img)) {
-                    CaptureWindow(gfx);
-                    //separate print window call to avoid locking up the bitmap
-                }
-                AudioMixerWindowCaptured.Invoke(null, img);
-                //do not dispose of img. clients may still be using it...
-            }
-
-            ObsAudioMixerMeter.RefreshMeterLists();
-            UpdateConsoleShowing();
-#warning We are currently not checking to see if the Audio Mixer is Vertical or Horizontal...
-            //OH MY GOD, THERE'S A VERTICAL LAYOUT... FUCK ME
-        }
-        private static void RefreshWindowSize() {
-            //check window size.
-            //FYI, this is scuffed. I think this might include the window border which is explicitly excluded from being captured...
-            //At least, I think so based on the behavior of resizing the ObsTest window...
-            //if window size changed, we need to get new drawing buffers.
-            if (_window_size != (_window_size = GetWindowSize(_h_audio_mixer))) {
-                _graphics?.Dispose();
-                _bitmap?.Dispose();
-                ObsAudioMixerMeter.ResetMeters();
-                _bitmap = new Bitmap(_window_size.Width, _window_size.Height);
-                _graphics = Graphics.FromImage(_bitmap);
-            }
-        }
-        private static void CheckWindow() {
             //check if window was closed.
             if (!(_h_audio_mixer == IntPtr.Zero || IsWindow(_h_audio_mixer))) {
                 _h_audio_mixer = IntPtr.Zero;
@@ -302,7 +264,39 @@ namespace WinAudioLevels {
                     OBSErrorFixed?.Invoke(null, new EventArgs());
                 }
             }
+
+            //check window size.
+            //FYI, this is scuffed. I think this might include the window border which is explicitly excluded from being captured...
+            //At least, I think so based on the behavior of resizing the ObsTest window...
+            //if window size changed, we need to get new drawing buffers.
+            if (_window_size != (_window_size = GetWindowSize(_h_audio_mixer))) {
+                _graphics?.Dispose();
+                Bitmap?.Dispose();
+                ObsAudioMixerMeter.ResetMeters();
+                Bitmap = new Bitmap(_window_size.Width, _window_size.Height);
+                _graphics = Graphics.FromImage(Bitmap);
+            }
+
+            CaptureWindow(_graphics);
+            if(AudioMixerWindowCaptured != null) {
+                Bitmap img = new Bitmap(_window_size.Width, _window_size.Height);
+                using(Graphics gfx = Graphics.FromImage(img)) {
+                    CaptureWindow(gfx);
+                    //separate print window call to avoid locking up the bitmap
+                }
+                AudioMixerWindowCaptured.Invoke(null, img);
+                //do not dispose of img. clients may still be using it...
+            }
+
+            ObsAudioMixerMeter.RefreshMeterLists();
+
+            Console.Title = string.Format(
+                "METER LEVELS: {0}",
+                string.Join(", ", ObsAudioMixerMeter.GetAllAudioMeterLevel()));
+#warning We are currently not checking to see if the Audio Mixer is Vertical or Horizontal...
+            //OH MY GOD, THERE'S A VERTICAL LAYOUT... FUCK ME
         }
+        
         private static void CaptureWindow(Graphics g) {
             try {
                 //capture OBS window. (PW_CLIENTONLY specifies not to capture the window border.)
@@ -315,12 +309,7 @@ namespace WinAudioLevels {
                 g.ReleaseHdc();
             }
         }
-        private static void UpdateConsoleShowing() {
-            Console.Title = string.Format(
-                "METER LEVELS: {0}",
-                string.Join(", ", ObsAudioMixerMeter.GetAllAudioMeterLevel()));
-        }
-        
+                
         internal static void RegisterCapture() {
             _listener_count++;
         }
@@ -509,5 +498,14 @@ namespace WinAudioLevels {
         */
     }
 }
+/*
+ERROR in obs audio capture loop: System.ArgumentNullException: Value cannot be null.
+Parameter name: key
+   at System.ThrowHelper.ThrowArgumentNullException(ExceptionArgument argument)
+   at System.Collections.Generic.Dictionary`2.FindEntry(TKey key)
+   at System.Collections.Generic.Dictionary`2.ContainsKey(TKey key)
+   at WinAudioLevels.ObsAudioMixerMeter.GetAudioMeterLevel(String meterName) in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\ObsAudioMixerMeter.cs:line 334
+   at WinAudioLevels.OBSAudioCapture.CaptureMain() in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\OBSAudioCapture.cs:line 126
+ * */
 //Need to hook into the events from this class in MainForm so that we can tell the user when they goof the OBS requirements.
 //we should add an ability to detach those event handlers temporarily so that the AddDeviceForm can hook into and detect when the goof occurs.

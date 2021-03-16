@@ -23,26 +23,6 @@ namespace WinAudioLevels {
                 }
             }
         }
-        public double LastAudioLevel {
-            get {
-                try {
-                    return this.LastAudioLevels.Max();
-                } catch {
-                    return double.NaN;
-                }
-            }
-        }
-
-        public long LastSample {
-            get {
-                try {
-                    return this.LastSamples.Max();
-                } catch {
-                    return 0;
-                }
-            }
-        }
-
         public IEnumerable<long> LastSamples {
             get {
                 foreach (IEnumerable<long> @enum in this._captures.Where(capture => capture.Valid).Select(capture => capture.LastSamples)) {
@@ -52,21 +32,10 @@ namespace WinAudioLevels {
                 }
             }
         }
-
-        public double LastAmplitudePercent {
-            get {
-                try {
-                    return this.LastAmplitudePercents.Max();
-                } catch {
-                    return double.NaN;
-                }
-            }
-        }
-
         public IEnumerable<double> LastAmplitudePercents {
             get {
-                foreach(IEnumerable<double> @enum in this._captures.Where(capture => capture.Valid).Select(capture => capture.LastAmplitudePercents)) {
-                    foreach(double @double in @enum) {
+                foreach (IEnumerable<double> @enum in this._captures.Where(capture => capture.Valid).Select(capture => capture.LastAmplitudePercents)) {
+                    foreach (double @double in @enum) {
                         yield return @double;
                         //how I did not think to use iterators is beyond me.
                         //assuming they function like JS generators, this should VASTLY improve speed.
@@ -76,6 +45,17 @@ namespace WinAudioLevels {
                 }
             }
         }
+
+        public double LastAudioLevel => this.LastAudioLevels.Count() > 1
+                    ? this.LastAudioLevels.Max()
+                    : double.NaN;
+        public long LastSample => this.LastSamples.Count() > 1
+                    ? this.LastSamples.Max()
+                    : 0;
+        public double LastAmplitudePercent => this.LastAmplitudePercents.Count() > 1
+                   ? this.LastAmplitudePercents.Max()
+                   : double.NaN;
+
 
         public bool Valid => this._captures.Any(a => a.Valid);
 
