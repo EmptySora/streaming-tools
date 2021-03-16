@@ -23,7 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Audio Devices Root");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Audio Devices Root");
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
@@ -31,12 +31,15 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testCaptureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testOBSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testOBSFontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testOBSNameGenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.oBSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.itselfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nameGenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.captureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -66,10 +69,10 @@
             this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeView1.Location = new System.Drawing.Point(0, 0);
             this.treeView1.Name = "treeView1";
-            treeNode1.Name = "audioRoot";
-            treeNode1.Text = "Audio Devices Root";
+            treeNode2.Name = "audioRoot";
+            treeNode2.Text = "Audio Devices Root";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode2});
             this.treeView1.Size = new System.Drawing.Size(266, 426);
             this.treeView1.TabIndex = 0;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.TreeView1_AfterSelect);
@@ -97,10 +100,8 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newBrowserToolStripMenuItem,
             this.refreshToolStripMenuItem,
-            this.testCaptureToolStripMenuItem,
-            this.testOBSToolStripMenuItem,
-            this.testOBSFontToolStripMenuItem,
-            this.testOBSNameGenToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.testingToolStripMenuItem,
             this.toolStripSeparator1,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -123,27 +124,6 @@
             this.refreshToolStripMenuItem.Text = "&Refresh";
             this.refreshToolStripMenuItem.Click += new System.EventHandler(this.RefreshToolStripMenuItem_Click);
             // 
-            // testCaptureToolStripMenuItem
-            // 
-            this.testCaptureToolStripMenuItem.Name = "testCaptureToolStripMenuItem";
-            this.testCaptureToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.testCaptureToolStripMenuItem.Text = "Test Capture";
-            this.testCaptureToolStripMenuItem.Click += new System.EventHandler(this.TestCaptureToolStripMenuItem_Click);
-            // 
-            // testOBSToolStripMenuItem
-            // 
-            this.testOBSToolStripMenuItem.Name = "testOBSToolStripMenuItem";
-            this.testOBSToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.testOBSToolStripMenuItem.Text = "Test OBS";
-            this.testOBSToolStripMenuItem.Click += new System.EventHandler(this.TestOBSToolStripMenuItem_Click);
-            // 
-            // testOBSFontToolStripMenuItem
-            // 
-            this.testOBSFontToolStripMenuItem.Name = "testOBSFontToolStripMenuItem";
-            this.testOBSFontToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.testOBSFontToolStripMenuItem.Text = "Test OBS Font";
-            this.testOBSFontToolStripMenuItem.Click += new System.EventHandler(this.TestOBSFontToolStripMenuItem_Click);
-            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
@@ -157,12 +137,57 @@
             this.quitToolStripMenuItem.Text = "&Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
-            // testOBSNameGenToolStripMenuItem
+            // testingToolStripMenuItem
             // 
-            this.testOBSNameGenToolStripMenuItem.Name = "testOBSNameGenToolStripMenuItem";
-            this.testOBSNameGenToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.testOBSNameGenToolStripMenuItem.Text = "Test OBS Name Gen";
-            this.testOBSNameGenToolStripMenuItem.Click += new System.EventHandler(this.TestOBSNameGenToolStripMenuItem_Click);
+            this.testingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.oBSToolStripMenuItem,
+            this.captureToolStripMenuItem});
+            this.testingToolStripMenuItem.Name = "testingToolStripMenuItem";
+            this.testingToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.testingToolStripMenuItem.Text = "Testing";
+            // 
+            // oBSToolStripMenuItem
+            // 
+            this.oBSToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.itselfToolStripMenuItem,
+            this.fontToolStripMenuItem,
+            this.nameGenToolStripMenuItem});
+            this.oBSToolStripMenuItem.Name = "oBSToolStripMenuItem";
+            this.oBSToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.oBSToolStripMenuItem.Text = "OBS";
+            // 
+            // itselfToolStripMenuItem
+            // 
+            this.itselfToolStripMenuItem.Name = "itselfToolStripMenuItem";
+            this.itselfToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.itselfToolStripMenuItem.Text = "Itself";
+            this.itselfToolStripMenuItem.Click += new System.EventHandler(this.TestOBSToolStripMenuItem_Click);
+            // 
+            // fontToolStripMenuItem
+            // 
+            this.fontToolStripMenuItem.Name = "fontToolStripMenuItem";
+            this.fontToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fontToolStripMenuItem.Text = "Font";
+            this.fontToolStripMenuItem.Click += new System.EventHandler(this.TestOBSFontToolStripMenuItem_Click);
+            // 
+            // nameGenToolStripMenuItem
+            // 
+            this.nameGenToolStripMenuItem.Name = "nameGenToolStripMenuItem";
+            this.nameGenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.nameGenToolStripMenuItem.Text = "Name Gen";
+            this.nameGenToolStripMenuItem.Click += new System.EventHandler(this.TestOBSNameGenToolStripMenuItem_Click);
+            // 
+            // captureToolStripMenuItem
+            // 
+            this.captureToolStripMenuItem.Name = "captureToolStripMenuItem";
+            this.captureToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.captureToolStripMenuItem.Text = "Capture";
+            this.captureToolStripMenuItem.Click += new System.EventHandler(this.TestCaptureToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(183, 6);
             // 
             // Form1
             // 
@@ -196,10 +221,13 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newBrowserToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem testCaptureToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem testOBSToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem testOBSFontToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem testOBSNameGenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem testingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem oBSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem itselfToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fontToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem nameGenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem captureToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }
 

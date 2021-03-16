@@ -179,6 +179,10 @@
     <Compile Include="AudioCapture.cs" />
     <Compile Include="AudioControlProperties.cs" />
     <Compile Include="AudioDeviceProperties.cs" />
+    <Compile Include="AudioPeakMessage.cs" />
+    <Compile Include="AudioPeakMessageStatus.cs" />
+    <Compile Include="AudioPeakMessageType.cs" />
+    <Compile Include="AudioPeaksBehavior.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="IAudioCapture.cs" />
     <Compile Include="MyWasapiCapture.cs" />
@@ -223,6 +227,7 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="OBSAudioCapture.cs" />
+    <Compile Include="ObsAudioMixerMeter.cs" />
     <Compile Include="OBSCapture.cs" />
     <Compile Include="ObsTest.cs">
       <SubType>Form</SubType>
@@ -236,6 +241,7 @@
     <Compile Include="ObsTestTheme.Designer.cs">
       <DependentUpon>ObsTestTheme.cs</DependentUpon>
     </Compile>
+    <Compile Include="ObsTheme.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Prompt.cs">
       <SubType>Form</SubType>
@@ -251,6 +257,7 @@
     </Compile>
     <Compile Include="SoundAudioCapture.cs" />
     <Compile Include="WebServer.cs" />
+    <Content Include="TodoList.txt" />
     <EmbeddedResource Include="AddDeviceForm.resx">
       <DependentUpon>AddDeviceForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -139,70 +139,6 @@ namespace WinAudioLevels {
         }
         private static readonly MD5CryptoServiceProvider HASHER = new MD5CryptoServiceProvider();
         //key is the theme's name. value is array of colors: ggyyrr (first is light, second is dark)
-        private static readonly Dictionary<string, Color[]> METER_COLORS = new Dictionary<string, Color[]>() {
-            {
-                "Dark", new Color[] {
-                    Color.FromArgb(76,255,76), //GREEN: ACTIVE
-                    Color.FromArgb(38,127,38), //GREEN: INACTIVE
-                    Color.FromArgb(255,255,76), //YELLOW: ACTIVE
-                    Color.FromArgb(127,127,38), //YELLOW: INACTIVE
-                    Color.FromArgb(255,76,76), //RED: ACTIVE
-                    Color.FromArgb(127,38,38), //RED: INACTIVE
-                    Color.FromArgb(0,0,0), //Dark thingie
-                }
-            },
-            {
-                "Acri", new Color[] {
-                    Color.FromArgb(132,216,43), //GREEN: ACTIVE
-                    Color.FromArgb(66,116,12), //GREEN: INACTIVE
-                    Color.FromArgb(228,215,23), //YELLOW: ACTIVE
-                    Color.FromArgb(152,143,15), //YELLOW: INACTIVE
-                    Color.FromArgb(215,65,22), //RED: ACTIVE
-                    Color.FromArgb(128,32,4), //RED: INACTIVE
-                    Color.FromArgb(49,54,59), //Dark thingie
-                }
-            },
-            {
-                "Rachni", new Color[] {
-                    Color.FromArgb(119,255,143), //GREEN: ACTIVE
-                    Color.FromArgb(0,128,79), //GREEN: INACTIVE
-                    Color.FromArgb(255,157,76), //YELLOW: ACTIVE
-                    Color.FromArgb(128,57,0), //YELLOW: INACTIVE
-                    Color.FromArgb(255,89,76), //RED: ACTIVE
-                    Color.FromArgb(128,9,0), //RED: INACTIVE
-                    Color.FromArgb(49,54,59), //Dark thingie
-                }
-            },
-            {
-                "System", new Color[] {
-                    Color.FromArgb(50,200,50), //GREEN: ACTIVE
-                    Color.FromArgb(15,100,15), //GREEN: INACTIVE
-                    Color.FromArgb(255,200,50), //YELLOW: ACTIVE
-                    Color.FromArgb(100,100,15), //YELLOW: INACTIVE
-                    Color.FromArgb(200,50,50), //RED: ACTIVE
-                    Color.FromArgb(100,15,15), //RED: INACTIVE
-                    Color.FromArgb(0,0,0), //Dark thingie
-                }
-            }
-        };
-        private static readonly Dictionary<string, Color> METER_TICK_COLORS = new Dictionary<string, Color>() {
-            { "Dark", Color.FromArgb(225,224,225) },
-            { "Acri", Color.FromArgb(239,240,241) },
-            { "Rachni", Color.FromArgb(239,240,241) },
-            { "System", Color.FromArgb(0,0,0) }
-        };
-        private static readonly Dictionary<string, Color[]> BACKGROUND_COLORS = new Dictionary<string, Color[]>() {
-            { "Dark", new Color[]{ Color.FromArgb(31,30,31) } },
-            { "Acri", new Color[]{Color.FromArgb(24,24,25) } },
-            { "Rachni", new Color[]{Color.FromArgb(49,54,59), Color.FromArgb(118, 121, 124) } },
-            { "System", new Color[]{ Color.FromArgb(240, 240, 240), Color.FromArgb(130,135,144) } }
-        };
-        private static readonly Color[] ALL_METER_COLORS = METER_COLORS["Dark"]
-            .Union(METER_COLORS["Acri"])
-            .Union(METER_COLORS["Rachni"])
-            .Union(METER_COLORS["System"])
-            .Distinct()
-            .ToArray();
         private static readonly List<ObsAudioMixerMeter> METERS = new List<ObsAudioMixerMeter>();
         private static readonly object LOCK = new object();
         private static readonly Dictionary<string, double> METER_LEVELS = new Dictionary<string, double>();
@@ -218,7 +154,9 @@ namespace WinAudioLevels {
         }
         public static ObsTheme? GetCurrentObsTheme() {
             if (METERS.Count > 0) {
-                switch (METERS[0].Theme) {
+                return METERS[0].Theme;
+                /*
+                switch (METERS[0].ThemeName) {
                 case "Acri":
                     return ObsTheme.ACRI;
                 case "System":
@@ -228,12 +166,13 @@ namespace WinAudioLevels {
                 case "Rachni":
                     return ObsTheme.RACHNI;
                 }
+                */
             }
             return null;
         }
         public static string GetCurrentObsThemeName() {
             if (METERS.Count > 0) {
-                return METERS[0].Theme;
+                return METERS[0].ThemeName;
             }
             return null;
         }
@@ -450,7 +389,7 @@ namespace WinAudioLevels {
             double levelA = double.MinValue;
             double levelB = double.MinValue;
             bool bTemp = false;
-            Color[] colors = METER_COLORS[meter.Theme].Where(a => bTemp = !bTemp).ToArray();
+            Color[] colors = meter.Theme.meterColors.Where(a => bTemp = !bTemp).ToArray();
             if (meter.HasDualMeter) {
                 double maxX = meter.MeterChannelBottom.X;
                 for (int x = meter.MeterChannelBottom.X; x < meter.MeterChannelBottom.Right; x++) {
@@ -493,7 +432,7 @@ namespace WinAudioLevels {
             for (int y = 0; y < height; y++) {
                 Color a = _bitmap.GetPixel(scanLineA, y);
                 Color b = _bitmap.GetPixel(scanLineB, y);
-                if (ALL_METER_COLORS.Contains(a) || ALL_METER_COLORS.Contains(b)) {
+                if (ObsTheme.ALL_METER_COLORS.Contains(a) || ObsTheme.ALL_METER_COLORS.Contains(b)) {
                     if (!meter && (pAfter > ObsAudioMixerMeter.MAX_PIXELS_BETWEEN_CHANNELS || !anyMeter)) {
                         count++;
                     }
@@ -524,8 +463,8 @@ namespace WinAudioLevels {
             int yEndA = 0;
             int yStartB = 0;
             int yEndB = 0;
-            string theme = null;
-            Color[] match_colors = ALL_METER_COLORS;
+            ObsTheme theme = default;
+            Color[] match_colors = ObsTheme.ALL_METER_COLORS;
             Color tick_color = default;
             List<Tuple<Point, Point>> coords = new List<Tuple<Point, Point>>();
             //a:start,end; b:start,end
@@ -533,12 +472,12 @@ namespace WinAudioLevels {
                 Color a = _bitmap.GetPixel(scanLineA, y);
                 Color b = _bitmap.GetPixel(scanLineB, y);
                 if (match_colors.Contains(a) || match_colors.Contains(b)) {
-                    theme = METER_COLORS.First(c => c.Value.Contains(a) || c.Value.Contains(b)).Key;
-                    if (ReferenceEquals(match_colors, ALL_METER_COLORS)) {
+                    theme = ObsTheme.GetThemeByMeterColor(a, b);
+                    if (ReferenceEquals(match_colors, ObsTheme.ALL_METER_COLORS)) {
                         //ReferenceEquals because it's quicker and we don't want to check sequences.
                         //we just care if we're checking all meter colors or not.
-                        match_colors = METER_COLORS[theme];
-                        tick_color = METER_TICK_COLORS[theme];
+                        match_colors = theme.meterColors;
+                        tick_color = theme.meterTickColor;
                     }
                     if (!meter && (pAfter > ObsAudioMixerMeter.MAX_PIXELS_BETWEEN_CHANNELS || !anyMeter)) {
                         if (anyMeter) {
@@ -638,7 +577,7 @@ namespace WinAudioLevels {
         }
         private static string GetMeterId(ObsAudioMixerMeter meterBase, Bitmap bmp, Rectangle rect) {
             List<List<bool>> bits = new List<List<bool>>();
-            Color[] bgColors = BACKGROUND_COLORS[meterBase.Theme];
+            Color[] bgColors = meterBase.Theme.meterBackgroundColors;
             //step 1: convert the OCR region to bool[][] where false=bg, true=!bg
             for (int x = rect.X,i=0; x < Math.Min(rect.Right,bmp.Width); x++,i++) {
                 bits.Add(new List<bool>());
@@ -684,7 +623,7 @@ namespace WinAudioLevels {
         }
         internal static string GetMeterId(ObsTheme theme, string name) {
             List<List<bool>> bits = new List<List<bool>>();
-            Color[] bgColors = BACKGROUND_COLORS[theme.name];
+            Color[] bgColors = theme.meterBackgroundColors;
             Bitmap bmp = theme.RenderText(name);
             Rectangle rect = new Rectangle(default, bmp.Size);
             //step 1: convert the OCR region to bool[][] where false=bg, true=!bg
@@ -952,38 +891,6 @@ namespace WinAudioLevels {
         }
         */
     }
-
-    public struct ObsAudioMixerMeter {
-        public const int MAX_PIXELS_BETWEEN_CHANNELS = 10;
-        public string Theme { get; set; }
-        public string MeterName { get; set; }
-        public string MeterId { get; set; }
-        public Rectangle MeterChannelTop { get; set; }
-        public Rectangle MeterChannelBottom { get; set; }
-        public bool HasDualMeter => this.MeterChannelBottom != default;
-    }
 }
 //Need to hook into the events from this class in MainForm so that we can tell the user when they goof the OBS requirements.
 //we should add an ability to detach those event handlers temporarily so that the AddDeviceForm can hook into and detect when the goof occurs.
-/*
- * Slight issue: OCR isn't working. I already checked, and I know for a fact that it should be.
- * The input rectangles are all correct (I checked them visually through ObsTest. They all highlighted the right region...)
- * 
- * What we may end up having to do is partially serialize the pixels of the text and use THAT as an ID instead.
- * Also, removing Iron might be good because of the fact that there's probably licensing issues.
- * 
- * Removed Iron in favor of original Tesseract library (which has an Apache license :) )
- * Still doesn't work...
- * 
- * Might switch to using the pixels... We would have to assume the minimum height of all the rects is the proper height (and offset vertical by difference)
- * All the rects must have same number of pixels.
- * We should record the background colors for each theme
- * We then scan each pixel in the OCR area to see the max pixel that isn't that background color.
- *     The OCR area has a hard-coded offset to account for the decibels text. (which is why we use that rect.)
- * Convert each pixel in that subregion to a bool value: true if not bgcolor, false if bgcolor
- *     We could also do this before the subregion and then trim off all columns/rows on the top/right that are all false
- *         cannot trim bottom/left because that's our reference start. (because then it would be ambiguous as to whether the top or bottom was lopped off. eg: if it were possible to have "a" at the top of the line, lopping off both sides would say the normal and top-line "a" are the same.
- * Pack the boolean values into a byte array...
- * Convert the byte array to base64 and prepend "{width}.{height}." (so "{w}.{h}.{base64}"
- * Then hash it! The hash is the ID! (and can easily be worked into a number)
- */
