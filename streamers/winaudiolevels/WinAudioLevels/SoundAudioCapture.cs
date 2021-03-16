@@ -20,10 +20,6 @@ namespace WinAudioLevels {
         private int _bytes_per_sample_set;
         private byte[] _sample_set_buffer;
         private readonly object _lock = new object();
-        [Obsolete("Use SoundAudioCapture(string) instead.")]
-        public SoundAudioCapture(MMDevice device) {
-            this._device_id = device.ID;
-        }
         public SoundAudioCapture(string deviceId) {
             this._device_id = deviceId;
         }
@@ -31,6 +27,9 @@ namespace WinAudioLevels {
         public long LastSample => this._last_samples.Count() > 1
                     ? this._last_samples.Max()
                     : this._last_samples.FirstOrDefault();
+        public double LastAudioLevel => 20 * Math.Log10(Math.Abs(this.LastSample) / Math.Pow(2, 31));
+        public double LastAmplitudePercent => Math.Abs(this.LastSample) / Math.Pow(2, 31);
+
         //largest sample out of every channel.
         public IEnumerable<long> LastSamples {
             get {
@@ -44,12 +43,7 @@ namespace WinAudioLevels {
                 }
             }
         }
-        public double LastAudioLevel => 20 * Math.Log10(Math.Abs(this.LastSample) / Math.Pow(2, 31));
-
         public IEnumerable<double> LastAudioLevels => this.LastSamples.Select(a => 20 * Math.Log10(Math.Abs(a) / Math.Pow(2, 31)));
-
-        public double LastAmplitudePercent => Math.Abs(this.LastSample) / Math.Pow(2, 31);
-
         public IEnumerable<double> LastAmplitudePercents => this.LastSamples.Select(a => Math.Abs(a) / Math.Pow(2, 31));
 
         public bool Valid => this.LastSample != 0;
@@ -165,7 +159,6 @@ namespace WinAudioLevels {
                         return Math.Abs((long)(sample * pow)); 
                     } catch {
                         return long.MaxValue;
-#warning naked catch
                     }
                 }).Take(buffer.Length / sampleSize).ToArray();
             default:
