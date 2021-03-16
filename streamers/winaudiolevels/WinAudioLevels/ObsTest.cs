@@ -115,7 +115,8 @@ namespace WinAudioLevels {
             OBSCapture.AudioMixerOcrAttempt += this.OBSCapture_AudioMixerOcrAttempt;
             OBSCapture.AudioMixerOcrStarting += this.OBSCapture_AudioMixerOcrStarting;
             OBSCapture.RegisterCapture();
-#warning Check to see if the elevated permissions are actually necessary. Always better to not require them. (Especially since this isn't signed)
+            //#warning Check to see if the elevated permissions are actually necessary. Always better to not require them. (Especially since this isn't signed)
+            //spoilers: they ARE required
         }
 
         private void OBSCapture_AudioMixerOcrStarting(object sender, EventArgs e) {

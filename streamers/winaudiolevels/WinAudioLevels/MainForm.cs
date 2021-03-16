@@ -125,7 +125,6 @@ namespace WinAudioLevels {
  *   - Actually finish the OBS capture
  *     - Add code to detect if the Audio Mixer is popped out. (if it is, our life is easy.
  *       - If not popped out display an error message.
- *     - Use Iron OCR to detect the names of the audio sources.
  *   - Add in the Form1 as an audio device explorer. (remove a bunch of the older features.)
  *   - Help and About maybe implement with cefsharp? (or is this too heavy-handed...?)
  *   - Add in a way to specify the reason why the old settings file was removed (in the ApplicationSettings bs)
