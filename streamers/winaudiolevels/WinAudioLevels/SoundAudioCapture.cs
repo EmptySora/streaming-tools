@@ -24,9 +24,16 @@ namespace WinAudioLevels {
             this._device_id = deviceId;
         }
 
-        public long LastSample => this._last_samples.Count() > 1
-                    ? this._last_samples.Max()
-                    : this._last_samples.FirstOrDefault();
+        public long LastSample {
+            get {
+                try {
+                    return this._last_samples.Count() > 1
+                        ? this._last_samples.Max()
+                        : this._last_samples.FirstOrDefault();
+#warning race condition... samples can be updated after counting. Need to lock this...
+                } catch { return 0; }
+            }
+        }
         public double LastAudioLevel => 20 * Math.Log10(Math.Abs(this.LastSample) / Math.Pow(2, 31));
         public double LastAmplitudePercent => Math.Abs(this.LastSample) / Math.Pow(2, 31);
 
