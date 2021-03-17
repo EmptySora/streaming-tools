@@ -43,7 +43,7 @@ function ajax(operation, parameters) {
 //2=textcontent, 0=innerhtml
 
 function sanitize(str) {
-    return str.replace(/\</g,"&LT;").replace(/\>/g,"&GT;");
+    return str.replace(/\</g,"&LT;").replace(/\>/g,"&GT;").replace(/\"/g,"&QUOT;");
 }
 
 function toggleRow(row) {
