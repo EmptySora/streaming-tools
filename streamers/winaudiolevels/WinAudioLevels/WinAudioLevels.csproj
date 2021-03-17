@@ -244,6 +244,7 @@
     <Compile Include="Prompt.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Content Include="postbuild.js" />
     <Content Include="Properties\AssemblyInfo.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AssemblyInfo.cs</LastGenOutput>
