@@ -16,46 +16,36 @@ namespace WinAudioLevels {
 
         public IEnumerable<double> LastAudioLevels {
             get {
-                foreach (IEnumerable<long> @enum in this._captures.Where(capture => capture.Valid).Select(capture => capture.LastAudioLevels)) {
-                    foreach (long @long in @enum) {
-                        yield return @long;
+                foreach (IEnumerable<long> levels in this._captures.Where(a => a.Valid).Select(a => a.LastAudioLevels)) {
+                    foreach (long level in levels) {
+                        yield return level;
                     }
                 }
             }
         }
         public IEnumerable<long> LastSamples {
             get {
-                foreach (IEnumerable<long> @enum in this._captures.Where(capture => capture.Valid).Select(capture => capture.LastSamples)) {
-                    foreach (long @long in @enum) {
-                        yield return @long;
+                foreach (IEnumerable<long> samples in this._captures.Where(a => a.Valid).Select(a => a.LastSamples)) {
+                    foreach (long sample in samples) {
+                        yield return sample;
                     }
                 }
             }
         }
         public IEnumerable<double> LastAmplitudePercents {
             get {
-                foreach (IEnumerable<double> @enum in this._captures.Where(capture => capture.Valid).Select(capture => capture.LastAmplitudePercents)) {
-                    foreach (double @double in @enum) {
-                        yield return @double;
-                        //how I did not think to use iterators is beyond me.
-                        //assuming they function like JS generators, this should VASTLY improve speed.
-                        //instead of copying the arrays every time, we give an iterator function that will do that for us.
-                        //it also means we don't have to zip anything.
+                foreach (IEnumerable<double> amps in this._captures.Where(a => a.Valid).Select(a => a.LastAmplitudePercents)) {
+                    foreach (double amp in amps) {
+                        yield return amp;
                     }
                 }
             }
         }
 
-        public double LastAudioLevel => this.LastAudioLevels.Count() > 1
-                    ? this.LastAudioLevels.Max()
-                    : (this.LastAudioLevels.Any() ? this.LastAudioLevels.First() : double.NaN);
-        public long LastSample => this.LastSamples.Count() > 1
-                    ? this.LastSamples.Max()
-                    : this.LastSamples.FirstOrDefault();
-        public double LastAmplitudePercent => this.LastAmplitudePercents.Count() > 1
-                   ? this.LastAmplitudePercents.Max()
-                   : (this.LastAmplitudePercents.Any() ? this.LastAmplitudePercents.First() : double.NaN);
-#warning cannot use linq enum functions here. Won't go well.
+        public double LastAudioLevel => this.LastAudioLevels.MaxOrDefault(double.NaN);
+        public long LastSample => this.LastSamples.MaxOrDefault(default);
+        public double LastAmplitudePercent => this.LastAmplitudePercents.MaxOrDefault(double.NaN);
+
 
         public bool Valid => this._captures.Any(a => a.Valid);
 
@@ -100,8 +90,5 @@ namespace WinAudioLevels {
             }
             return new AudioCapture(clients.ToArray());
         }
-
     }
-
-
 }

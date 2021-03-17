@@ -15,7 +15,7 @@ namespace WinAudioLevels {
         private MyWasapiCapture _capture;
         private WaveFormat _format;
         private Thread _thread;
-        private IEnumerable<long> _last_samples = new long[0];
+        private long[] _last_samples = new long[0];
         private DataFlow _flow;
         private int _bytes_per_sample_set;
         private byte[] _sample_set_buffer;
@@ -24,16 +24,7 @@ namespace WinAudioLevels {
             this._device_id = deviceId;
         }
 
-        public long LastSample {
-            get {
-                try {
-                    return this._last_samples.Count() > 1
-                        ? this._last_samples.Max()
-                        : this._last_samples.FirstOrDefault();
-#warning race condition... samples can be updated after counting. Need to lock this...
-                } catch { return 0; }
-            }
-        }
+        public long LastSample => this.LastSamples.MaxOrDefault(default);
         public double LastAudioLevel => 20 * Math.Log10(Math.Abs(this.LastSample) / Math.Pow(2, 31));
         public double LastAmplitudePercent => Math.Abs(this.LastSample) / Math.Pow(2, 31);
 
@@ -41,12 +32,14 @@ namespace WinAudioLevels {
         public IEnumerable<long> LastSamples {
             get {
                 lock (this._lock) {
-                    return (long[])this._last_samples.ToArray().Clone(); //clone so the original array isn't touched
+                    foreach(long sample in this._last_samples) {
+                        yield return sample;
+                    }
                 }
             }
             private set {
                 lock (this._lock) {
-                    this._last_samples = value;
+                    this._last_samples = value.ToArray();
                 }
             }
         }

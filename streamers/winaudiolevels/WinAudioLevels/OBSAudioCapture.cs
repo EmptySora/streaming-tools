@@ -23,23 +23,15 @@ namespace WinAudioLevels {
         private readonly string _id = null;
         private TimeSpan _wait;
 
-        public long LastSample => this.LastSamples.Count() > 1
-                    ? this.LastSamples.Max()
-                    : this.LastSamples.FirstOrDefault();
-        public double LastAudioLevel => this.LastAudioLevels.Count() > 1
-                    ? this.LastAudioLevels.Max()
-                    : this.LastAudioLevels.Any() ? this.LastAudioLevels.First() : double.NaN;
-        public double LastAmplitudePercent => this.LastAmplitudePercents.Count() > 1
-                    ? this.LastAmplitudePercents.Max()
-                    : this.LastAmplitudePercents.Any() ? this.LastAmplitudePercents.First() : double.NaN;
-
+        public long LastSample => this.LastSamples.MaxOrDefault(default);
+        public double LastAudioLevel => this.LastAudioLevels.MaxOrDefault(double.NaN);
+        public double LastAmplitudePercent => this.LastAmplitudePercents.MaxOrDefault(double.NaN);
         //largest sample out of every channel.
 
         public IEnumerable<long> LastSamples {
             get {
-                IEnumerable<double> doubles = this.LastAmplitudePercents;
-                foreach(double @double in doubles) {
-                    yield return (long)(@double * Math.Pow(2, 31));
+                foreach(double amp in this.LastAmplitudePercents) {
+                    yield return (long)(amp * Math.Pow(2, 31));
                 }
             }
         }
@@ -49,7 +41,9 @@ namespace WinAudioLevels {
                     throw new ObjectDisposedException(nameof(OBSAudioCapture));
                 }
                 lock (this._lock) {
-                    return (double[])this._last_levels.Clone(); //clone so the original array isn't touched
+                    foreach (double level in this._last_levels) {
+                        yield return level;
+                    }
                 }
             }
             private set {
@@ -63,9 +57,8 @@ namespace WinAudioLevels {
         }
         public IEnumerable<double> LastAmplitudePercents {
             get {
-                IEnumerable<double> doubles = this.LastAudioLevels;
-                foreach(double @double in doubles) {
-                    yield return Math.Pow(10, @double / 20);
+                foreach(double level in this.LastAudioLevels) {
+                    yield return Math.Pow(10, level / 20);
                 }
             }
         }
@@ -200,3 +193,5 @@ namespace WinAudioLevels {
         #endregion
     }
 }
+//all of the properties in here that access _last_levels can only access it via a lock.
+//that's good. (great, actually. It means I did this right...)
