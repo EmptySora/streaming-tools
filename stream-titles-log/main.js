@@ -15,7 +15,7 @@ function ajax(operation, parameters) {
             keys = Object.keys(parameters);
             for (i = 0; i < keys.length; i += 1) {
                 key = keys[i];
-                pdata.push(`${encodeURIComponent(key)}=${encodeURIComponent(parameters[key])}`)
+                pdata.push(`${encodeURIComponent(key)}=${encodeURIComponent(parameters[key])}`);
             }
             pdata = pdata.join("&");
         } else if (typeof parameters === "string") {
