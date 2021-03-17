@@ -195,6 +195,8 @@ function main() {
         "x86\\CefSharp.Core.pdb", "x86\\CefSharp.Core.Runtime.pdb", "x86\\CefSharp.Core.Runtime.xml",
         "x86\\CefSharp.Core.xml", "x86\\CefSharp.pdb", "x86\\CefSharp.xml", "x86\\README.txt"
     ];
+    //TODO: check these paths to make sure they're right...
+    //Oh, and DO NOT DELETE WinAudioLevels.exe.config!!! The app will not load!!!
     var cefPath = "cef";
     var cefFiles = ["cef.pak", "cef_100_percent.pak", "cef_200_percent.pak", "cef_extensions.pak",
         "CefSharp.BrowserSubprocess.Core.*", "CefSharp.BrowserSubprocess.*", "CefSharp.Core.Runtime.*",
