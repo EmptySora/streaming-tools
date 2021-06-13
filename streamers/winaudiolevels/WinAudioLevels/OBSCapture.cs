@@ -498,14 +498,5 @@ namespace WinAudioLevels {
         */
     }
 }
-/*
-ERROR in obs audio capture loop: System.ArgumentNullException: Value cannot be null.
-Parameter name: key
-   at System.ThrowHelper.ThrowArgumentNullException(ExceptionArgument argument)
-   at System.Collections.Generic.Dictionary`2.FindEntry(TKey key)
-   at System.Collections.Generic.Dictionary`2.ContainsKey(TKey key)
-   at WinAudioLevels.ObsAudioMixerMeter.GetAudioMeterLevel(String meterName) in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\ObsAudioMixerMeter.cs:line 334
-   at WinAudioLevels.OBSAudioCapture.CaptureMain() in C:\Users\Brandon\source\repos\WinAudioLevels\WinAudioLevels\OBSAudioCapture.cs:line 126
- * */
 //Need to hook into the events from this class in MainForm so that we can tell the user when they goof the OBS requirements.
 //we should add an ability to detach those event handlers temporarily so that the AddDeviceForm can hook into and detect when the goof occurs.

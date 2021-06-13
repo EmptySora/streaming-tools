@@ -32,3 +32,5 @@ TODO:
 The audio mixer window also has a vertical layout. We are not checking to see if it is vertical or not.
 
 OBS Audio meters can have more than two bars. (eg: surround sound has 5-6). We only assume stereo is the max.
+
+Maybe shift most of the sound code to a service container...? But service containers cannot access windows...
