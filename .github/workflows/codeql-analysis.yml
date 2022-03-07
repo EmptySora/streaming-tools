@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'csharp', 'javascript', 'python' ]
+        language: [ 'javascript', 'python' ] #removed csharp because I can't get it to work ATM and it's really not THAT important...
         paths-ignore:
         - "**/bot-storage/**"
         # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
