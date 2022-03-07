@@ -27,3 +27,11 @@ streamers/winaudiolevels/winaudiolevels/obj/**
 streamers/winaudiolevels/winaudiolevels/properties/assemblyinfo1.cs
 streamers/winaudiolevels/winaudiolevels/*.csproj.user
 streamers/winaudiolevels/winaudiolevels/mediaexternals.cs
+
+
+shiny-reset-app/.vs/**
+shiny-reset-app/ShinyResetApp/obj/**
+shiny-reset-app/ShinyResetApp/bin/**
+shiny-reset-app/ShinyResetApp/*.csproj.user
+shiny-reset-app/ShinyResetApp/Sora.pfx
+shiny-reset-app/ShinyResetApp/Properties/PublishProfiles/**
