@@ -39,3 +39,5 @@ A streamlabs chatbot script that watches chat for users that post various links 
 Currently, only YouTube is coded to work. Requires an API KEY from google to work, see the 
 [api console](https://console.cloud.google.com/apis/dashboard).
 
+## shiny-reset-app
+A desktop application that makes tracking resets while shiny hunting easy. It produces files in a similar manner to StreamLabels, which can then subsequently be loaded into OBS via the text source and selecting that file. See [the release](https://github.com/EmptySora/streaming-tools/releases/tag/sra-v0.1.0.1-alpha) where this was added to learn more about the app.
