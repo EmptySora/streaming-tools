@@ -3,15 +3,15 @@
 
 #from enum import Enum
 #from enum import IntFlag
-import datetime
+#import datetime
 import threading
 import time
-import urllib
+#import urllib
 import json
-import os.path
+#import os.path
 import re
 import http.client
-from HTMLParser import HTMLParser
+#from HTMLParser import HTMLParser
 import urlparse
 import dateutil.parser
 
@@ -226,6 +226,7 @@ def GetYoutubeVideoID(url):
     return urlparse.parse_qs(urlparse.urlparse(url).query)['v'][0]
   elif url.lower().startswith("youtu.be"):
     return url.split("/")[-1].split("?")[0] #take time off of end
+  #THIS IS AN ERROR, NOTHING IS BEING RETURNED HERE...
 
 
 

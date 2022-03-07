@@ -35,3 +35,4 @@ shiny-reset-app/ShinyResetApp/bin/**
 shiny-reset-app/ShinyResetApp/*.csproj.user
 shiny-reset-app/ShinyResetApp/Sora.pfx
 shiny-reset-app/ShinyResetApp/Properties/PublishProfiles/**
+command-py/diff.txt
