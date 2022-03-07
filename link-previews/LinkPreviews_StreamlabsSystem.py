@@ -45,9 +45,9 @@ API_VERSION = "v3"
 
 # Called only when initializing the script
 def Init():
-	Parent.Log(ScriptName,"Starting up "+ScriptName)
+	Parent.Log(ScriptName, "Starting up " + ScriptName)
 	LoadURLs()
-	Parent.Log(ScriptName,"Starting Scanner")
+	Parent.Log(ScriptName, "Starting Scanner")
 	MessageScanner()
 	return
 
